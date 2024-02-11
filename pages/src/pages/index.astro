@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { setSwellCredentials } from "../swell/api";
+import { getThemeTemplateValue } from "../swell/theme";
+
+await setSwellCredentials(Astro);
+const template = await getThemeTemplateValue(Astro, "home.template");
+---
+
+<Layout title="Swell Storefront App (Astro)">
+	{template}
+</Layout>
