@@ -13,8 +13,11 @@
   "dependencies": {
     "@astrojs/check": "^0.5.1",
     "@astrojs/cloudflare": "^9.0.0",
-    "astro": "^4.3.5",
+    "astro": "^4.4.6",
+    "liquidjs": "^10.10.1",
+    "lodash": "^4.17.21",
     "swell-js": "^4.0.3",
+    "textdiff-patch": "^1.1.8",
     "typescript": "^5.3.3"
   }
 }

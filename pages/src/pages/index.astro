@@ -1,12 +1,23 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { setSwellCredentials } from "../swell/api";
-import { getThemeTemplateValue } from "../swell/theme";
+import { Swell } from "../swell/api";
+import { SwellTheme } from "../swell/theme";
 
-await setSwellCredentials(Astro);
-const template = await getThemeTemplateValue(Astro, "home.template");
+const swell = new Swell(Astro);
+const theme = new SwellTheme(swell);
+
+await theme.init(Astro, 'index');
+
+const items = [{ name: 'one' }, { name: 'two' }, { name: 'three' }];
+const object = { name: 'one' };
+
+const [ title, description, content ] = await Promise.all([
+	theme.lang('pages.home.title', 'Home'),
+	theme.lang('pages.home.description'),
+	theme.renderPage({ items, object })
+]);
 ---
 
-<Layout title="Swell Storefront App (Astro)">
-	{template}
+<Layout theme={theme} title={title} description={description}>
+	<div slot="content_for_layout" set:html={content} />
 </Layout>

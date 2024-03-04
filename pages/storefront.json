@@ -1,0 +1,158 @@
+{
+  "editor": true,
+  "pages": [
+    {
+      "id": "products/product",
+      "label": "Product",
+      "url": "/products/{slug}",
+      "icon": "tag",
+      "templates": true,
+      "collection": "products",
+      "query": {
+        "active": true
+      }
+    },
+    {
+      "id": "categories/category",
+      "label": "Category",
+      "url": "/categories/{slug}",
+      "icon": "tags",
+      "templates": true,
+      "collection": "categories",
+      "query": {
+        "active": true
+      }
+    },
+    {
+      "id": "categories/index",
+      "label": "Category list",
+      "url": "/categories",
+      "icon": "tags",
+      "collection": "categories",
+      "query": {
+        "active": true
+      }
+    },
+    {
+      "id": "pages/page",
+      "label": "Page",
+      "url": "/pages/{slug}",
+      "icon": "page",
+      "templates": true,
+      "collection": "content/pages",
+      "query": {
+        "published": true
+      }
+    },
+    {
+      "id": "content/index",
+      "label": "Content list",
+      "url": "/content/{content_slug}",
+      "icon": "cube",
+      "templates": true,
+      "collection": "content/{content_slug}",
+      "query": {
+        "published": true
+      }
+    },
+    {
+      "id": "content/entry",
+      "label": "Content entry",
+      "url": "/content/{content_slug}/{entry_slug}",
+      "icon": "cube",
+      "templates": true,
+      "collection": "content/{content_slug}",
+      "query": {
+        "published": true
+      }
+    },
+    {
+      "id": "blogs/index",
+      "label": "Blog list",
+      "url": "/blogs",
+      "icon": "rss",
+      "collection": "content/blogs",
+      "query": {
+        "published": true
+      }
+    },
+    {
+      "id": "blogs/blog",
+      "label": "Blog post",
+      "url": "/blogs/{slug}",
+      "icon": "rss",
+      "templates": true,
+      "collection": "content/blogs",
+      "query": {
+        "published": true
+      }
+    }
+  ],
+  "forms": [
+    {
+      "id": "activate_customer_password",
+      "url": "/account/activate"
+    },
+    {
+      "id": "cart",
+      "url": "/cart",
+      "params": ["cart"]
+    },
+    {
+      "id": "contact",
+      "url": "/contact#contact_form"
+    },
+    {
+      "id": "create_customer",
+      "url": "/account"
+    },
+    {
+      "id": "currency",
+      "url": "/cart/update"
+    },
+    {
+      "id": "customer",
+      "url": "/contact#contact_form"
+    },
+    {
+      "id": "customer_address",
+      "url": "/account/addresses",
+      "params": ["address"]
+    },
+    {
+      "id": "customer_login",
+      "url": "/account/login"
+    },
+    {
+      "id": "guest_login",
+      "url": "/account/login"
+    },
+    {
+      "id": "localization",
+      "url": "/localization"
+    },
+    {
+      "id": "new_comment",
+      "url": "#comment_form",
+      "params": ["blog"]
+
+    },
+    {
+      "id": "product",
+      "url": "/cart/add",
+      "params": ["product"]
+    },
+    {
+      "id": "recover_customer_password",
+      "url": "/account/recover"
+    },
+    {
+      "id": "reset_customer_password",
+      "url": "/account/reset"
+    },
+    {
+      "id": "storefront_password",
+      "url": "/password"
+    }
+  ]
+}

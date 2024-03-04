@@ -1,0 +1,35 @@
+---
+import _ from 'lodash';
+import Layout from '../../layouts/Layout.astro';
+import { Swell } from "../../swell/api";
+import { getContentModel, getContentList } from "../../swell/content";
+import { SwellTheme } from "../../swell/theme";
+
+const swell = new Swell(Astro);
+const theme = new SwellTheme(swell);
+
+await theme.init(Astro, 'content/index');
+
+const { content_slug } = Astro.params;
+const [ model, entries ] = await Promise.all([
+  getContentModel(swell, content_slug),
+  getContentList(swell, content_slug, theme.page?.query)
+]);
+
+let title, description, content;
+
+if (model && entries) {
+	title = model.label || model.name;
+	description = model.description;
+	[ content ] = await Promise.all([
+		theme.renderPage({ entries })
+	]);
+} else {
+	title = 'Page not found';
+	content = await theme.renderPageTemplate('404');
+}
+---
+
+<Layout theme={theme} title={title} description={description}>
+	<div slot="content_for_layout" set:html={content} />
+</Layout>

@@ -1,56 +1,186 @@
-import swellStorefront from "swell-js";
-
-export { swellStorefront };
+import SwellJS from "swell-js";
+import { AstroGlobal } from "astro";
+import { toBase64 } from "./utils";
 
 const DEFAULT_API_HOST = "https://api.schema.io";
+const CACHE_TIMEOUT = 1000 * 60 * 1; // 1min
 
-let API_BACKEND_HOST: string = DEFAULT_API_HOST;
-let API_BACKEND_AUTH: string = toBase64(
-  "test:sk_test_xjT2cmaz9eMzNfhx0WMSj5ZC4DMFTlBP"
-);
+export class Swell {
+  public Astro: AstroGlobal;
+  public headers: { [key: string]: string };
+  public swellHeaders: { [key: string]: string };
+  public backend: SwellBackendAPI;
+  public storefront: typeof SwellJS;
+  public instanceId: string = "";
+  public isPreview: boolean = false;
 
-export async function getSwellHeaders(Astro: any): Promise<{
-  [key: string]: string;
-}> {
-  const swellHeaders: { [key: string]: string } = {};
-  const headersList = Astro.request.headers;
+  // Preview uses instance cache
+  public cache: Map<string, any> = new Map();
 
-  headersList.forEach((value: string, key: string) => {
-    if (key.startsWith("swell-")) {
-      swellHeaders[key.replace("swell-", "")] = value || "";
+  // Live uses static cache
+  static cache: Map<string, any> = new Map();
+
+  constructor(Astro: AstroGlobal) {
+    this.Astro = Astro;
+
+    const { headers, swellHeaders } = Swell.getSwellHeaders(Astro);
+    this.headers = headers;
+    this.swellHeaders = swellHeaders;
+
+    this.backend = new SwellBackendAPI({
+      storeId: swellHeaders["store-id"],
+      accessToken: swellHeaders["access-token"],
+      apiHost: swellHeaders["api-host"],
+    });
+
+    // TODO: make a create method to separate instanced of swell.js
+    this.storefront = SwellJS;
+    this.storefront.init(swellHeaders["store-id"], swellHeaders["public-key"], {
+      url: swellHeaders["admin-url"],
+      vaultUrl: swellHeaders["vault-url"],
+    });
+
+    this.instanceId = [
+      "store-id",
+      "environment-id",
+      "deployment-mode",
+      "theme-id",
+      "theme-branch-id",
+    ]
+      .map((key) => swellHeaders[key])
+      .join("_");
+
+    this.isPreview = swellHeaders["deployment-mode"] === "preview";
+
+    // Clear cache if header changed
+    if (swellHeaders["cache-modified"]) {
+      const cacheModified = this.getCachedSync("_cache-modified");
+      if (cacheModified !== swellHeaders["cache-modified"]) {
+        this.clearCache();
+      }
+
+      this.getCacheInstance().set(
+        "_cache-modified",
+        swellHeaders["cache-modified"]
+      );
     }
-  });
-
-  return swellHeaders;
-}
-
-export async function setSwellCredentials(Astro: any): Promise<void> {
-  const swellHeaders = await getSwellHeaders(Astro);
-
-  API_BACKEND_HOST = swellHeaders["api-host"] || DEFAULT_API_HOST;
-  API_BACKEND_AUTH = toBase64(
-    `${swellHeaders["store-id"]}:${swellHeaders["access-token"]}`
-  );
-
-  swellStorefront.init(swellHeaders["store-id"], swellHeaders["public-key"], {
-    url: swellHeaders["admin-url"],
-    vaultUrl: swellHeaders["vault-url"],
-  });
-}
-
-export function toBase64(inputString: string): string {
-  const utf8Bytes = new TextEncoder().encode(inputString);
-  let base64String = "";
-
-  for (let i = 0; i < utf8Bytes.length; i += 3) {
-    const chunk = Array.from(utf8Bytes.slice(i, i + 3));
-    base64String += btoa(String.fromCharCode(...chunk));
   }
 
-  return base64String;
+  static getSwellHeaders(Astro: AstroGlobal): {
+    headers: { [key: string]: string };
+    swellHeaders: { [key: string]: string };
+  } {
+    const headers: { [key: string]: string } = {};
+    const swellHeaders: { [key: string]: string } = {};
+    const headersList = Astro.request.headers;
+
+    headersList.forEach((value: string, key: string) => {
+      headers[key] = value;
+      if (key.startsWith("swell-")) {
+        swellHeaders[key.replace("swell-", "")] = value || "";
+      }
+    });
+
+    return { headers, swellHeaders };
+  }
+
+  getCacheInstance() {
+    if (this.isPreview) {
+      return this.cache;
+    }
+
+    let cacheInstance = Swell.cache.get(this.instanceId);
+    if (!cacheInstance) {
+      cacheInstance = new Map();
+      Swell.cache.set(this.instanceId, cacheInstance);
+    }
+
+    return cacheInstance;
+  }
+
+  getCachedSync(
+    key: string,
+    args?: Array<any> | Function,
+    handler?: Function
+  ): any {
+    const cacheArgs = typeof args === "function" ? undefined : args;
+    const cacheHandler = typeof args === "function" ? args : handler;
+    const cacheKey = `${this.instanceId}:${key}_${JSON.stringify(cacheArgs)}`;
+    const cacheInstance = this.getCacheInstance();
+
+    if (cacheInstance.has(cacheKey)) {
+      return cacheInstance.get(cacheKey);
+    }
+
+    if (cacheHandler) {
+      const result = cacheHandler();
+      if (result instanceof Promise) {
+        result.then((data) => cacheInstance.set(cacheKey, data));
+      } else {
+        cacheInstance.set(cacheKey, result);
+      }
+
+      // Clear live cache only, since preview lives just for the duration of the request
+      if (!this.isPreview) {
+        setTimeout(() => cacheInstance.delete(cacheKey), CACHE_TIMEOUT);
+      }
+
+      return result;
+    }
+  }
+
+  async getCached(
+    key: string,
+    args: Array<any> | Function,
+    handler?: Function
+  ): Promise<any> {
+    return await this.getCachedSync(key, args, handler);
+  }
+
+  clearCache() {
+    Swell.cache.delete(this.instanceId);
+  }
+
+  async getStorefrontSettings(): Promise<SwellRecord> {
+    return await this.getCached("storefront-settings", () =>
+      this.storefront.settings.get()
+    );
+  }
+
+  get(...args: Parameters<SwellBackendAPI["get"]>) {
+    return this.backend.get(...args);
+  }
+
+  put(...args: Parameters<SwellBackendAPI["put"]>) {
+    return this.backend.put(...args);
+  }
+
+  post(...args: Parameters<SwellBackendAPI["post"]>) {
+    return this.backend.post(...args);
+  }
+
+  delete(...args: Parameters<SwellBackendAPI["delete"]>) {
+    return this.backend.delete(...args);
+  }
 }
 
-export class SwellAPI {
+export class SwellBackendAPI {
+  public apiHost: string = DEFAULT_API_HOST;
+  public apiAuth: string = "";
+
+  constructor({
+    storeId,
+    accessToken,
+    apiHost,
+  }: {
+    storeId: string;
+    accessToken: string;
+    apiHost?: string;
+  }) {
+    this.apiHost = apiHost || DEFAULT_API_HOST;
+    this.apiAuth = toBase64(`${storeId}:${accessToken}`);
+  }
+
   async makeRequest(method: string, url: string, data?: object) {
     const requestOptions: {
       method: string;
@@ -59,7 +189,7 @@ export class SwellAPI {
     } = {
       method,
       headers: {
-        Authorization: `Basic ${API_BACKEND_AUTH}`,
+        Authorization: `Basic ${this.apiAuth}`,
         "User-Agent": "swell-functions/1.0",
         "Content-Type": "application/json",
       },
@@ -85,7 +215,7 @@ export class SwellAPI {
     const endpointUrl = String(url).startsWith("/") ? url.substring(1) : url;
 
     const response = await fetch(
-      `${API_BACKEND_HOST}/${endpointUrl}${query}`,
+      `${this.apiHost}/${endpointUrl}${query}`,
       requestOptions
     );
 
@@ -180,7 +310,7 @@ export interface SwellRecord {
   [key: string]: SwellData;
 }
 
-export interface SwellResult {
+export interface SwellCollection {
   count: number;
   results: Array<SwellRecord>;
   pages: Array<object>;
