@@ -56,7 +56,7 @@
       }
     },
     {
-      "id": "content/entry",
+      "id": "content/content",
       "label": "Content entry",
       "url": "/content/{content_slug}/{entry_slug}",
       "icon": "cube",
@@ -91,7 +91,8 @@
   "forms": [
     {
       "id": "activate_customer_password",
-      "url": "/account/activate"
+      "url": "/account/activate",
+      "return_url": "/account"
     },
     {
       "id": "cart",
@@ -108,11 +109,13 @@
     },
     {
       "id": "currency",
-      "url": "/cart/update"
+      "url": "/cart/update",
+      "return_url": "/cart"
     },
     {
       "id": "customer",
-      "url": "/contact#contact_form"
+      "url": "/contact#contact_form",
+      "return_url": "/contact"
     },
     {
       "id": "customer_address",
@@ -121,11 +124,13 @@
     },
     {
       "id": "customer_login",
-      "url": "/account/login"
+      "url": "/account/login",
+      "return_url": "/account"
     },
     {
       "id": "guest_login",
-      "url": "/account/login"
+      "url": "/account/login",
+      "return_url": "/account"
     },
     {
       "id": "localization",
@@ -135,7 +140,6 @@
       "id": "new_comment",
       "url": "#comment_form",
       "params": ["blog"]
-
     },
     {
       "id": "product",
