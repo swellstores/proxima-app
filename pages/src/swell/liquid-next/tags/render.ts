@@ -1,4 +1,4 @@
-import _ from "lodash";
+import assign from "lodash/assign";
 import { LiquidSwell } from "..";
 import {
   Liquid,
@@ -11,6 +11,7 @@ import {
   evalToken,
 } from "liquidjs";
 import { QuotedToken, IdentifierToken } from "liquidjs/dist/tokens";
+import { ForloopDrop, toEnumerable } from "../utils";
 
 // {% render 'component', variable: value %}
 // {% render 'component' for array as item %}
@@ -85,7 +86,7 @@ export default function bind(liquidSwell: LiquidSwell) {
       });
 
       const scope = childCtx.bottom() as { [key: string]: any };
-      _.assign(scope, yield hash.render(ctx));
+      assign(scope, yield hash.render(ctx));
 
       let output = "";
 

@@ -1,7 +1,3 @@
-/**
- * NOT USED (unless we need to modify the for tag for compatibility)
- */
-
 import { LiquidSwell } from "..";
 import {
   Liquid,
@@ -17,10 +13,11 @@ import {
   Emitter,
 } from "liquidjs";
 import { ForloopDrop, toEnumerable } from "../utils";
-import { dump } from "../../utils";
 
 const MODIFIERS = ["offset", "limit", "reversed"];
 
+// Adapted from liquidjs/src/tags/for.ts
+// 1) to use our own toEnumerable implementation for compatibility
 export default function bind(_liquidSwell: LiquidSwell) {
   return class ForTag extends Tag {
     variable: string;
@@ -67,8 +64,6 @@ export default function bind(_liquidSwell: LiquidSwell) {
     ): Generator<unknown, void | string, Template[]> {
       const r = this.liquid.renderer;
       let collection = toEnumerable(yield evalToken(this.collection, ctx));
-
-      dump(collection);
 
       if (!collection.length) {
         yield r.renderTemplates(this.elseTemplates, ctx, emitter);

@@ -1,7 +1,7 @@
-import _ from "lodash";
+import each from "lodash/each";
 import { LiquidSwell } from "..";
 
-// import { default as forTag } from "./for";
+import { default as forTag } from "./for";
 import form from "./form";
 import include from "./include";
 import javascript from "./javascript";
@@ -13,7 +13,7 @@ import sections from "./sections";
 import style from "./style";
 
 export const tags = {
-  // for: forTag,
+  for: forTag,
   form,
   include,
   javascript,
@@ -26,7 +26,7 @@ export const tags = {
 };
 
 export function bindTags(liquidSwell: LiquidSwell) {
-  _.each(tags, (bind, tag) =>
+  each(tags, (bind, tag) =>
     liquidSwell.engine.registerTag(tag, bind(liquidSwell)),
   );
 }

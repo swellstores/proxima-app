@@ -1,4 +1,6 @@
-import _ from "lodash";
+import get from "lodash/get";
+import clone from "lodash/clone";
+import snakeCase from "lodash/snakeCase";
 import { arrayToObject } from "./utils";
 
 export type Menu = {
@@ -42,9 +44,9 @@ export type MenuItem = {
   };
 };
 
-export function resolveMenus(menus: Menu[]) {
+export function resolveMenuSettings(menus: Menu[]) {
   return arrayToObject(
-    menus?.map((menu: any) => ({
+    clone(menus)?.map((menu: any) => ({
       ...menu,
       items: resolveMenuItems(menu.items),
     })),
@@ -57,7 +59,7 @@ export function resolveMenuItems(
   path?: string,
 ): MenuItem[] {
   return menuItems?.map((item) => {
-    const handle = _.snakeCase(item.name).toLowerCase();
+    const handle = snakeCase(item.name).toLowerCase();
     return {
       ...item,
       url: resolveMenuUrl(item, options),
@@ -112,7 +114,7 @@ export function getMenuItemPath({ type, value, url }: MenuItem): string {
 
   // Get slug from linked object slug or id, fall back to value itself
   const fallback = typeof value === "string" ? value : "";
-  const slug = _.get(value, "slug", _.get(value, "id", fallback)) || "";
+  const slug = get(value, "slug", get(value, "id", fallback)) || "";
 
   // Build path based on content type of item
   switch (type) {

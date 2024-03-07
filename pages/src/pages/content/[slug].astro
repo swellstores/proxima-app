@@ -1,5 +1,4 @@
 ---
-import _ from 'lodash';
 import Layout from '@/layouts/Layout.astro';
 import { Swell } from "@/swell/api";
 import { getContentModel, getContentList } from "@/swell/content";
@@ -21,9 +20,7 @@ let title, description, content;
 if (model && entries) {
 	title = model.label || model.name;
 	description = model.description;
-	[ content ] = await Promise.all([
-		theme.renderPage({ entries })
-	]);
+	content = await theme.renderPage({ entries });
 } else {
 	title = 'Page not found';
 	content = await theme.renderPageTemplate('404');

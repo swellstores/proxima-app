@@ -1,3 +1,4 @@
+import clone from "lodash/clone";
 import { AstroGlobal } from "astro";
 import storefrontConfig from "../../storefront.json";
 import { Swell, SwellData, SwellRecord, SwellCollection } from "./api";
@@ -8,8 +9,10 @@ import {
   ThemeSection,
   ThemeSectionGroup,
   ThemeSettings,
+  ThemeColor,
 } from "./liquid-next";
-import { resolveMenus } from "./menus";
+import { resolveMenuSettings } from "./menus";
+import { isObject, dump } from "./utils";
 
 export class SwellTheme {
   private swell: Swell;
@@ -77,12 +80,13 @@ export class SwellTheme {
           return acc;
         }, {});
 
-      const resolvedMenus = resolveMenus(configs?.menus);
+      const resolvedTheme = resolveThemeSettings(configs?.theme);
+      const resolvedMenus = resolveMenuSettings(configs?.menus);
 
       return {
         ...settings,
-        settings: configs?.theme,
         language: configs?.language,
+        settings: resolvedTheme,
         menus: resolvedMenus,
       };
     });
@@ -420,4 +424,24 @@ export class PageNotFound extends PageError {
     super(title, template);
     this.statusCode = 404;
   }
+}
+
+export function resolveThemeSettings(
+  themeSettings: ThemeSettings,
+): ThemeSettings {
+  const theme = clone(themeSettings);
+  if (isObject(theme)) {
+    for (const key in theme) {
+      const value = theme[key];
+      if (isObject(value)) {
+        theme[key] = resolveThemeSettings(value);
+      } else if (
+        typeof value === "string" &&
+        (value.startsWith("#") || value.startsWith("rgb"))
+      ) {
+        theme[key] = new ThemeColor(value);
+      }
+    }
+  }
+  return theme;
 }

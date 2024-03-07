@@ -1,5 +1,5 @@
 ---
-import _ from 'lodash';
+import { get } from 'lodash';
 import Layout from '../../../layouts/Layout.astro';
 import { Swell } from "../../../swell/api";
 import { getContentModel, getContentEntry } from "../../../swell/content";
@@ -12,18 +12,16 @@ await theme.init(Astro, 'content/entry');
 
 const { content_slug, entry_slug } = Astro.params;
 const [ model, entry ] = await Promise.all([
-  getContentModel(swell, content_slug),
-  getContentEntry(swell, content_slug, entry_slug, theme.page?.query)
+  getContentModel(swell, content_slug as string),
+  getContentEntry(swell, content_slug as string, entry_slug as string, theme.page?.query)
 ]);
 
 let title, description, content;
 
 if (model && entry) {
-	title = _.get(entry, model.storefront.title_field) || entry.id;
-	description = _.get(entry, model.storefront.description_field)
-	[ content ] = await Promise.all([
-		theme.renderPage({ entry }, entry.theme_template)
-	]);
+	title = get(entry, model.storefront.title_field) || entry.id;
+	description = get(entry, model.storefront.description_field)
+	content = await theme.renderPage({ entry }, entry.theme_template);
 } else {
 	title = 'Page not found';
 	content = await theme.renderPageTemplate('404');

@@ -1,4 +1,4 @@
-import _ from "lodash";
+import get from "lodash/get";
 import { Liquid } from "liquidjs";
 import { bindTags } from "./tags";
 import { bindFilters } from "./filters";
@@ -11,6 +11,7 @@ import {
   ThemeSettings,
 } from "./types";
 
+export * from "./color";
 export * from "./types";
 
 export class LiquidSwell extends Liquid {
@@ -148,11 +149,11 @@ export class LiquidSwell extends Liquid {
     const keyParts = key?.split(".") || [];
     const keyName = keyParts.pop() || "";
     const keyPath = keyParts.join(".");
-    const langObject = _.get(lang, keyPath);
+    const langObject = get(lang, keyPath);
 
     const localeValue =
-      _.get(langObject?.[localeCode], keyName) ||
-      _.get(langObject?.[localeCode.split("-")[0]], keyName) ||
+      get(langObject?.[localeCode], keyName) ||
+      get(langObject?.[localeCode.split("-")[0]], keyName) ||
       langObject?.[keyName] ||
       defaultValue;
 

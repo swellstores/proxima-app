@@ -1,9 +1,19 @@
-import _ from "lodash";
+import reduce from "lodash/reduce";
 import { LANG_TO_COUNTRY_CODES } from "./constants";
 import util from "util";
 
 export function dump(...args: any[]) {
   args.forEach((arg) => console.log(util.inspect(arg, false, null, true)));
+}
+
+export function isArray(value: any) {
+  // be compatible with IE 8
+  return String(value) === "[object Array]";
+}
+
+export function isObject(value: any) {
+  const type = typeof value;
+  return value !== null && (type === "object" || type === "function");
 }
 
 export function toBase64(inputString: string): string {
@@ -19,7 +29,7 @@ export function toBase64(inputString: string): string {
 }
 
 export function arrayToObject(arr: Array<any>, key = "id") {
-  return _.reduce(
+  return reduce(
     arr,
     (obj: { [key: string]: any }, value) => {
       obj[value[key]] = value;
