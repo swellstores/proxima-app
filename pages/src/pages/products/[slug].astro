@@ -1,30 +1,25 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { Swell } from "../../swell/api";
-import { getProduct } from "../../swell/products";
-import { SwellTheme } from "../../swell/theme";
+import ThemePage from "@/components/ThemePage.astro";
+import { PageNotFound } from "@/swell/theme";
+import { getProduct } from "@/swell/products";
 
-const swell = new Swell(Astro);
-const theme = new SwellTheme(swell);
-
-await theme.init(Astro, 'products/product');
-
-const product = await getProduct(swell, Astro.params.slug, theme.page?.query);
-
-let title, description, content;
-
-if (product) {
-	title = product.meta_title || product.name;
-	description = product.meta_description || product.description;
-	[ content ] = await Promise.all([
-		theme.renderPage({ product }, product.theme_template)
-	]);
-} else {
-	title = 'Product not found';
-	content = await theme.renderPageTemplate('404');
-}
+const { slug } = Astro.params;
 ---
 
-<Layout theme={theme} title={title} description={description}>
-	<div slot="content_for_layout" set:html={content} />
-</Layout>
+<ThemePage
+	id="products/product"
+	getData={async (swell, theme) => {
+		const product = await getProduct(swell, slug as string, theme.page?.query);
+
+		if (product) {
+			return {
+				product,
+				title: product.meta_title || product.name,
+				description: product.meta_description || product.description,
+				theme_template: product.theme_template
+			};
+		}
+
+		throw new PageNotFound('Product not found');
+	}}
+/>

@@ -1,0 +1,184 @@
+---
+import { SwellData } from "@/swell/api";
+import { SwellTheme } from "@/swell/theme";
+/* import {
+  buildDocument,
+  Easyblocks,
+  Config,
+  Backend,
+  Document,
+  UserDefinedTemplate,
+  NoCodeComponentProps,
+} from "@easyblocks/core"; */
+
+interface Props {
+  theme: SwellTheme;
+  content: SwellData;
+  data: SwellData;
+}
+
+const { theme, content, data } = Astro.props;
+
+const sections = await theme.renderSectionData(content, data);
+
+// Easyblocks testing
+/* const easyblocksBackend: Backend = {
+  documents: {
+    get: async (payload) => {
+      console.log("get document", payload);
+      return {} as Document;
+    },
+    create: async (payload) => {
+      console.log("create document", payload);
+      return {} as Document;
+    },
+    update: async (payload) => {
+      console.log("update document", payload);
+      return {} as Document;
+    },
+  },
+  templates: {
+    get: async (payload) => {
+      console.log("get template", payload);
+      return {} as UserDefinedTemplate;
+    },
+    getAll: async () => {
+      console.log("get all templates");
+      return [] as UserDefinedTemplate[];
+    },
+    create: async (payload) => {
+      console.log("create template", payload);
+      return {} as UserDefinedTemplate;
+    },
+    update: async (payload) => {
+      console.log("update template", payload);
+      return {} as UserDefinedTemplate;
+    },
+    delete: async (payload) => {
+      console.log("delete template", payload);
+      return;
+    },
+  },
+}; */
+
+/*function shopifySchemaToEasyblocksProps(setting: any) {
+  switch (setting?.type) {
+    case "select":
+      return {
+        type: "select",
+        options: setting.options?.map((option: any) => ({
+          label: option.label?.startsWith("t:")
+            ? theme.lang(option.label.slice(2))
+            : option.label,
+          value: option.value,
+        })),
+      };
+
+    case "checkbox":
+      return {
+        type: "boolean",
+        defaultValue: setting.default,
+      };
+
+    // TODO: custom types
+    case "image_picker":
+    case "range":
+    default:
+      return {
+        type: "string",
+      };
+  }
+}
+
+const easyblocksSectionSchemas = sections.map(
+  ({ section, schema, output, tag: Tag, props }) => ({
+    id: section.type,
+    label: section.type,
+    schema: schema.settings?.map((setting: any) => ({
+      prop: setting.id,
+      label: setting.label?.startsWith("t:")
+        ? theme.lang(setting.label.slice(2))
+        : setting.label,
+      ...shopifySchemaToEasyblocksProps(setting.type),
+    })),
+  }),
+); */
+
+/*
+function SectionWrapper({
+  HeaderStack,
+  Panels,
+  PanelsGrid,
+  panelWrappers,
+}: NoCodeComponentProps) {
+  return (
+    <section className="container mx-auto">
+      <div className="mb-5">
+        <HeaderStack.type {...HeaderStack.props} />
+      </div>
+      <PanelsGrid.type {...PanelsGrid.props}>
+        {(Panels as Array<ReactElement>).map((Panel, index) => {
+          const PanelWrapper = panelWrappers[index];
+
+          return (
+            <PanelWrapper.type key={index} {...PanelWrapper.props}>
+              <Panel.type {...Panel.props} />
+            </PanelWrapper.type>
+          );
+        })}
+      </PanelsGrid.type>
+    </section>
+  );
+}
+*/
+
+/* const easyblocksSectionComponents = sections.reduce(
+  (acc: any, section: SwellData) => {
+    const {
+      section: { type },
+      output,
+      tag: Tag,
+      props,
+    } = section;
+    acc[type] = function () {
+      return output;
+    };
+    return acc;
+  },
+  {},
+);
+
+export const easyblocksConfig: Config = {
+  backend: easyblocksBackend,
+  locales: [
+    {
+      code: "en-US",
+      isDefault: true,
+    },
+  ],
+  components: easyblocksSectionSchemas,
+};
+
+const { renderableDocument } = await buildDocument({
+  documentId: theme.pageId as string,
+  config: easyblocksConfig,
+  locale: "en-US",
+}); */
+---
+
+{
+  /*<Easyblocks
+  renderableDocument={renderableDocument}
+  components={easyblocksSectionComponents}
+/>*/
+}
+
+{
+  sections.map(({ section, output, tag: Tag, props }) => (
+    <Tag
+      data-swell-section={section?.type || "unknown"}
+      {...props}
+      set:html={output}
+    />
+  ))
+}

@@ -24,6 +24,7 @@ export class Swell {
     this.Astro = Astro;
 
     const { headers, swellHeaders } = Swell.getSwellHeaders(Astro);
+
     this.headers = headers;
     this.swellHeaders = swellHeaders;
 
@@ -61,7 +62,7 @@ export class Swell {
 
       this.getCacheInstance().set(
         "_cache-modified",
-        swellHeaders["cache-modified"]
+        swellHeaders["cache-modified"],
       );
     }
   }
@@ -101,7 +102,7 @@ export class Swell {
   getCachedSync(
     key: string,
     args?: Array<any> | Function,
-    handler?: Function
+    handler?: Function,
   ): any {
     const cacheArgs = typeof args === "function" ? undefined : args;
     const cacheHandler = typeof args === "function" ? args : handler;
@@ -132,7 +133,7 @@ export class Swell {
   async getCached(
     key: string,
     args: Array<any> | Function,
-    handler?: Function
+    handler?: Function,
   ): Promise<any> {
     return await this.getCachedSync(key, args, handler);
   }
@@ -143,7 +144,7 @@ export class Swell {
 
   async getStorefrontSettings(): Promise<SwellRecord> {
     return await this.getCached("storefront-settings", () =>
-      this.storefront.settings.get()
+      this.storefront.settings.get(),
     );
   }
 
@@ -204,7 +205,7 @@ export class SwellBackendAPI {
         } else {
           requestOptions.body = JSON.stringify(data);
           requestOptions.headers["Content-Length"] = String(
-            requestOptions.body.length
+            requestOptions.body.length,
           );
         }
       } catch {
@@ -216,7 +217,7 @@ export class SwellBackendAPI {
 
     const response = await fetch(
       `${this.apiHost}/${endpointUrl}${query}`,
-      requestOptions
+      requestOptions,
     );
 
     const responseText = await response.text();
@@ -297,22 +298,24 @@ export class SwellError extends Error {
   }
 }
 
-export interface SwellErrorOptions {
+export type SwellErrorOptions = {
   status?: number;
   method?: string;
   endpointUrl?: string;
-}
+};
 
-export type SwellData = any;
+export type SwellData = {
+  [key: string]: any;
+};
 
-export interface SwellRecord {
+export type SwellRecord = {
   id: string;
-  [key: string]: SwellData;
-}
+  [key: string]: any;
+};
 
-export interface SwellCollection {
+export type SwellCollection = {
   count: number;
   results: Array<SwellRecord>;
   pages: Array<object>;
   page_count: number;
-}
+};

@@ -1,0 +1,95 @@
+---
+import { Swell } from "../swell/api";
+import { PageError, SwellTheme } from "../swell/theme";
+import Layout from "@/layouts/Layout.astro";
+import ThemeSections from "@/components/ThemeSections.astro";
+
+interface Props {
+  id: string;
+  title?: string;
+  titleKey?: string;
+  description?: string;
+  descriptionKey?: string;
+  content?: string;
+  props?: {
+    [key: string]: any;
+  };
+  layoutProps?: {
+    [key: string]: any;
+  };
+  getData?: (
+    swell: Swell,
+    theme: SwellTheme,
+  ) => Promise<{ [key: string]: any }>;
+}
+
+const {
+  id,
+  title,
+  titleKey,
+  description,
+  descriptionKey,
+  content,
+  layoutProps,
+  props,
+  getData,
+} = Astro.props;
+
+const swell = new Swell(Astro);
+const theme = new SwellTheme(swell);
+
+await theme.init(Astro, id);
+
+let pageData, pageTitle, pageDescription, pageContent;
+
+try {
+  pageData = getData && (await getData(swell, theme));
+
+  [pageTitle, pageDescription, pageContent] = await Promise.all([
+    (titleKey && theme.lang(titleKey)) ?? title,
+    (descriptionKey && theme.lang(descriptionKey)) ?? description,
+    content ??
+      theme.renderPage(
+        {
+          ...props,
+          ...pageData,
+        },
+        pageData?.theme_template,
+      ),
+  ]);
+
+  if (!pageContent && typeof pageContent !== "string") {
+    throw new PageError();
+  }
+} catch (err: any) {
+  if (err instanceof PageError) {
+    pageTitle = err.title;
+    pageContent = await theme.renderPageTemplate(err.template);
+  } else {
+    pageTitle = "Something went wrong";
+    pageContent = await theme.renderPageTemplate("500");
+  }
+}
+---
+
+<Layout
+  theme={theme}
+  page_title={pageTitle}
+  page_description={pageDescription}
+  {...props}
+  props={layoutProps}
+>
+  <div slot="content_for_layout">
+    {
+      typeof pageContent === "string" ? (
+        <Fragment set:html={pageContent} />
+      ) : (
+        <ThemeSections
+          theme={theme}
+          content={pageContent}
+          data={{ ...props, ...pageData }}
+        />
+      )
+    }
+  </div>
+</Layout>

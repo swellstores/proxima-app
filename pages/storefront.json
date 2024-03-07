@@ -2,6 +2,12 @@
   "editor": true,
   "pages": [
     {
+      "id": "index",
+      "label": "Home",
+      "url": "/",
+      "icon": "home"
+    },
+    {
       "id": "products/product",
       "label": "Product",
       "url": "/products/{slug}",
