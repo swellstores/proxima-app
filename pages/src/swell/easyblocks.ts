@@ -13,6 +13,7 @@ export async function getThemeConfig(swell: Swell, themePath: string): Promise<a
   if (!swell.swellHeaders["theme-id"]) {
     return null;
   }
+
   const config = await swell.getCached("editor-theme-config", [themePath], async () => {
     return await swell.get("/:themes:configs/:last", {
       ...themeConfigQuery(swell.swellHeaders),
@@ -109,12 +110,16 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
       ({ section, schema }: ThemeSectionConfig) => {
         return {
           id: section.type,
-          label: section.type,
+          label: schema?.name?.startsWith('t:')
+            ? renderLanguage(lang, schema.name.split('t:')[1], schema.type)
+            : section.type,
           schema: [
             ...schema?.settings?.map((setting: any) => {
               return {
                 prop: setting.id,
-                label: setting.id, // TODO: figure out how to rework locales/..schema.json for settings
+                label: setting.label?.startsWith('t:')
+                  ? renderLanguage(lang, setting.label.split('t:')[1], setting.id)
+                  : setting.id,
                 ...schemaToEasyblocksProps(lang, setting.type),
               };
             })

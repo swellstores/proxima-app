@@ -46,7 +46,7 @@ function getSectionComponent(props: any, theme: SwellTheme, sectionConfig: any) 
 
     return (
       <Root.type {...Root.props}>
-        <div dangerouslySetInnerHTML={{ __html: renderedOutput }} />;
+        <div dangerouslySetInnerHTML={{ __html: renderedOutput }} />
       </Root.type>
     );
   }
