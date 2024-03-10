@@ -1,4 +1,3 @@
-import get from "lodash/get";
 import { Liquid } from "liquidjs";
 import { bindTags } from "./tags";
 import { bindFilters } from "./filters";
@@ -7,6 +6,8 @@ import {
   RenderTemplate,
   RenderTemplateString,
   RenderTemplateSections,
+  RenderLanguage,
+  RenderCurrency,
   GetAssetUrl,
   ThemeSettings,
 } from "./types";
@@ -20,9 +21,13 @@ export class LiquidSwell extends Liquid {
   public renderTemplate: RenderTemplate;
   public renderTemplateString: RenderTemplateString;
   public renderTemplateSections: RenderTemplateSections;
+  public renderLanguage: RenderLanguage;
+  public renderCurrency: RenderCurrency;
   public getAssetUrl: GetAssetUrl;
   public engine: Liquid;
 
+  public locale: string | undefined;
+  public currency: string | undefined;
   public layoutName: string | undefined;
   public extName: string | undefined;
   public componentsDir: string | undefined;
@@ -36,7 +41,11 @@ export class LiquidSwell extends Liquid {
     renderTemplate,
     renderTemplateString,
     renderTemplateSections,
+    renderLanguage,
+    renderCurrency,
     getAssetUrl,
+    locale,
+    currency,
     layoutName,
     extName,
     componentsDir,
@@ -47,7 +56,11 @@ export class LiquidSwell extends Liquid {
     renderTemplate: RenderTemplate;
     renderTemplateString: RenderTemplateString;
     renderTemplateSections: RenderTemplateSections;
+    renderLanguage: RenderLanguage;
+    renderCurrency: RenderCurrency;
     getAssetUrl: GetAssetUrl;
+    locale?: string;
+    currency?: string;
     layoutName?: string;
     extName?: string;
     componentsDir?: string;
@@ -60,6 +73,10 @@ export class LiquidSwell extends Liquid {
     this.renderTemplate = renderTemplate;
     this.renderTemplateString = renderTemplateString;
     this.renderTemplateSections = renderTemplateSections;
+    this.renderLanguage = renderLanguage;
+    this.renderCurrency = renderCurrency;
+    this.locale = locale || 'en-US';
+    this.currency = currency || 'USD';
     this.layoutName = layoutName || "theme";
     this.extName = extName || "liquid";
     this.componentsDir = componentsDir || "components";
@@ -135,34 +152,4 @@ export class LiquidSwell extends Liquid {
   getSectionGroupPath(sectionName: string): string {
     return this.resolveFilePath(`${this.sectionsDir}/${sectionName}`, "json");
   }
-
-  async renderLanguageValue(
-    key: string,
-    defaultValue?: string,
-  ): Promise<string> {
-    if (key === undefined) {
-      return "";
-    }
-
-    const lang = this.globals?.language;
-    const localeCode = String(this.globals?.store?.locale || "") || "en-US";
-    const keyParts = key?.split(".") || [];
-    const keyName = keyParts.pop() || "";
-    const keyPath = keyParts.join(".");
-    const langObject = get(lang, keyPath);
-
-    const localeValue =
-      get(langObject?.[localeCode], keyName) ||
-      get(langObject?.[localeCode.split("-")[0]], keyName) ||
-      langObject?.[keyName] ||
-      defaultValue;
-
-    if (typeof localeValue !== "string") {
-      return "";
-    }
-
-    return await this.renderTemplateString(localeValue);
-  }
-
-  getCurrencyValue() {}
 }

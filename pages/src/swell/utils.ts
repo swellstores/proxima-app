@@ -1,9 +1,67 @@
 import reduce from "lodash/reduce";
+import { ThemeSection, ThemeBlock, ThemeSectionGroup, ThemeSectionConfig } from "./liquid-next/types";
 import { LANG_TO_COUNTRY_CODES } from "./constants";
-import util from "util";
+//import util from "util";
 
 export function dump(...args: any[]) {
-  args.forEach((arg) => console.log(util.inspect(arg, false, null, true)));
+  console.log(args);
+  //args.forEach((arg) => console.log(util.inspect(arg, false, null, true)));
+}
+
+export function themeConfigQuery(swellHeaders: { [key: string]: any }): { [key: string]: any } {
+  return {
+    parent_id: swellHeaders["theme-id"],
+    branch_id: swellHeaders["theme-branch-id"] || null,
+    preview:
+      swellHeaders["deployment-mode"] === "preview" ? true : { $ne: true },
+  };
+}
+
+export async function getSectionGroupConfigs(sectionGroup: ThemeSectionGroup, getSchema: (type: string) => any): Promise<ThemeSectionConfig[]> {
+  const order =
+    sectionGroup.order instanceof Array
+      ? sectionGroup.order
+      : Object.keys(sectionGroup.sections || {});
+
+  const sections = await Promise.all(
+    order.map(
+      (
+        key: string,
+      ): Promise<ThemeSectionConfig> => {
+        return new Promise(async (resolve) => {
+          const section: ThemeSection = sectionGroup.sections[key];
+
+          const blockOrder =
+            section.block_order instanceof Array
+              ? section.block_order
+              : Object.keys(section.blocks || {});
+
+          const blocks: ThemeBlock[] = await Promise.all(
+            blockOrder.map((key: string) => section.blocks[key]),
+          );
+
+          const schema = await getSchema(section.type);
+
+          const settings = {
+            section: {
+              ...section,
+              blocks,
+            },
+          };
+
+          resolve({
+            section,
+            schema,
+            settings,
+            tag: schema?.tag || "div",
+            class: schema?.class,
+          });
+        });
+      },
+    ),
+  );
+
+  return sections;
 }
 
 export function isArray(value: any) {

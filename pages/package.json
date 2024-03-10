@@ -13,11 +13,24 @@
   "dependencies": {
     "@astrojs/check": "^0.5.1",
     "@astrojs/cloudflare": "^9.0.0",
+    "@astrojs/react": "^3.0.10",
+    "@easyblocks/core": "^1.0.5-alpha.0",
+    "@easyblocks/editor": "^1.0.5-alpha.0",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
     "astro": "^4.4.6",
+    "color": "^4.2.3",
     "liquidjs": "^10.10.1",
     "lodash": "^4.17.21",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "swell-js": "^4.0.3",
     "textdiff-patch": "^1.1.8",
     "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/color": "^3.0.6",
+    "prettier": "^3.2.5",
+    "prettier-plugin-astro": "^0.13.0"
   }
 }

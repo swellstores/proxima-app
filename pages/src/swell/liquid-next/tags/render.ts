@@ -79,6 +79,7 @@ export default function bind(liquidSwell: LiquidSwell) {
       const themeConfig = yield liquidSwell.getThemeConfig(
         liquidSwell.getComponentPath(this.fileName),
       );
+
       const childCtx = new Context({}, ctx.opts, {
         sync: ctx.sync,
         globals: ctx.globals,
@@ -87,6 +88,10 @@ export default function bind(liquidSwell: LiquidSwell) {
 
       const scope = childCtx.bottom() as { [key: string]: any };
       assign(scope, yield hash.render(ctx));
+
+      // Append section from parent scope if present
+      const parentSection = yield ctx._get(["section"]);
+      if (parentSection) assign(scope, { section: parentSection });
 
       let output = "";
 

@@ -4,7 +4,7 @@ import { Swell } from "../../swell/api";
 import { getBlogs } from "../../swell/content";
 import { SwellTheme } from "../../swell/theme";
 
-const swell = new Swell(Astro);
+const swell = new Swell({ Astro });
 const theme = new SwellTheme(swell);
 
 await theme.init(Astro, 'blogs/index');

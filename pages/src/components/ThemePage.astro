@@ -1,8 +1,10 @@
 ---
 import { Swell } from "../swell/api";
-import { PageError, SwellTheme } from "../swell/theme";
+import { PageError, SwellTheme, ThemeSectionGroup } from "../swell/theme";
 import Layout from "@/layouts/Layout.astro";
-import ThemeSections from "@/components/ThemeSections.astro";
+import ThemeSections from "./ThemeSections.astro";
+import EasyblocksPage from "./EasyblocksPage.jsx";
+import { getThemeConfig, getEasyblocksPagePropsWithConfigs } from "@/swell/easyblocks";
 
 interface Props {
   id: string;
@@ -14,9 +16,7 @@ interface Props {
   props?: {
     [key: string]: any;
   };
-  layoutProps?: {
-    [key: string]: any;
-  };
+  easyblocks?: boolean;
   getData?: (
     swell: Swell,
     theme: SwellTheme,
@@ -30,25 +30,28 @@ const {
   description,
   descriptionKey,
   content,
-  layoutProps,
   props,
   getData,
 } = Astro.props;
 
-const swell = new Swell(Astro);
+const swell = new Swell({ Astro });
 const theme = new SwellTheme(swell);
 
 await theme.init(Astro, id);
 
+const isEditor = typeof Astro.url.searchParams.get("_editor") === 'string';
+const swellClientProps = isEditor && swell.getClientProps();
+
 let pageData, pageTitle, pageDescription, pageContent;
 
 try {
+  // Rendering page content
   pageData = getData && (await getData(swell, theme));
 
   [pageTitle, pageDescription, pageContent] = await Promise.all([
     (titleKey && theme.lang(titleKey)) ?? title,
     (descriptionKey && theme.lang(descriptionKey)) ?? description,
-    content ??
+    content ?? 
       theme.renderPage(
         {
           ...props,
@@ -70,26 +73,51 @@ try {
     pageContent = await theme.renderPageTemplate("500");
   }
 }
+
+const pageProps = { ...props, ...pageData };
+const layoutProps = {
+  page_title: pageTitle,
+  page_description: pageDescription,
+  ...props,
+};
+
+let sectionConfigs, lang;
+if (isEditor && pageContent && typeof pageContent !== 'string') {
+  sectionConfigs = await theme.renderSections(
+    pageContent as ThemeSectionGroup,
+    pageData,
+  );
+  lang = await getThemeConfig(swell, `config/language`);
+}
 ---
 
-<Layout
-  theme={theme}
-  page_title={pageTitle}
-  page_description={pageDescription}
-  {...props}
-  props={layoutProps}
->
-  <div slot="content_for_layout">
-    {
-      typeof pageContent === "string" ? (
-        <Fragment set:html={pageContent} />
-      ) : (
-        <ThemeSections
-          theme={theme}
-          content={pageContent}
-          data={{ ...props, ...pageData }}
-        />
-      )
-    }
-  </div>
-</Layout>
+{
+  <Layout
+    theme={theme}
+    {...layoutProps}
+  >
+    <div slot="content_for_layout">
+      {
+        typeof pageContent === "string" ? (
+          <Fragment set:html={pageContent} />
+        ) : isEditor ? (
+          <EasyblocksPage
+            pageId={theme.pageId}
+            pageProps={pageProps}
+            layoutProps={layoutProps}
+            sectionConfigs={sectionConfigs}
+            swellClientProps={swellClientProps}
+            lang={lang}
+            client:load
+          />
+        ) : (
+          <ThemeSections
+            theme={theme}
+            content={pageContent}
+            data={pageProps}
+          />
+        )
+      }
+    </div>
+  </Layout>
+}

@@ -4,15 +4,26 @@ import { toBase64 } from "./utils";
 
 const DEFAULT_API_HOST = "https://api.schema.io";
 const CACHE_TIMEOUT = 1000 * 60 * 1; // 1min
+const SWELL_CLIENT_HEADERS = [
+  "swell-store-id",
+  "swell-public-key",
+  "swell-admin-url",
+  "swell-vault-url",
+  "swell-environment-id",
+  "swell-deployment-mode",
+  "swell-theme-id",
+  "swell-theme-branch-id",
+];
 
 export class Swell {
-  public Astro: AstroGlobal;
+  public Astro?: AstroGlobal;
   public headers: { [key: string]: string };
   public swellHeaders: { [key: string]: string };
-  public backend: SwellBackendAPI;
+  public backend?: SwellBackendAPI;
   public storefront: typeof SwellJS;
   public instanceId: string = "";
   public isPreview: boolean = false;
+  public isEditor: boolean = false;
 
   // Preview uses instance cache
   public cache: Map<string, any> = new Map();
@@ -20,50 +31,67 @@ export class Swell {
   // Live uses static cache
   static cache: Map<string, any> = new Map();
 
-  constructor(Astro: AstroGlobal) {
+  constructor({ Astro, ...clientProps }: { Astro?: AstroGlobal, [key: string]: any }) {
     this.Astro = Astro;
 
-    const { headers, swellHeaders } = Swell.getSwellHeaders(Astro);
+    if (Astro) {
+      const { headers, swellHeaders } = Swell.getSwellHeaders(Astro);
 
-    this.headers = headers;
-    this.swellHeaders = swellHeaders;
+      this.headers = headers;
+      this.swellHeaders = swellHeaders;
 
-    this.backend = new SwellBackendAPI({
-      storeId: swellHeaders["store-id"],
-      accessToken: swellHeaders["access-token"],
-      apiHost: swellHeaders["api-host"],
-    });
+      this.backend = new SwellBackendAPI({
+        storeId: swellHeaders["store-id"],
+        accessToken: swellHeaders["access-token"],
+        apiHost: swellHeaders["api-host"],
+      });
 
-    // TODO: make a create method to separate instanced of swell.js
-    this.storefront = SwellJS;
-    this.storefront.init(swellHeaders["store-id"], swellHeaders["public-key"], {
-      url: swellHeaders["admin-url"],
-      vaultUrl: swellHeaders["vault-url"],
-    });
+      // TODO: make a create method to separate instanced of swell.js
+      this.storefront = SwellJS;
+      this.storefront.init(swellHeaders["store-id"], swellHeaders["public-key"], {
+        url: swellHeaders["admin-url"],
+        vaultUrl: swellHeaders["vault-url"],
+      });
 
-    this.instanceId = [
-      "store-id",
-      "environment-id",
-      "deployment-mode",
-      "theme-id",
-      "theme-branch-id",
-    ]
-      .map((key) => swellHeaders[key])
-      .join("_");
+      this.instanceId = [
+        "store-id",
+        "environment-id",
+        "deployment-mode",
+        "theme-id",
+        "theme-branch-id",
+      ]
+        .map((key) => swellHeaders[key])
+        .join("_");
 
-    this.isPreview = swellHeaders["deployment-mode"] === "preview";
+      this.isPreview = swellHeaders["deployment-mode"] === "preview";
+      this.isEditor = swellHeaders["deployment-mode"] === "editor";
 
-    // Clear cache if header changed
-    if (swellHeaders["cache-modified"]) {
-      const cacheModified = this.getCachedSync("_cache-modified");
-      if (cacheModified !== swellHeaders["cache-modified"]) {
-        this.clearCache();
+      // Clear cache if header changed
+      if (swellHeaders["cache-modified"]) {
+        const cacheModified = this.getCachedSync("_cache-modified");
+        if (cacheModified !== swellHeaders["cache-modified"]) {
+          this.clearCache();
+        }
+
+        this.getCacheInstance().set(
+          "_cache-modified",
+          swellHeaders["cache-modified"],
+        );
       }
+    } else {
+      // Set props from cache, typically used when hydrating client-side
+      const { headers, swellHeaders } = clientProps;
+      Object.assign(this, clientProps);
 
-      this.getCacheInstance().set(
-        "_cache-modified",
-        swellHeaders["cache-modified"],
-      );
+      this.headers = headers;
+      this.swellHeaders = swellHeaders;
+
+      // TODO: make a create method to separate instanced of swell.js
+      this.storefront = SwellJS;
+      this.storefront.init(swellHeaders["store-id"], swellHeaders["public-key"], {
+        url: swellHeaders["admin-url"],
+        vaultUrl: swellHeaders["vault-url"],
+      });
     }
   }
 
@@ -83,6 +111,28 @@ export class Swell {
     });
 
     return { headers, swellHeaders };
+  }
+
+  getClientProps() {
+    const clientHeaders = SWELL_CLIENT_HEADERS.reduce((acc, key) => {
+      acc[key] = this.headers[key];
+      return acc;
+    }, {} as { [key: string]: string });
+
+    const clientSwellHeaders = SWELL_CLIENT_HEADERS.reduce((acc, key) => {
+      const swellKey = key.replace('swell-', '');
+      acc[swellKey] = this.swellHeaders[swellKey];
+      return acc;
+    }, {} as { [key: string]: string });
+    
+    return {
+      headers: clientHeaders,
+      swellHeaders: clientSwellHeaders,
+      instanceId: this.instanceId,
+      isPreview: this.isPreview,
+      isEditor: this.isEditor,
+      cache: this.cache,
+    };
   }
 
   getCacheInstance() {
@@ -149,19 +199,19 @@ export class Swell {
   }
 
   get(...args: Parameters<SwellBackendAPI["get"]>) {
-    return this.backend.get(...args);
+    return this.backend?.get(...args);
   }
 
   put(...args: Parameters<SwellBackendAPI["put"]>) {
-    return this.backend.put(...args);
+    return this.backend?.put(...args);
   }
 
   post(...args: Parameters<SwellBackendAPI["post"]>) {
-    return this.backend.post(...args);
+    return this.backend?.post(...args);
   }
 
   delete(...args: Parameters<SwellBackendAPI["delete"]>) {
-    return this.backend.delete(...args);
+    return this.backend?.delete(...args);
   }
 }
 

@@ -1,4 +1,4 @@
-import { LiquidSwell } from "..";
+import { LiquidSwell } from "../..";
 import {
   Liquid,
   Tag,
@@ -7,7 +7,6 @@ import {
   TopLevelToken,
   TypeGuards,
 } from "liquidjs";
-import { QuotedToken } from "liquidjs/dist/tokens";
 
 // {% schema %}
 

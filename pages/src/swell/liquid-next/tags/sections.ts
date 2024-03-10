@@ -24,7 +24,15 @@ export default function bind(liquidSwell: LiquidSwell) {
       );
       try {
         const sectionGroup = JSON.parse(themeConfig.file_data);
-        return yield liquidSwell.renderTemplateSections(sectionGroup);
+        const output = yield liquidSwell.renderTemplateSections(sectionGroup);
+        const sc = liquidSwell.globals.shopify_compat;
+        return sc
+          ? `
+          <div id="shopify-sections--${themeConfig.hash}__this.fileName" class="shopify-section shopify-section-group-${this.fileName}">
+            ${output}
+          </div>
+        `
+          : output;
       } catch (err) {
         return "";
       }

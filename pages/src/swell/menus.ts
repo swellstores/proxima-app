@@ -42,32 +42,44 @@ export type MenuItem = {
       [key: string]: string;
     };
   };
+  // Dynamic properties
+  handle: string;
+  current?: boolean;
+  child_active?: boolean;
 };
 
-export function resolveMenuSettings(menus: Menu[]) {
+export function resolveMenuSettings(
+  menus: Menu[],
+  options?: { currentUrl?: string },
+) {
   return arrayToObject(
     clone(menus)?.map((menu: any) => ({
       ...menu,
-      items: resolveMenuItems(menu.items),
+      items: resolveMenuItems(menu.items, options),
     })),
   );
 }
 
 export function resolveMenuItems(
   menuItems: MenuItem[],
-  options?: { trailingSlash?: boolean },
+  options?: { currentUrl?: string },
   path?: string,
 ): MenuItem[] {
   return menuItems?.map((item) => {
     const handle = snakeCase(item.name).toLowerCase();
+    const url = resolveMenuUrl(item, {
+      trailingSlash:
+        options?.currentUrl?.endsWith("/") && options.currentUrl !== "/",
+    });
+    const childItems =
+      item.items && resolveMenuItems(item.items, options, handle);
     return {
       ...item,
-      url: resolveMenuUrl(item, options),
+      url,
       handle: `${path ? `${path}-` : ""}${handle}`,
-      ...(item.items
-        ? {
-            items: resolveMenuItems(item.items, options, handle),
-          }
+      current: url === options?.currentUrl,
+      ...(childItems
+        ? { items: childItems, child_active: isChildItemActive(childItems) }
         : undefined),
     };
   });
@@ -100,6 +112,13 @@ export function resolveMenuUrl(
     // Treat item as complete URL
     return item;
   }
+}
+
+function isChildItemActive(items: MenuItem[]): boolean {
+  return items.some(
+    (item: MenuItem) =>
+      item.current || (item.items && isChildItemActive(item.items)),
+  );
 }
 
 export function getMenuItemPath({ type, value, url }: MenuItem): string {

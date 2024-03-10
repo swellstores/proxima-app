@@ -58,6 +58,7 @@ export default function bind(_liquidSwell: LiquidSwell) {
 
       stream.start();
     }
+
     *render(
       ctx: Context,
       emitter: Emitter,
@@ -92,6 +93,7 @@ export default function bind(_liquidSwell: LiquidSwell) {
         continueKey,
         ((hash as any)["offset"] || 0) + collection.length,
       );
+
       const scope = {
         forloop: new ForloopDrop(
           collection.length,
@@ -99,7 +101,9 @@ export default function bind(_liquidSwell: LiquidSwell) {
           this.variable,
         ),
       };
+      
       ctx.push(scope);
+      
       for (const item of collection) {
         (scope as any)[this.variable] = item;
         yield r.renderTemplates(this.templates, ctx, emitter);

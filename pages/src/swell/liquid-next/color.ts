@@ -48,7 +48,7 @@ export class ThemeColor {
 
   darken(percent: any) {
     const percentVal = Number(percent);
-    return new ThemeColor(this.color.lighten(percentVal / 100).hex());
+    return new ThemeColor(this.color.darken(percentVal / 100).hex());
   }
 
   /**

@@ -7,38 +7,43 @@ export class Drop {
   }
 }
 
+// Note: has to refactor this to use class props instead of methods for some reason
+// The class methods weren't working in our implementation
 export class ForloopDrop extends Drop {
   public i: number;
   public length: number;
   public name: string;
+  public test: string = 'test';
+  public index: number;
+  public index0: number;
+  public first: boolean;
+  public last: boolean;
+  public rindex: number;
+  public rindex0: number;
 
   constructor(length: number, collection: string, variable: string) {
     super();
-    this.i = 0;
     this.length = length;
     this.name = `${variable}-${collection}`;
+    this.i = 1;
+    this.index = 0;
+    this.index0 = 0;
+    this.first = true;
+    this.last = false;
+    this.rindex = length;
+    this.rindex0 = length - 1;
   }
+
   next() {
     this.i++;
+    this.index++;
+    this.index0++;
+    this.first = this.index === 0;
+    this.last = this.i === this.length;
+    this.rindex--;
+    this.rindex0--;
   }
-  index0() {
-    return this.i;
-  }
-  index() {
-    return this.i + 1;
-  }
-  first() {
-    return this.i === 0;
-  }
-  last() {
-    return this.i === this.length - 1;
-  }
-  rindex() {
-    return this.length - this.i;
-  }
-  rindex0() {
-    return this.length - this.i - 1;
-  }
+
   valueOf() {
     return JSON.stringify(this);
   }

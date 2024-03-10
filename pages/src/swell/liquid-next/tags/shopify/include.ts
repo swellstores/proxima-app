@@ -1,4 +1,4 @@
-import { LiquidSwell } from "..";
+import { LiquidSwell } from "../..";
 import {
   Liquid,
   Tag,

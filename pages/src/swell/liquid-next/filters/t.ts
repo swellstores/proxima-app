@@ -4,6 +4,6 @@ import { LiquidSwell } from "..";
 
 export default function bind(liquidSwell: LiquidSwell) {
   return async (key: string, defaultValue?: any) => {
-    return await liquidSwell.renderLanguageValue(key, defaultValue);
+    return await liquidSwell.renderLanguage(key, defaultValue);
   };
 }

@@ -1,0 +1,40 @@
+---
+import { Swell } from "../swell/api";
+import EasyblocksEditor from "../components/EasyblocksEditor.jsx";
+import { getThemeConfig } from "../swell/easyblocks";
+import { getSectionGroupConfigs } from "../swell/utils";
+
+const initialPageId = "index";
+
+// Editor requires rootComponent param
+if (!Astro.url.searchParams.get("rootTemplate")) {
+  return Astro.redirect(`/editor?rootTemplate=page_${initialPageId}`);
+}
+
+const swell = new Swell({ Astro });
+
+const sectionGroup = await getThemeConfig(swell, `pages/${initialPageId}`);
+const sectionConfigs = await getSectionGroupConfigs(sectionGroup, (type) =>
+  getThemeConfig(swell, `sections/${type}`),
+);
+
+const lang = await getThemeConfig(swell, `config/language`);
+---
+
+<html lang="en">
+  <head>
+    <title>Swell Theme Editor</title>
+  </head>
+  <body style={{ margin: 0, padding: 0 }}>
+    {
+      (
+        <EasyblocksEditor
+          pageId={initialPageId}
+          sectionConfigs={sectionConfigs}
+          lang={lang}
+          client:only="react"
+        />
+      )
+    }
+  </body>
+</html>
