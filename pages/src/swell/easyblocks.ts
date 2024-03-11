@@ -38,6 +38,24 @@ export async function getThemeConfig(swell: Swell, themePath: string): Promise<a
   }
 }
 
+export async function getEditorLanguageConfig(swell: Swell) {
+  let editorLang = await getThemeConfig(swell, `config/language-editor`);
+  
+  // Fallback to shopify theme locales
+  // TODO: put this logic in ShopifyCompatibility class
+  if (!editorLang) {
+    const storefrontSettings = await swell.getStorefrontSettings();
+    const localeCode = storefrontSettings?.locale || "en-US";
+    editorLang = await getThemeConfig(swell, `locales/${localeCode}.schema`);
+    if (!editorLang) {
+      const localeBaseCode = (localeCode as string).split("-")[0];
+      editorLang = await getThemeConfig(swell, `locales/${localeBaseCode}.schema`);
+    }
+  }
+
+  return editorLang;
+}
+
 export function renderLanguage(
   lang: any,
   key: string,
@@ -76,6 +94,12 @@ export async function getEasyblocksPageProps(swell: Swell, pageId: string, lang:
 }
 
 export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionConfig[], pageId: string, lang: any) {
+  const translateLabel = (label: string, fallback: string) => {
+    return label?.startsWith('t:')
+      ? renderLanguage(lang, label.split('t:')[1], fallback)
+      : fallback;
+  };
+
   const components = [
     {
       id: `page_${pageId}`,
@@ -110,19 +134,22 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
       ({ section, schema }: ThemeSectionConfig) => {
         return {
           id: section.type,
-          label: schema?.name?.startsWith('t:')
-            ? renderLanguage(lang, schema.name.split('t:')[1], schema.type)
-            : section.type,
+          label: translateLabel(schema?.name, section.type),
           schema: [
             ...schema?.settings?.map((setting: any) => {
+              if (!setting.id || !setting.type) return;
               return {
                 prop: setting.id,
-                label: setting.label?.startsWith('t:')
-                  ? renderLanguage(lang, setting.label.split('t:')[1], setting.id)
-                  : setting.id,
-                ...schemaToEasyblocksProps(lang, setting.type),
+                label: translateLabel(setting.label, setting.id),
+                ...schemaToEasyblocksProps(lang, setting),
               };
-            })
+            }).filter(Boolean),
+            ...(schema?.blocks ? [{
+              prop: "Blocks",
+              type: "component-collection",
+              required: true,
+              accepts: schema.blocks.map((block: any) => `block__${section.type}__${block.type}`),
+            }] : []),
           ],
           styles: () => {
             return {
@@ -133,6 +160,32 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
           },
         }
       }),
+    ...sectionConfigs.reduce((acc: Array<any>, { section, schema }: any) => {
+        if (schema?.blocks) {
+          acc.push(...schema.blocks.map((block: any) => ({
+            id: `block__${section.type}__${block.type}`,
+            label: translateLabel(block.name, block.type),
+            schema: [
+              ...block.settings?.map((setting: any) => {
+                if (!setting.id || !setting.type) return;
+                return {
+                  prop: setting.id,
+                  label: translateLabel(setting.label, setting.id),
+                  ...schemaToEasyblocksProps(lang, setting),
+                };
+              }).filter(Boolean),
+            ],
+            styles: () => {
+              return {
+                styled: {
+                  Root: {},
+                },
+              };
+            },
+          })));
+        }
+        return acc;
+      }, []),
   ];
 
   const templates = [{
@@ -140,16 +193,28 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
     entry: {
       _id: `page_${pageId}`,
       _component: `page_${pageId}`,
-      Sections: sectionConfigs.map(({ section }: any) => ({
+      Sections: sectionConfigs.map(({ section, settings, schema }: any) => ({
         _id: `${section.type}_${Math.random()}`,
         _component: section.type,
         ...reduce(section.settings, (acc, value, key) => ({
           ...acc,
-          [key]: value
-        }), {})
-      }))
+          [key]: schemaToEasyblocksValue(schema?.settings, key, value)
+        }), {}),
+        ...(settings.section.blocks ? {
+          Blocks: settings.section.blocks.map((block: any) => ({
+            _id: `block__${section.type}__${block.type}_${Math.random()}`,
+            _component: `block__${section.type}__${block.type}`,
+            ...reduce(block.settings, (acc, value, key) => ({
+              ...acc,
+              [key]: schemaToEasyblocksValue(schema?.blocks.find(({ type }: any) => type === block.type)?.settings, key, value),
+            }), {}),
+          }))
+        } : {}),
+      })),
     }
   }];
+
+  console.log(components)
 
   return {
     sectionConfigs,
@@ -287,16 +352,46 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
 }
 
 export function schemaToEasyblocksProps(lang: any, setting: any) {
+  // TODO: combine with ShopifyCompatibility
   switch (setting?.type) {
+    case "text":
+    // Note these need a different component:
+    case "textarea":
+    case "inline_richtext":
+      return {
+        //type: "text"
+        type: "string"
+      };
+    
+    case "number":
+      return {
+        type: "number"
+      };
+    
     case "select":
       return {
         type: "select",
-        options: setting.options?.map((option: any) => ({
-          label: option.label?.startsWith('t:')
+        params: {
+          options: setting.options?.map((option: any) => ({
+            label: option.label?.startsWith('t:')
               ? renderLanguage(lang, option.label.split('t:')[1], option.label)
               : option.label,
-          value: option.value,
-        })),
+            value: option.value,
+          })),
+        }
+      };
+    
+    case "radio":
+      return {
+        type: "radio-group",
+        params: {
+          options: setting.options?.map((option: any) => ({
+            label: option.label?.startsWith('t:')
+              ? renderLanguage(lang, option.label.split('t:')[1], option.label)
+              : option.label,
+            value: option.value,
+          })),
+        }
       };
 
     case "checkbox":
@@ -304,7 +399,13 @@ export function schemaToEasyblocksProps(lang: any, setting: any) {
         type: "boolean",
         defaultValue: setting.default,
       };
-
+    
+    case "color":
+    case "color_background":
+      return {
+        type: "color"
+      };
+    
     // TODO: custom types
     case "image_picker":
     case "range":
@@ -312,6 +413,31 @@ export function schemaToEasyblocksProps(lang: any, setting: any) {
       return {
         type: "string",
       };
+  }
+}
+
+export function schemaToEasyblocksValue(settings: any, settingId: string, value: any) {
+  // TODO: combine with ShopifyCompatibility
+  if (!settings?.find) {
+    console.log('No find?!', settings)
+  }
+  const setting = settings?.find?.((setting: any) => setting.id === settingId);
+  switch (setting?.type) {
+    // Note this should work for type "text" but it doesn't
+    /* case "text":
+    // Note these need a different component:
+    case "textarea":
+    case "inline_richtext":
+      console.log('schemaToEasyblocksValue text!', settings, settingId, value)
+      return {
+        id: Math.random().toString(),
+        value: {
+          ['en-US']: value || "",
+        },
+        widgetId: "@easyblocks/local-text"
+      } */
+    default:
+      return value;
   }
 }
 

@@ -40,6 +40,7 @@ export class SwellTheme {
       renderLanguage: this.lang.bind(this),
       renderCurrency: this.renderCurrency.bind(this),
       getAssetUrl: this.getAssetUrl.bind(this),
+      isEditor: swell.isEditor,
     });
   }
 
@@ -67,7 +68,9 @@ export class SwellTheme {
 
   async getSettingsAndConfigs(): Promise<{ store: SwellData; configs: any }> {
     return await this.swell.getCached("theme-globals", async () => {
-      const storefrontSettings = await this.swell.getStorefrontSettings();
+      const storefrontSettings = await this.swell.getCached("store-settings", async () => {
+        return await this.swell.getStorefrontSettings();
+      });
 
       const settingConfigs = await this.getAllThemeConfigs();
 
@@ -371,7 +374,7 @@ export class SwellTheme {
               ...settings,
             }
           ) as string;
-          
+
           resolve({
             ...sectionConfig,
             output,
@@ -424,6 +427,12 @@ export class SwellTheme {
   }
 
   renderCurrency(amount: number, params: any): string {
+    // FIXME: Total hack because on the client side the currency is getting set to `[object Promise]` for some reason
+    const settingState = (this.swell.storefront.settings as any).state;
+    const code = (this.swell.storefront.currency as any).code = settingState?.store?.currency || "USD";
+    (this.swell.storefront.currency as any).locale = settingState?.store?.locale || "en-US";
+    (this.swell.storefront.currency as any).state = settingState?.store?.locales?.find((locale: any) => locale.code === code) || { code };
+
     return this.swell.storefront.currency.format(amount, params);
   }
 }

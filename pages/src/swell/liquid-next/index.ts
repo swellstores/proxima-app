@@ -26,6 +26,7 @@ export class LiquidSwell extends Liquid {
   public getAssetUrl: GetAssetUrl;
   public engine: Liquid;
 
+  public isEditor: boolean;
   public locale: string | undefined;
   public currency: string | undefined;
   public layoutName: string | undefined;
@@ -44,6 +45,7 @@ export class LiquidSwell extends Liquid {
     renderLanguage,
     renderCurrency,
     getAssetUrl,
+    isEditor,
     locale,
     currency,
     layoutName,
@@ -59,6 +61,7 @@ export class LiquidSwell extends Liquid {
     renderLanguage: RenderLanguage;
     renderCurrency: RenderCurrency;
     getAssetUrl: GetAssetUrl;
+    isEditor: boolean;
     locale?: string;
     currency?: string;
     layoutName?: string;
@@ -75,6 +78,7 @@ export class LiquidSwell extends Liquid {
     this.renderTemplateSections = renderTemplateSections;
     this.renderLanguage = renderLanguage;
     this.renderCurrency = renderCurrency;
+    this.isEditor = isEditor;
     this.locale = locale || 'en-US';
     this.currency = currency || 'USD';
     this.layoutName = layoutName || "theme";

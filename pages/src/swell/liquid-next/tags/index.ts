@@ -1,6 +1,7 @@
 import each from "lodash/each";
 import { LiquidSwell } from "..";
 
+import { default as caseTag } from "./case";
 import { default as forTag } from "./for";
 import form from "./form";
 import javascript from "./javascript";
@@ -15,6 +16,7 @@ import include from "./shopify/include";
 import schema from "./shopify/schema";
 
 export const tags = {
+  case: caseTag,
   for: forTag,
   form,
   javascript,

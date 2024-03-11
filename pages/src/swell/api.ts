@@ -63,8 +63,8 @@ export class Swell {
         .map((key) => swellHeaders[key])
         .join("_");
 
-      this.isPreview = swellHeaders["deployment-mode"] === "preview";
-      this.isEditor = swellHeaders["deployment-mode"] === "editor";
+      this.isPreview = clientProps.isEditor || swellHeaders["deployment-mode"] === "preview";
+      this.isEditor = clientProps.isEditor ?? swellHeaders["deployment-mode"] === "editor";
 
       // Clear cache if header changed
       if (swellHeaders["cache-modified"]) {
@@ -92,6 +92,8 @@ export class Swell {
         url: swellHeaders["admin-url"],
         vaultUrl: swellHeaders["vault-url"],
       });
+
+      Object.assign(this.storefront.settings, clientProps.storefrontSettingStates);
     }
   }
 
@@ -124,6 +126,8 @@ export class Swell {
       acc[swellKey] = this.swellHeaders[swellKey];
       return acc;
     }, {} as { [key: string]: string });
+
+    const storefrontSettings = (this.storefront.settings as any);
     
     return {
       headers: clientHeaders,
@@ -132,6 +136,13 @@ export class Swell {
       isPreview: this.isPreview,
       isEditor: this.isEditor,
       cache: this.cache,
+      storefrontSettingStates: {
+        state: storefrontSettings.state,
+        menuState: storefrontSettings.menuState,
+        paymentState: storefrontSettings.paymentState,
+        subscriptionState: storefrontSettings.subscriptionState,
+        sessionState: storefrontSettings.sessionState,
+      }
     };
   }
 
