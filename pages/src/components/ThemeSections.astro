@@ -1,6 +1,4 @@
 ---
-import { SwellData } from "@/swell/api";
-import { ThemeSectionGroup } from "@/swell/liquid-next";
 import { SwellTheme } from "@/swell/theme";
 
 interface Props {
@@ -11,11 +9,11 @@ interface Props {
 
 const { theme, content, data } = Astro.props;
 
-const sections = await theme.renderSections(content, data);
+const sections = await theme.renderPageSections(content, data);
 ---
 
 {
-  sections.map(({ section, output, tag: Tag }: any) => (
+  sections.map(({ section, output, tag: Tag /* FIXME */ }: any) => (
     <div
       data-swell-section={section?.type || "unknown"}
       set:html={output}

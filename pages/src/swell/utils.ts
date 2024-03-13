@@ -1,12 +1,5 @@
 import reduce from "lodash/reduce";
-import { ThemeSection, ThemeBlock, ThemeSectionGroup, ThemeSectionConfig } from "./liquid-next/types";
 import { LANG_TO_COUNTRY_CODES } from "./constants";
-//import util from "util";
-
-export function dump(...args: any[]) {
-  console.log(args);
-  //args.forEach((arg) => console.log(util.inspect(arg, false, null, true)));
-}
 
 export function themeConfigQuery(swellHeaders: { [key: string]: any }): { [key: string]: any } {
   return {
@@ -17,7 +10,84 @@ export function themeConfigQuery(swellHeaders: { [key: string]: any }): { [key: 
   };
 }
 
-export async function getSectionGroupConfigs(sectionGroup: ThemeSectionGroup, getSchema: (type: string) => any): Promise<ThemeSectionConfig[]> {
+export async function getPageSections(allSections: SwellCollection): Promise<ThemePageSectionSchema[]> {
+  if (!allSections?.results) return [];
+
+  const pageSectionConfigs = allSections.results.filter(
+    (config: SwellRecord) =>
+      config.file_path?.endsWith('.json')
+      // Page sections must have a liquid file
+      && allSections.results.find((c: any) => c.file_path === config.file_path.replace(/\.json$/, '.liquid')),
+  );
+
+  return pageSectionConfigs.map((config: any) => {
+    let schema;
+    try {
+      schema = JSON.parse(config.file_data);
+    } catch {
+      // noop
+    }
+    return {
+      ...schema,
+      id: config.name.split('.').pop(),
+    }
+  });
+}
+
+export async function getLayoutSectionGroups(allSections: SwellCollection): Promise<ThemeLayoutSectionGroupSchema[]> {
+  if (!allSections?.results) return [];
+
+  const sectionGroupConfigs = allSections.results.filter(
+    (config: SwellRecord) =>
+      config.file_path?.endsWith('.json')
+      // Section groups must not have a liquid file
+      && !allSections.results.find((c: SwellRecord) => c.file_path === config.file_path.replace(/\.json$/, '.liquid')),
+  );
+
+  const getSectionSchema = async (type: string): Promise<ThemeSectionSchema | undefined> => {
+    const config = allSections.results.find(
+      (config: SwellRecord) =>
+        config.file_path?.endsWith(`${type}.json`)
+    );
+    try {
+      return {
+        ...(JSON.parse(config?.file_data) || undefined),
+        id: config?.name.split('.').pop(),
+      };
+    } catch {
+      // noop
+    }
+  };
+
+  return await Promise.all(
+    sectionGroupConfigs.map((config: SwellRecord): Promise<ThemeLayoutSectionGroupSchema> => {
+      return new Promise(async (resolve: any) => {
+        let sectionGroup;
+        try {
+          sectionGroup = JSON.parse(config.file_data);
+        } catch {
+          // noop
+        }
+        // Must have a type property
+        if (sectionGroup?.type) {
+          const sectionConfigs = await getSectionGroupConfigs(sectionGroup, getSectionSchema)
+          resolve({
+            ...sectionGroup,
+            id: config.name.split('.').pop(),
+            sectionConfigs,
+          });
+        } else {
+          resolve();
+        }
+      });
+    })
+  ).then((result: any[]) => result.filter(Boolean));
+}
+
+export async function getSectionGroupConfigs(
+  sectionGroup: ThemeSectionGroup | SwellRecord,
+  getSchema: (type: string) => Promise<ThemeSectionSchema | undefined>
+): Promise<ThemeSectionGroupConfig[]> {
   const order =
     sectionGroup.order instanceof Array
       ? sectionGroup.order
@@ -27,7 +97,7 @@ export async function getSectionGroupConfigs(sectionGroup: ThemeSectionGroup, ge
     order.map(
       (
         key: string,
-      ): Promise<ThemeSectionConfig> => {
+      ): Promise<ThemeSectionGroupConfig> => {
         return new Promise(async (resolve) => {
           const section: ThemeSection = sectionGroup.sections[key];
 
@@ -50,6 +120,7 @@ export async function getSectionGroupConfigs(sectionGroup: ThemeSectionGroup, ge
           };
 
           resolve({
+            id: key,
             section,
             schema,
             settings,

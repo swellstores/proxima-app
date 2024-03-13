@@ -2,23 +2,11 @@ import clone from "lodash/clone";
 import get from "lodash/get";
 import { AstroGlobal } from "astro";
 import storefrontConfig from "../../storefront.json";
-import { Swell, SwellData, SwellRecord, SwellCollection } from "./api";
-import {
-  LiquidSwell,
-  ThemeConfig,
-  ThemeBlock,
-  ThemeSection,
-  ThemeSectionGroup,
-  ThemeSectionConfig,
-  ThemeSettings,
-  ThemeGlobals,
-  ThemeColor,
-} from "./liquid-next";
+import { Swell } from "./api";
+import { LiquidSwell, ThemeColor } from "./liquid-next";
 import { ShopifyCompatibility } from "./shopify";
 import { Menu, resolveMenuSettings } from "./menus";
-import { themeConfigQuery, getSectionGroupConfigs, isObject } from "./utils";
-
-export * from "./liquid-next/types";
+import { themeConfigQuery, getPageSections, getLayoutSectionGroups, getSectionGroupConfigs, isObject } from "./utils";
 
 export class SwellTheme {
   private swell: Swell;
@@ -54,7 +42,7 @@ export class SwellTheme {
       pageId,
     );
 
-    this.setGlobals(Astro, {
+    this.setGlobals({
       store,
       settings,
       menus,
@@ -63,7 +51,7 @@ export class SwellTheme {
       canonical_url: `${store.url}${this.url}`,
       // Experimental flag to enable Shopify compatibility in sections and tags/filters
       shopify_compat: Boolean(settings.$shopify_compatibility),
-    });
+    }, Astro);
   }
 
   async getSettingsAndConfigs(): Promise<{ store: SwellData; configs: any }> {
@@ -126,8 +114,8 @@ export class SwellTheme {
     );
   }
 
-  setGlobals(Astro: AstroGlobal, globals: ThemeGlobals) {
-    if (globals.shopify_compat) {
+  setGlobals(globals: ThemeGlobals, Astro?: AstroGlobal, ) {
+    if (globals.shopify_compat && Astro) {
       ShopifyCompatibility.applyGlobals(Astro, this.swell, globals);
     }
 
@@ -148,10 +136,7 @@ export class SwellTheme {
     return themeConfigQuery(swellHeaders);
   }
 
-  async getAllThemeConfigs(): Promise<SwellCollection | null> {
-    if (!this.swell.swellHeaders["theme-id"]) {
-      return null;
-    }
+  async getAllThemeConfigs(): Promise<SwellCollection> {
     return await this.swell.getCached("theme-configs-all", async () => {
       return await this.swell.get("/:themes:configs", {
         ...this.themeConfigQuery(),
@@ -176,7 +161,7 @@ export class SwellTheme {
     });
   }
 
-  async getThemeConfig(filePath: string): Promise<ThemeConfig | null> {
+  async getThemeConfig(filePath: string): Promise<SwellThemeConfig | null> {
     if (!this.swell.swellHeaders["theme-id"]) {
       return null;
     }
@@ -185,12 +170,12 @@ export class SwellTheme {
       return (
         (configs?.results?.find(
           (config: SwellRecord) => config.file_path === filePath,
-        ) as ThemeConfig) || null
+        ) as SwellThemeConfig) || null
       );
     });
   }
 
-  async getThemeTemplateConfig(filePath: string): Promise<ThemeConfig | null> {
+  async getThemeTemplateConfig(filePath: string): Promise<SwellThemeConfig | null> {
     // Explicit extension
     if (filePath.endsWith(".json") || filePath.endsWith(".liquid")) {
       return await this.getThemeConfig(filePath);
@@ -231,7 +216,7 @@ export class SwellTheme {
   }
 
   async renderTemplate(
-    config: ThemeConfig | null,
+    config: SwellThemeConfig | null,
     data?: SwellData,
   ): Promise<string> {
     const template = config?.file_data || null;
@@ -266,15 +251,14 @@ export class SwellTheme {
 
   async getSectionSchema(
     sectionName: string,
-  ): Promise<ThemeSettings | undefined> {
+  ): Promise<ThemeSectionSchema | undefined> {
     const config = await this.getThemeTemplateConfig(
       `theme/sections/${sectionName}.json`,
     );
-
     if (config) {
       try {
-        return JSON.parse(config.file_data);
-      } catch (err) {
+        return JSON.parse(config.file_data) || undefined;
+      } catch {
         // noop
       }
     }
@@ -349,22 +333,32 @@ export class SwellTheme {
     }
   }
 
-  async getSectionConfigs(
+  async getSectionGroupConfigs(
     sectionGroup: ThemeSectionGroup,
-  ): Promise<ThemeSectionConfig[]> {
+  ): Promise<ThemeSectionGroupConfig[]> {
     return await getSectionGroupConfigs(sectionGroup, (type) =>
       this.getSectionSchema(type),
     );
   }
 
-  async renderSections(sectionGroup: ThemeSectionGroup, data: SwellData): Promise<ThemeSectionConfig[]> {
-    const sectionConfigs = await this.getSectionConfigs(sectionGroup);
+  async getPageSections(): Promise<any[]> { // TODO: type
+    const configs = await this.getAllThemeConfigs();
+    return getPageSections(configs);
+  }
+
+  async getLayoutSectionGroups(): Promise<any[]> { // TODO: type
+    const configs = await this.getAllThemeConfigs();
+    return getLayoutSectionGroups(configs);
+  }
+
+  async renderPageSections(sectionGroup: ThemeSectionGroup, data: SwellData): Promise<ThemeSectionGroupConfig[]> {
+    const sectionConfigs = await this.getSectionGroupConfigs(sectionGroup);
     return this.renderSectionConfigs(sectionConfigs, data);
   }
 
-  async renderSectionConfigs(sectionConfigs: ThemeSectionConfig[], data: SwellData): Promise<ThemeSectionConfig[]> {
+  async renderSectionConfigs(sectionConfigs: ThemeSectionGroupConfig[], data: SwellData): Promise<ThemeSectionGroupConfig[]> {
     return await Promise.all(
-      sectionConfigs.map((sectionConfig: ThemeSectionConfig) => {
+      sectionConfigs.map((sectionConfig: ThemeSectionGroupConfig) => {
         const { section, settings } = sectionConfig;
         return new Promise(async (resolve) => {
           const output = await this.renderThemeTemplate(
@@ -379,7 +373,7 @@ export class SwellTheme {
             ...sectionConfig,
             output,
           });
-        }) as Promise<ThemeSectionConfig>;
+        }) as Promise<ThemeSectionGroupConfig>;
       })
     );
   }
@@ -388,7 +382,7 @@ export class SwellTheme {
     sectionGroup: ThemeSectionGroup,
     data: SwellData,
   ) {
-    const sectionConfigs = await this.renderSections(sectionGroup, data);
+    const sectionConfigs = await this.renderPageSections(sectionGroup, data);
 
     return sectionConfigs
       .map(

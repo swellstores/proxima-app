@@ -1,19 +1,8 @@
 import { Liquid } from "liquidjs";
 import { bindTags } from "./tags";
 import { bindFilters } from "./filters";
-import {
-  GetThemeConfig,
-  RenderTemplate,
-  RenderTemplateString,
-  RenderTemplateSections,
-  RenderLanguage,
-  RenderCurrency,
-  GetAssetUrl,
-  ThemeSettings,
-} from "./types";
 
 export * from "./color";
-export * from "./types";
 
 export class LiquidSwell extends Liquid {
   public storefrontConfig: any;

@@ -1,8 +1,8 @@
 ---
 import { Swell } from "../swell/api";
 import EasyblocksEditor from "../components/EasyblocksEditor.jsx";
-import { getThemeConfig } from "../swell/easyblocks";
-import { getSectionGroupConfigs } from "../swell/utils";
+import { getThemeConfig, getThemeSectionConfigs } from "../swell/easyblocks";
+import { getSectionGroupConfigs, getPageSections, getLayoutSectionGroups } from "../swell/utils";
 
 const initialPageId = "index";
 
@@ -13,10 +13,24 @@ if (!Astro.url.searchParams.get("rootTemplate")) {
 
 const swell = new Swell({ Astro });
 
-const sectionGroup = await getThemeConfig(swell, `pages/${initialPageId}`);
-const sectionConfigs = await getSectionGroupConfigs(sectionGroup, (type) =>
-  getThemeConfig(swell, `sections/${type}`),
-);
+const [sectionGroup, allSections] = await Promise.all([
+  getThemeConfig(swell, `pages/${initialPageId}`),
+  getThemeSectionConfigs(swell),
+]);
+
+if (!sectionGroup) {
+  return Astro.redirect(`/404`);
+}
+
+const [sectionConfigs, pageSections, layoutSectionGroups] = await Promise.all([
+  getSectionGroupConfigs(sectionGroup, (type) =>
+    getThemeConfig(swell, `sections/${type}`).then(
+      (config: any) => config as ThemeSectionSchema || undefined
+    )
+  ),
+  getPageSections(allSections),
+  getLayoutSectionGroups(allSections)
+]);
 
 const editorLang = await getThemeConfig(swell, `config/language-editor`);
 ---
@@ -30,6 +44,9 @@ const editorLang = await getThemeConfig(swell, `config/language-editor`);
       (
         <EasyblocksEditor
           pageId={initialPageId}
+          pageSections={pageSections}
+          layoutSectionGroups={layoutSectionGroups}
+          sectionConfigs={sectionConfigs}
           sectionConfigs={sectionConfigs}
           lang={editorLang}
           client:only="react"

@@ -358,25 +358,3 @@ export class SwellError extends Error {
     this.status = options.status || 500;
   }
 }
-
-export type SwellErrorOptions = {
-  status?: number;
-  method?: string;
-  endpointUrl?: string;
-};
-
-export type SwellData = {
-  [key: string]: any;
-};
-
-export type SwellRecord = {
-  id: string;
-  [key: string]: any;
-};
-
-export type SwellCollection = {
-  count: number;
-  results: Array<SwellRecord>;
-  pages: Array<object>;
-  page_count: number;
-};

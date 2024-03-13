@@ -1,10 +1,10 @@
 ---
 import { Swell } from "../swell/api";
-import { PageError, SwellTheme, ThemeSectionGroup } from "../swell/theme";
+import { PageError, SwellTheme } from "../swell/theme";
 import Layout from "@/layouts/Layout.astro";
 import ThemeSections from "./ThemeSections.astro";
 import EasyblocksPage from "./EasyblocksPage.jsx";
-import { getThemeConfig, getEasyblocksPagePropsWithConfigs } from "@/swell/easyblocks";
+import { getThemeConfig } from "@/swell/easyblocks";
 
 interface Props {
   id: string;
@@ -81,43 +81,54 @@ const layoutProps = {
   ...props,
 };
 
-let sectionConfigs, lang;
+let sectionConfigs, pageSections, layoutSectionGroups, lang, themeGlobals;
 if (isEditor && pageContent && typeof pageContent !== 'string') {
-  sectionConfigs = await theme.renderSections(
-    pageContent as ThemeSectionGroup,
-    pageData,
-  );
-  lang = await getThemeConfig(swell, `config/language-editor`);
+  [sectionConfigs, pageSections, layoutSectionGroups, lang] = await Promise.all([
+    theme.getSectionGroupConfigs(
+      pageContent as ThemeSectionGroup,
+    ),
+    theme.getPageSections(),
+    theme.getLayoutSectionGroups(),
+    getThemeConfig(swell, `config/language-editor`)
+  ]);
+  themeGlobals = theme.globals;
 }
+
 ---
 
 {
-  <Layout
-    theme={theme}
-    {...layoutProps}
-  >
-    <div slot="content_for_layout">
-      {
-        typeof pageContent === "string" ? (
-          <Fragment set:html={pageContent} />
-        ) : isEditor ? (
-          <EasyblocksPage
-            pageId={theme.pageId}
-            pageProps={pageProps}
-            layoutProps={layoutProps}
-            sectionConfigs={sectionConfigs}
-            swellClientProps={swellClientProps}
-            lang={lang}
-            client:load
-          />
-        ) : (
-          <ThemeSections
-            theme={theme}
-            content={pageContent}
-            data={pageProps}
-          />
-        )
-      }
-    </div>
-  </Layout>
+  isEditor ? (
+    <html class="TEST2">
+      <EasyblocksPage
+        pageId={theme.pageId}
+        pageProps={pageProps}
+        pageContent={pageContent}
+        pageSections={pageSections}
+        layoutProps={layoutProps}
+        layoutSectionGroups={layoutSectionGroups}
+        themeGlobals={themeGlobals}
+        sectionConfigs={sectionConfigs}
+        swellClientProps={swellClientProps}
+        lang={lang}
+        client:load
+      />
+    </html>
+  ) : (
+    <Layout
+      theme={theme}
+      {...layoutProps}
+    >
+      <div slot="content_for_layout">
+        {typeof pageContent === "string" ? (
+            <Fragment set:html={pageContent} />
+          ) : (
+            <ThemeSections
+              theme={theme}
+              content={pageContent}
+              data={pageProps}
+            />
+          )}
+      </div>
+    </Layout>
+  )
 }

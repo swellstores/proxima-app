@@ -101,7 +101,7 @@ export default function bind(liquidSwell: LiquidSwell) {
           if (target === value) {
             const blockOutput = yield r.renderTemplates(branch.templates, ctx)
             output += this.isBlock && liquidSwell.isEditor
-              ? `<span class="swell-block" id="swell-block--${encodeURIComponent(value as string)}">${blockOutput}</span>`
+              ? `<span class="swell-block">${blockOutput}</span>`
               : blockOutput
             branchHit = true
             break

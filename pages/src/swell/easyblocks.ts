@@ -1,15 +1,15 @@
 import get from "lodash/get";
 import reduce from "lodash/reduce";
 import { Swell } from "./api";
-import { ThemeSectionConfig } from "./liquid-next/types";
+
 import {
   Backend,
   Document,
   UserDefinedTemplate,
 } from "@easyblocks/core";
-import { themeConfigQuery, getSectionGroupConfigs } from "@/swell/utils";
+import { themeConfigQuery } from "@/swell/utils";
 
-export async function getThemeConfig(swell: Swell, themePath: string): Promise<any> {
+export async function getThemeConfig(swell: Swell, themePath: string): Promise<SwellRecord | null> {
   if (!swell.swellHeaders["theme-id"]) {
     return null;
   }
@@ -18,7 +18,6 @@ export async function getThemeConfig(swell: Swell, themePath: string): Promise<a
     return await swell.get("/:themes:configs/:last", {
       ...themeConfigQuery(swell.swellHeaders),
       file_path: `theme/${themePath}.json`,
-      limit: 1000,
       fields: "type, name, file, file_path, file_data",
       include: {
         file_data: {
@@ -36,6 +35,27 @@ export async function getThemeConfig(swell: Swell, themePath: string): Promise<a
   } catch {
     return null;
   }
+}
+
+export async function getThemeSectionConfigs(swell: Swell): Promise<SwellCollection> {
+  const configs = await swell.getCached("editor-theme-section-configs", async () => {
+    return await swell.get("/:themes:configs", {
+      ...themeConfigQuery(swell.swellHeaders),
+      file_path: { $regex: "^theme/sections/" },
+      limit: 1000,
+      fields: "type, name, file, file_path, file_data",
+      include: {
+        file_data: {
+          url: "/:themes:configs/{id}/file/data",
+          conditions: {
+            type: "theme",
+          },
+        },
+      },
+    });
+  });
+
+  return configs;
 }
 
 export async function getEditorLanguageConfig(swell: Swell) {
@@ -84,21 +104,80 @@ export function renderLanguage(
   return localeValue;
 }
 
-export async function getEasyblocksPageProps(swell: Swell, pageId: string, lang: any) {
-  const sectionGroup = await getThemeConfig(swell, `pages/${pageId}`);
-  const sectionConfigs = await getSectionGroupConfigs(
-    sectionGroup,
-    (type) => getThemeConfig(swell, `sections/${type}`)
-  );
-  return getEasyblocksPagePropsWithConfigs(sectionConfigs, pageId, lang);
-}
-
-export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionConfig[], pageId: string, lang: any) {
+export function getEasyblocksPagePropsWithConfigs(
+  sectionConfigs: ThemeSectionGroupConfig[],
+  pageSections: any[],
+  layoutSectionGroups: any[],
+  pageId: string,
+  lang: any
+) {
   const translateLabel = (label: string, fallback: string) => {
     return label?.startsWith('t:')
       ? renderLanguage(lang, label.split('t:')[1], fallback)
       : fallback;
   };
+
+  const getLayoutSectionGroupComponentProps = () => {
+    return layoutSectionGroups.map((sectionGroup: any) => ({
+      prop: `SectionGroup_${sectionGroup.id}`,
+      type: "component-collection",
+      required: true,
+      accepts: getAcceptedLayoutSections(sectionGroup.type),
+    }));
+  }
+
+  const checkEnabledDisabledOn = (config: any, key: string, targetId: string) => {
+    if (config.templates === '*') {
+      return true;
+    }
+    if (config[key]?.includes(targetId)) {
+      return true;
+    }
+    return false;
+  };
+
+  const getAcceptedPageSections = () => {
+    return pageSections.reduce((acc: any, section: any) => {
+      if (section.enabled_on) {
+        if (checkEnabledDisabledOn(section.enabled_on, 'templates', pageId)) {
+          acc.push(section.id);
+        }
+      } else if (section.disabled_on) {
+        if (!checkEnabledDisabledOn(section.disabled_on, 'templates', pageId)) {
+          acc.push(section.id);
+        }
+      } else {
+        // Default hide sections named after layout section group types
+        if (!layoutSectionGroups.map(({ type }: any) => type).includes(section.id)) {
+          acc.push(section.id);
+        }
+      }
+      return acc;
+    }, []).map((sectionId: string) => `${sectionId}`);
+  };
+
+  const getAcceptedLayoutSections = (groupType: string) => {
+    return pageSections.reduce((acc: any, section: any) => {
+      if (section.enabled_on) {
+        if (checkEnabledDisabledOn(section.enabled_on, 'groups', groupType)) {
+          acc.push(section.id);
+        }
+      } else if (section.disabled_on) {
+        if (!checkEnabledDisabledOn(section.disabled_on, 'groups', groupType)) {
+          acc.push(section.id);
+        }
+      } else {
+        // Default to section of the same type name
+        // Note: limit is also supposed to be 1 for sections named after group types
+        if (section.id === groupType) {
+          acc.push(section.id);
+        }
+      }
+      return acc;
+    }, []).map((sectionId: string) => `${sectionId}`);
+  }
+
+  console.log({ pageSections, layoutSectionGroups })
 
   const components = [
     {
@@ -106,21 +185,17 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
       label: 'Page: ' + pageId,
       schema: [
         {
-          prop: 'title',
-          label: 'Title',
-          type: 'string',
-        },
-        {
-          prop: 'description',
-          label: 'Description',
-          type: 'string',
-        },
-        {
-          prop: "Sections",
+          prop: "ContentSections",
           type: "component-collection",
           required: true,
-          accepts: sectionConfigs.map(({ section }: ThemeSectionConfig) => section.type),
-        }
+          accepts: getAcceptedPageSections(),
+          placeholderAppearance: {
+            height: 250,
+            label: 'Add section',
+            aspectRatio: 1,
+          }
+        },
+        ...getLayoutSectionGroupComponentProps(),
       ],
       styles: () => {
         return {
@@ -130,25 +205,43 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
         };
       },
     },
-    ...sectionConfigs.map(
-      ({ section, schema }: ThemeSectionConfig) => {
+    ...pageSections.map(
+      (section: any) => {
         return {
-          id: section.type,
-          label: translateLabel(schema?.name, section.type),
+          id: `${section.id}`,
+          label: translateLabel(section.name, section.id),
           schema: [
-            ...schema?.settings?.map((setting: any) => {
+            ...(section.settings || []).map((setting: any) => {
               if (!setting.id || !setting.type) return;
               return {
                 prop: setting.id,
                 label: translateLabel(setting.label, setting.id),
+                defaultValue: setting.default,
                 ...schemaToEasyblocksProps(lang, setting),
               };
             }).filter(Boolean),
-            ...(schema?.blocks ? [{
+            ...(section?.blocks ? [{
               prop: "Blocks",
               type: "component-collection",
               required: true,
-              accepts: schema.blocks.map((block: any) => `block__${section.type}__${block.type}`),
+              accepts: section.blocks.map((block: any) => `Block__${section.id}__${block.type}`),
+              // TODO: figure out how to make this work, doesn't work for collections normally
+              defaultValue: section.presets?.[0]?.blocks?.map((block: any) => {
+                const blockDef = section.blocks.find(({ type }: any) => type === block.type);
+                if (!blockDef) return;
+                return {
+                  _component: `Block__${section.id}__${block.type}`,
+                  ...reduce(blockDef.settings, (acc, blockSetting) => ({
+                    ...acc,
+                    [blockSetting.id]: schemaToEasyblocksValue(blockDef.settings, blockSetting.id, blockSetting.default)
+                  }), {}),
+                }
+              }),
+              placeholderAppearance: {
+                height: 50,
+                label: 'Add block',
+                aspectRatio: 1,
+              }
             }] : []),
           ],
           styles: () => {
@@ -157,53 +250,52 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
                 Root: {},
               },
             };
-          },
+          }
         }
       }),
-    ...sectionConfigs.reduce((acc: Array<any>, { section, schema }: any) => {
-        if (schema?.blocks) {
-          acc.push(...schema.blocks.map((block: any) => ({
-            id: `block__${section.type}__${block.type}`,
-            label: translateLabel(block.name, block.type),
-            schema: [
-              ...block.settings?.map((setting: any) => {
-                if (!setting.id || !setting.type) return;
-                return {
-                  prop: setting.id,
-                  label: translateLabel(setting.label, setting.id),
-                  ...schemaToEasyblocksProps(lang, setting),
-                };
-              }).filter(Boolean),
-            ],
-            styles: () => {
+    ...pageSections.reduce((acc: any[], section: any) => {
+      if (section.blocks) {
+        acc.push(...section.blocks.map((block: any) => ({
+          id: `Block__${section.id}__${block.type}`,
+          label: translateLabel(block.name, block.type),
+          schema: [
+            ...(block.settings || []).map((setting: any) => {
+              if (!setting.id || !setting.type) return;
               return {
-                styled: {
-                  Root: {},
-                },
+                prop: setting.id,
+                label: translateLabel(setting.label, setting.id),
+                defaultValue: setting.default,
+                ...schemaToEasyblocksProps(lang, setting),
               };
-            },
-          })));
-        }
-        return acc;
-      }, []),
+            }).filter(Boolean),
+          ],
+          styles: () => {
+            return {
+              styled: {
+                Root: {},
+              },
+            };
+          },
+        })));
+      }
+      return acc;
+    }, []),
   ];
 
-  const templates = [{
-    id: `page_${pageId}`,
-    entry: {
-      _id: `page_${pageId}`,
-      _component: `page_${pageId}`,
-      Sections: sectionConfigs.map(({ section, settings, schema }: any) => ({
-        _id: `${section.type}_${Math.random()}`,
-        _component: section.type,
+  const getSectionGroupTemplateValues = () => {
+    return layoutSectionGroups.reduce((acc: any, sectionGroup: any) => ({
+      ...acc,
+      [`SectionGroup_${sectionGroup.id}`]: sectionGroup.sectionConfigs.map(({ section, settings, schema }: any) => ({
+        _id: `SectionGroup__${section.type}_${Math.random()}`,
+        _component: `${section.type}`,
         ...reduce(section.settings, (acc, value, key) => ({
           ...acc,
           [key]: schemaToEasyblocksValue(schema?.settings, key, value)
         }), {}),
         ...(settings.section.blocks ? {
           Blocks: settings.section.blocks.map((block: any) => ({
-            _id: `block__${section.type}__${block.type}_${Math.random()}`,
-            _component: `block__${section.type}__${block.type}`,
+            _id: `Block__${section.type}__${block.type}_${Math.random()}`,
+            _component: `Block__${section.type}__${block.type}`,
             ...reduce(block.settings, (acc, value, key) => ({
               ...acc,
               [key]: schemaToEasyblocksValue(schema?.blocks.find(({ type }: any) => type === block.type)?.settings, key, value),
@@ -211,14 +303,43 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
           }))
         } : {}),
       })),
+    }), {});
+  };
+
+  const templates = [{
+    id: `page_${pageId}`,
+    entry: {
+      _id: `page_${pageId}`,
+      _component: `page_${pageId}`,
+      ContentSections: sectionConfigs.map(({ section, settings, schema }: any) => ({
+        _id: `${section.type}_${Math.random()}`,
+        _component: `${section.type}`,
+        ...reduce(section.settings, (acc, value, key) => ({
+          ...acc,
+          [key]: schemaToEasyblocksValue(schema?.settings, key, value)
+        }), {}),
+        ...(settings.section.blocks ? {
+          Blocks: settings.section.blocks.map((block: any) => ({
+            _id: `Block__${section.type}__${block.type}_${Math.random()}`,
+            _component: `Block__${section.type}__${block.type}`,
+            ...reduce(block.settings, (acc, value, key) => ({
+              ...acc,
+              [key]: schemaToEasyblocksValue(schema?.blocks.find(({ type }: any) => type === block.type)?.settings, key, value),
+            }), {}),
+          }))
+        } : {}),
+      })),
+      ...getSectionGroupTemplateValues(),
     }
   }];
 
-  console.log(components)
+  console.log({ components, templates })
 
   return {
     sectionConfigs,
     easyblocksConfig: {
+      hideCloseButton: true,
+      allowSave: true,
       locales: [
         {
           code: "en-US",
@@ -228,6 +349,7 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
       components,
       templates,
       tokens: {
+        // Note these are just examples, would actually need to transform from theme settings I guess
         colors: [
           {
             id: "black",
@@ -353,23 +475,31 @@ export function getEasyblocksPagePropsWithConfigs(sectionConfigs: ThemeSectionCo
 
 export function schemaToEasyblocksProps(lang: any, setting: any) {
   // TODO: combine with ShopifyCompatibility
+  const sharedProps = {
+    description: setting.description || setting.info,
+  };
+
+  let typeProps;
   switch (setting?.type) {
     case "text":
     // Note these need a different component:
     case "textarea":
     case "inline_richtext":
-      return {
+      typeProps = {
         //type: "text"
         type: "string"
       };
+      break;
     
+    case "range":
     case "number":
-      return {
+      typeProps = {
         type: "number"
       };
+      break;
     
     case "select":
-      return {
+      typeProps = {
         type: "select",
         params: {
           options: setting.options?.map((option: any) => ({
@@ -380,9 +510,10 @@ export function schemaToEasyblocksProps(lang: any, setting: any) {
           })),
         }
       };
+      break;
     
     case "radio":
-      return {
+      typeProps = {
         type: "radio-group",
         params: {
           options: setting.options?.map((option: any) => ({
@@ -393,34 +524,74 @@ export function schemaToEasyblocksProps(lang: any, setting: any) {
           })),
         }
       };
+      break;
 
     case "checkbox":
-      return {
+      typeProps = {
         type: "boolean",
         defaultValue: setting.default,
       };
+      break;
     
     case "color":
     case "color_background":
-      return {
+      typeProps = {
         type: "color"
       };
+      break;
     
     // TODO: custom types
     case "image_picker":
-    case "range":
     default:
-      return {
+      typeProps = {
         type: "string",
       };
+      break;
   }
+
+  return {
+    ...sharedProps,
+    ...typeProps
+  }
+}
+
+export function getEasyblocksComponentDefinitions(props: any, pageId: string, getComponent: (type: string, data?: any) => any) {
+  const { pageSections, layoutSectionGroups,  } = props;
+  
+  const pageSectionComponents = pageSections.reduce(
+    (acc: any, section: any) => {
+      acc[`${section.id}`] = getComponent('pageSection', section);
+      return acc;
+    }, {});
+  
+  const layoutSectionGroupComponents = layoutSectionGroups.reduce(
+    (acc: any, sectionGroup: any) => {
+      acc[`SectionGroup___${sectionGroup.id}`] = getComponent('layoutSectionGroup', sectionGroup);
+      return acc;
+    }, {});
+  
+  const blockComponents = pageSections.reduce(
+    (acc: any[], section: any) => {
+      if (section.blocks) {
+        for (const block of section.blocks) {
+          const blockId = `Block__${section.id}__${block.type}` as any;
+          acc[blockId] = getComponent('block', { section, block });
+        }
+      }
+      return acc;
+    }, {});
+  
+  return {
+    ...pageSectionComponents,
+    ...layoutSectionGroupComponents,
+    ...blockComponents,
+    // Root component
+    [`page_${pageId}`]: getComponent('root'),
+  };
 }
 
 export function schemaToEasyblocksValue(settings: any, settingId: string, value: any) {
   // TODO: combine with ShopifyCompatibility
-  if (!settings?.find) {
-    console.log('No find?!', settings)
-  }
   const setting = settings?.find?.((setting: any) => setting.id === settingId);
   switch (setting?.type) {
     // Note this should work for type "text" but it doesn't
@@ -441,7 +612,7 @@ export function schemaToEasyblocksValue(settings: any, settingId: string, value:
   }
 }
 
-export function getEasyblocksBackend(sectionConfigs: ThemeSectionConfig[]) {
+export function getEasyblocksBackend(sectionConfigs: ThemeSectionGroupConfig[]) {
   // TODO: client-side methods for saving etc
   const easyblocksBackend: Backend = {
     documents: {

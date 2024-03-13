@@ -1,6 +1,5 @@
 import { AstroGlobal } from "astro";
 import { Swell } from "./api";
-import { ThemeGlobals } from "./liquid-next/types";
 
 export class ShopifyCompatibility {
   static applyGlobals(Astro: AstroGlobal, swell: Swell, globals: ThemeGlobals) {
