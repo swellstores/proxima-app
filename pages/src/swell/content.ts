@@ -1,55 +1,51 @@
-import { Swell } from "./api";
+import { Swell, SwellStorefrontCollection, SwellStorefrontRecord } from './api';
 
 export async function getContentModel(
   swell: Swell,
-  name: string
+  name: string,
 ): Promise<any> {
-  return await swell.getCached("content-model", [name], () =>
-    swell.get("/:content/{name}", {
+  return await swell.getCached('content-model', [name], () =>
+    swell.get('/:content/{name}', {
       name,
       public: true,
-      "storefront.enabled": true,
-    })
+      'storefront.enabled': true,
+    }),
   );
 }
 
 export async function getContentList(
   swell: Swell,
   type: string,
-  query?: object
+  query?: SwellData,
 ): Promise<any> {
-  return await swell.getCached("content-collection", [type, query], () =>
-    swell.storefront.content.list(type, query)
-  );
+  return new SwellStorefrontCollection(swell, `content/${type}`, query);
 }
 
 export async function getContentEntry(
   swell: Swell,
   type: string,
   id: string,
-  query?: object
+  query?: SwellData,
 ): Promise<any> {
-  return await swell.getCached("content-record", [type, id, query], () =>
-    swell.storefront.content.get(type, id, query)
-  );
+  return new SwellStorefrontRecord(swell, `content/${type}`, id, query);
 }
 
 export async function getPage(
   swell: Swell,
   id: string,
-  query?: object
+  query?: object,
 ): Promise<any> {
-  return await getContentEntry(swell, "pages", id, query);
+  return await getContentEntry(swell, 'pages', id, query);
 }
 
 export async function getBlogs(swell: Swell, query?: object): Promise<any> {
-  return await getContentList(swell, "blogs", query);
+  return await getContentList(swell, 'blogs', query);
 }
 
 export async function getBlog(
   swell: Swell,
   id: string,
-  query?: object
+  query?: object,
 ): Promise<any> {
-  return await getContentEntry(swell, "blogs", id, query);
+  return await getContentEntry(swell, 'blogs', id, query);
 }

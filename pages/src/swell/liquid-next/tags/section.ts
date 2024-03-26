@@ -19,9 +19,8 @@ export default function bind(liquidSwell: LiquidSwell) {
     }
 
     *render(_ctx: Context): any {
-      const themeConfig = yield liquidSwell.getThemeConfig(
-        liquidSwell.getSectionPath(this.fileName),
-      );
+      const filePath = yield liquidSwell.getSectionPath(this.fileName);
+      const themeConfig = yield liquidSwell.getThemeConfig(filePath);
       return yield liquidSwell.renderTemplate(themeConfig);
     }
   };

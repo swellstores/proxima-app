@@ -4,11 +4,11 @@ import { LiquidSwell, ThemeColor } from "..";
 
 export default function bind(_liquidSwell: LiquidSwell) {
   return (
-    colorVal1: string | ThemeColor,
-    colorVal2: string | ThemeColor,
+    color1: string | ThemeColor,
+    color2: string | ThemeColor,
   ): number => {
-    return ThemeColor.get(colorVal1).brightnessDifference(
-      ThemeColor.get(colorVal2),
+    return ThemeColor.get(color1).brightnessDifference(
+      ThemeColor.get(color2),
     );
   };
 }

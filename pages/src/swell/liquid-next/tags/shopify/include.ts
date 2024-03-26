@@ -10,8 +10,10 @@ import {
 } from "liquidjs";
 import { QuotedToken } from "liquidjs/dist/tokens";
 
-// {% include 'component' %}
 // Deprecated in Shopify, supported for backward compatibility
+// Replaced by {% render %}
+
+// {% include 'component' %}
 
 export default function bind(liquidSwell: LiquidSwell) {
   return class IncludeTag extends Tag {

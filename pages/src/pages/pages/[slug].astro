@@ -1,25 +1,25 @@
 ---
-import ThemePage from "@/components/ThemePage.astro";
-import { PageNotFound } from "@/swell/theme";
-import { getPage } from "@/swell/content";
+import { SwellStorefrontRecord } from '@/swell/api';
+import ThemePage from '@/components/ThemePage.astro';
 
 const { slug } = Astro.params;
 ---
 
 <ThemePage
-	id="pages/page"
-	getData={async (swell, theme) => {
-		const page = await getPage(swell, slug as string, theme.page?.query);
+  id="pages/page"
+  required="page.id"
+  title="{{ page.meta_title | default: page.name }}"
+  description="{{ page.meta_description | default: page.description }}"
+  getData={async (swell: Swell, theme: SwellTheme) => {
+    const page = new SwellStorefrontRecord(
+      swell,
+      'content/pages',
+      slug as string,
+      theme.page?.query
+    );
 
-		if (page) {
-			return {
-				page,
-				title: page.meta_title || page.name,
-				description: page.meta_description || page.description,
-				theme_template: page.theme_template
-			};
-		}
-
-		throw new PageNotFound('Page not found');
-	}}
+    return {
+      page,
+    };
+  }}
 />

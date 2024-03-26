@@ -6,6 +6,7 @@ import { default as forTag } from "./for";
 import form from "./form";
 import javascript from "./javascript";
 import layout from "./layout";
+import paginate from "./paginate";
 import render from "./render";
 import section from "./section";
 import sections from "./sections";
@@ -21,6 +22,7 @@ export const tags = {
   form,
   javascript,
   layout,
+  paginate,
   render,
   section,
   sections,

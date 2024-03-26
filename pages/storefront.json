@@ -8,6 +8,17 @@
       "icon": "home"
     },
     {
+      "id": "products/index",
+      "label": "Product list",
+      "url": "/products",
+      "group": "store",
+      "icon": "tag",
+      "query": {
+        "active": true,
+        "limit": 25
+      }
+    },
+    {
       "id": "products/product",
       "label": "Product",
       "url": "/products/{slug}",
@@ -20,6 +31,16 @@
       }
     },
     {
+      "id": "categories/index",
+      "label": "Category list",
+      "url": "/categories",
+      "group": "store",
+      "icon": "tags",
+      "query": {
+        "active": true
+      }
+    },
+    {
       "id": "categories/category",
       "label": "Category",
       "url": "/categories/{slug}",
@@ -27,16 +48,6 @@
       "icon": "tags",
       "templates": true,
       "collection": "categories",
-      "query": {
-        "active": true
-      }
-    },
-    {
-      "id": "categories/index",
-      "label": "Category list",
-      "url": "/categories",
-      "group": "store",
-      "icon": "tags",
       "query": {
         "active": true
       }
@@ -56,12 +67,12 @@
     {
       "id": "content/index",
       "label": "Content list",
-      "url": "/content/{content_slug}",
+      "url": "/content/{collection}",
       "group": "store",
       "icon": "cube",
       "templates": true,
       "expand_pages": true,
-      "collection": "content/{content_slug}",
+      "collection": "content/{collection}",
       "query": {
         "published": true
       }
@@ -69,11 +80,11 @@
     {
       "id": "content/content",
       "label": "Content entry",
-      "url": "/content/{content_slug}/{entry_slug}",
+      "url": "/content/{collection}/{slug}",
       "group": "store",
       "icon": "cube",
       "templates": true,
-      "collection": "content/{content_slug}",
+      "collection": "content/{collection}",
       "query": {
         "published": true
       }

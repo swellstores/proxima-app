@@ -1,17 +1,21 @@
 ---
-import { Swell } from "../swell/api";
-import { PageError, SwellTheme } from "../swell/theme";
-import Layout from "@/layouts/Layout.astro";
-import ThemeSections from "./ThemeSections.astro";
-import EasyblocksPage from "./EasyblocksPage.jsx";
-import { getThemeConfig } from "@/swell/easyblocks";
+import get from 'lodash/get';
+import { Swell } from '../swell/api';
+import { PageError, PageNotFound, SwellTheme } from '../swell/theme';
+import Layout from '@/layouts/Layout.astro';
+import ThemeSections from './ThemeSections.astro';
+import EasyblocksPage from './EasyblocksPage.jsx';
+import { getThemeConfig } from '@/swell/easyblocks';
 
-interface Props {
+export interface Props {
   id: string;
   title?: string;
   titleKey?: string;
+  titlePath?: string;
   description?: string;
   descriptionKey?: string;
+  descriptionPath?: string;
+  requiredPath?: string;
   content?: string;
   props?: {
     [key: string]: any;
@@ -19,7 +23,7 @@ interface Props {
   easyblocks?: boolean;
   getData?: (
     swell: Swell,
-    theme: SwellTheme,
+    theme: SwellTheme
   ) => Promise<{ [key: string]: any }>;
 }
 
@@ -27,8 +31,11 @@ const {
   id,
   title,
   titleKey,
+  titlePath,
   description,
   descriptionKey,
+  descriptionPath,
+  required,
   content,
   props,
   getData,
@@ -39,7 +46,7 @@ const theme = new SwellTheme(swell);
 
 await theme.init(Astro, id);
 
-const isEditor = typeof Astro.url.searchParams.get("_editor") === 'string';
+const isEditor = typeof Astro.url.searchParams.get('_editor') === 'string';
 const swellClientProps = isEditor && swell.getClientProps();
 
 let pageData, pageTitle, pageDescription, pageContent;
@@ -48,57 +55,84 @@ try {
   // Rendering page content
   pageData = getData && (await getData(swell, theme));
 
+  theme.setCompatibilityData(pageData);
+
   [pageTitle, pageDescription, pageContent] = await Promise.all([
-    (titleKey && theme.lang(titleKey)) ?? title,
-    (descriptionKey && theme.lang(descriptionKey)) ?? description,
-    content ?? 
+    titleKey
+      ? await theme.lang(titleKey)
+      : typeof title === 'string'
+        ? await theme.renderTemplateString(title, pageData)
+        : typeof title === 'function'
+          ? await title(pageData)
+          : await get(pageData, titlePath),
+
+    descriptionKey
+      ? await theme.lang(descriptionKey)
+      : typeof description === 'string'
+        ? await theme.renderTemplateString(description, pageData)
+        : typeof description === 'function'
+          ? await description(pageData)
+          : await get(pageData, descriptionPath),
+
+    content ??
       theme.renderPage(
         {
           ...props,
           ...pageData,
         },
-        pageData?.theme_template,
+        pageData?.theme_template
       ),
   ]);
 
-  if (!pageContent && typeof pageContent !== "string") {
+  if (!pageContent && typeof pageContent !== 'string') {
     throw new PageError();
   }
+
+  if (required) {
+    const isFound = await get(pageData, required);
+    if (!isFound) {
+      throw new PageNotFound();
+    }
+  }
 } catch (err: any) {
+  console.log('something went wrong!', err)
   if (err instanceof PageError) {
     pageTitle = err.title;
     pageContent = await theme.renderPageTemplate(err.template);
   } else {
-    pageTitle = "Something went wrong";
-    pageContent = await theme.renderPageTemplate("500");
+    pageTitle = 'Something went wrong';
+    pageContent = await theme.renderPageTemplate('500');
+    console.error(err);
   }
 }
 
+console.log({ pageTitle, pageContent });
+
 const pageProps = { ...props, ...pageData };
 const layoutProps = {
-  page_title: pageTitle,
-  page_description: pageDescription,
-  ...props,
+  page_title: pageTitle || pageData?.title || theme.globals?.store?.name,
+  page_description: pageDescription || pageData?.description,
+  content_for_header: theme.getContentForHeader(),
+  props,
 };
 
 let sectionConfigs, pageSections, layoutSectionGroups, lang, themeGlobals;
 if (isEditor && pageContent && typeof pageContent !== 'string') {
-  [sectionConfigs, pageSections, layoutSectionGroups, lang] = await Promise.all([
-    theme.getSectionGroupConfigs(
-      pageContent as ThemeSectionGroup,
-    ),
-    theme.getPageSections(),
-    theme.getLayoutSectionGroups(),
-    getThemeConfig(swell, `config/language-editor`)
-  ]);
+  [sectionConfigs, pageSections, layoutSectionGroups, lang] = await Promise.all(
+    [
+      theme.getSectionGroupConfigs(pageContent as ThemeSectionGroup),
+      theme.getPageSections(),
+      theme.getLayoutSectionGroups(),
+      getThemeConfig(swell, `config/language-editor`),
+    ]
+  );
   themeGlobals = theme.globals;
 }
-
 ---
 
 {
   isEditor ? (
-    <html class="TEST2">
+    <html>
       <EasyblocksPage
         pageId={theme.pageId}
         pageProps={pageProps}
@@ -114,20 +148,13 @@ if (isEditor && pageContent && typeof pageContent !== 'string') {
       />
     </html>
   ) : (
-    <Layout
-      theme={theme}
-      {...layoutProps}
-    >
+    <Layout theme={theme} {...layoutProps}>
       <div slot="content_for_layout">
-        {typeof pageContent === "string" ? (
-            <Fragment set:html={pageContent} />
-          ) : (
-            <ThemeSections
-              theme={theme}
-              content={pageContent}
-              data={pageProps}
-            />
-          )}
+        {typeof pageContent === 'string' ? (
+          <Fragment set:html={pageContent} />
+        ) : (
+          <ThemeSections theme={theme} content={pageContent} data={pageProps} />
+        )}
       </div>
     </Layout>
   )

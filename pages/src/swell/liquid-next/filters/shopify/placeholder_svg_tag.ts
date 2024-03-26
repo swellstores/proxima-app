@@ -8,9 +8,9 @@ export default function bind(_liquidSwell: LiquidSwell) {
     const svg =
       placeholderSvgs[name as keyof typeof placeholderSvgs];
 
-    return svg
+    return svg?.src
       ? `<img src="${svg.src}" alt="${name}"` +
           ` class="placeholder-svg placeholder-svg--${name}" />`
-      : "";
+      : svg;
   };
 }

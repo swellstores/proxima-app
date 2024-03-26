@@ -1,5 +1,5 @@
 ---
-import { SwellTheme } from "@/swell/theme";
+import { SwellTheme } from '@/swell/theme';
 
 interface Props {
   theme: SwellTheme;
@@ -14,9 +14,6 @@ const sections = await theme.renderPageSections(content, data);
 
 {
   sections.map(({ section, output, tag: Tag /* FIXME */ }: any) => (
-    <div
-      data-swell-section={section?.type || "unknown"}
-      set:html={output}
-    />
+    <div data-swell-section={section?.type || 'unknown'} set:html={output} />
   ))
 }

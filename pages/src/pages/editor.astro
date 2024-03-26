@@ -1,35 +1,34 @@
 ---
-import { Swell } from "../swell/api";
-import EasyblocksEditor from "../components/EasyblocksEditor.jsx";
-import { getThemeConfig, getThemeSectionConfigs } from "../swell/easyblocks";
-import { getSectionGroupConfigs, getPageSections, getLayoutSectionGroups } from "../swell/utils";
+import { Swell } from '@/swell/api';
+import { SwellTheme } from '@/swell/theme';
+import EasyblocksEditor from '@/components/EasyblocksEditor.jsx';
+import { getThemeConfig } from '@/swell/easyblocks';
 
-const initialPageId = "index";
+const initialPageId = 'index';
 
 // Editor requires rootComponent param
-if (!Astro.url.searchParams.get("rootTemplate")) {
+if (!Astro.url.searchParams.get('rootTemplate')) {
   return Astro.redirect(`/editor?rootTemplate=page_${initialPageId}`);
 }
 
 const swell = new Swell({ Astro });
+const theme = new SwellTheme(swell);
 
-const [sectionGroup, allSections] = await Promise.all([
-  getThemeConfig(swell, `pages/${initialPageId}`),
-  getThemeSectionConfigs(swell),
-]);
+await theme.init(Astro);
+
+const sectionGroup = getThemeConfig(
+  swell,
+  `pages/${initialPageId}`
+) as unknown as ThemeSectionGroup;
 
 if (!sectionGroup) {
   return Astro.redirect(`/404`);
 }
 
 const [sectionConfigs, pageSections, layoutSectionGroups] = await Promise.all([
-  getSectionGroupConfigs(sectionGroup, (type) =>
-    getThemeConfig(swell, `sections/${type}`).then(
-      (config: any) => config as ThemeSectionSchema || undefined
-    )
-  ),
-  getPageSections(allSections),
-  getLayoutSectionGroups(allSections)
+  theme.getSectionGroupConfigs(sectionGroup),
+  theme.getPageSections(),
+  theme.getLayoutSectionGroups(),
 ]);
 
 const editorLang = await getThemeConfig(swell, `config/language-editor`);
@@ -46,7 +45,6 @@ const editorLang = await getThemeConfig(swell, `config/language-editor`);
           pageId={initialPageId}
           pageSections={pageSections}
           layoutSectionGroups={layoutSectionGroups}
-          sectionConfigs={sectionConfigs}
           sectionConfigs={sectionConfigs}
           lang={editorLang}
           client:only="react"

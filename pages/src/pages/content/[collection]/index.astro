@@ -1,0 +1,27 @@
+---
+import { SwellStorefrontCollection } from '../../../swell/api';
+import ThemePage from '../../../components/ThemePage.astro';
+import { getContentModel } from '../../../swell/content';
+
+const { collection } = Astro.params;
+---
+
+<ThemePage
+  id="content/index"
+  required="model.id"
+  title="{{ model.name }}"
+  description="{{ model.description }}"
+  getData={async (swell: Swell, theme: SwellTheme) => {
+    const model = await getContentModel(swell, collection);
+    const entries = new SwellStorefrontCollection(
+      swell,
+      `content/${collection}`,
+      theme.page?.query
+    );
+
+    return {
+      model,
+      entries,
+    };
+  }}
+/>

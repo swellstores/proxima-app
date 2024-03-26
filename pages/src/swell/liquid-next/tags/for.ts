@@ -13,11 +13,13 @@ import {
   Emitter,
 } from "liquidjs";
 import { ForloopDrop, toEnumerable } from "../utils";
+import { SwellStorefrontCollection } from '@/swell/api';
 
-const MODIFIERS = ["offset", "limit", "reversed"];
+const MODIFIERS = ['offset', 'limit', 'reversed'];
 
 // Adapted from liquidjs/src/tags/for.ts
 // 1) to use our own toEnumerable implementation for compatibility
+
 export default function bind(_liquidSwell: LiquidSwell) {
   return class ForTag extends Tag {
     variable: string;
@@ -32,10 +34,11 @@ export default function bind(_liquidSwell: LiquidSwell) {
       liquid: Liquid,
     ) {
       super(token, remainTokens, liquid);
+
       const variable = this.tokenizer.readIdentifier();
       const inStr = this.tokenizer.readIdentifier();
       const collection = this.tokenizer.readValue();
-      if (!variable.size() || inStr.content !== "in" || !collection) {
+      if (!variable.size() || inStr.content !== 'in' || !collection) {
         throw new Error(`illegal tag: ${token.getText()}`);
       }
 
@@ -48,23 +51,28 @@ export default function bind(_liquidSwell: LiquidSwell) {
       let p;
       const stream: ParseStream = this.liquid.parser
         .parseStream(remainTokens)
-        .on("start", () => (p = this.templates))
-        .on("tag:else", () => (p = this.elseTemplates))
-        .on("tag:endfor", () => stream.stop())
-        .on("template", (tpl: Template) => p.push(tpl))
-        .on("end", () => {
+        .on('start', () => (p = this.templates))
+        .on('tag:else', () => (p = this.elseTemplates))
+        .on('tag:endfor', () => stream.stop())
+        .on('template', (tpl: Template) => p.push(tpl))
+        .on('end', () => {
           throw new Error(`tag ${token.getText()} not closed`);
         });
 
       stream.start();
     }
 
-    *render(
-      ctx: Context,
-      emitter: Emitter,
-    ): Generator<unknown, void | string, Template[]> {
+    *render(ctx: Context, emitter: Emitter): any {
       const r = this.liquid.renderer;
-      let collection = toEnumerable(yield evalToken(this.collection, ctx));
+
+      let collection = yield evalToken(this.collection, ctx);
+
+      // Get swell collection if needed
+      if (!collection?._result && collection?._get) {
+        yield collection._get();
+      } else if (!(collection instanceof Array)) {
+        collection = toEnumerable(collection);
+      }
 
       if (!collection.length) {
         yield r.renderTemplates(this.elseTemplates, ctx, emitter);
@@ -72,7 +80,7 @@ export default function bind(_liquidSwell: LiquidSwell) {
       }
 
       const continueKey =
-        "continue-" + this.variable + "-" + this.collection.getText();
+        'continue-' + this.variable + '-' + this.collection.getText();
       ctx.push({ continue: ctx.getRegister(continueKey) });
       const hash = yield this.hash.render(ctx);
       ctx.pop();
@@ -82,16 +90,16 @@ export default function bind(_liquidSwell: LiquidSwell) {
         : MODIFIERS.filter((x) => (hash as any)[x] !== undefined);
 
       collection = modifiers.reduce((collection, modifier: any) => {
-        if (modifier === "offset")
-          return offset(collection, (hash as any)["offset"]);
-        if (modifier === "limit")
-          return limit(collection, (hash as any)["limit"]);
+        if (modifier === 'offset')
+          return offset(collection, (hash as any)['offset']);
+        if (modifier === 'limit')
+          return limit(collection, (hash as any)['limit']);
         return reversed(collection);
       }, collection);
 
       ctx.setRegister(
         continueKey,
-        ((hash as any)["offset"] || 0) + collection.length,
+        ((hash as any)['offset'] || 0) + collection.length,
       );
 
       const scope = {
@@ -101,17 +109,17 @@ export default function bind(_liquidSwell: LiquidSwell) {
           this.variable,
         ),
       };
-      
+
       ctx.push(scope);
-      
+
       for (const item of collection) {
         (scope as any)[this.variable] = item;
         yield r.renderTemplates(this.templates, ctx, emitter);
-        if ((emitter as any)["break"]) {
-          (emitter as any)["break"] = false;
+        if ((emitter as any)['break']) {
+          (emitter as any)['break'] = false;
           break;
         }
-        (emitter as any)["continue"] = false;
+        (emitter as any)['continue'] = false;
         scope.forloop.next();
       }
       ctx.pop();

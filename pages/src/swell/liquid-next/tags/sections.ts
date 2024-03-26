@@ -18,18 +18,9 @@ export default function bind(liquidSwell: LiquidSwell) {
       this.fileName = (tokenizer.readValue() as QuotedToken)?.content;
     }
 
-    *render(ctx: Context): any {
-      const themeConfig = yield liquidSwell.getThemeConfig(
-        liquidSwell.getSectionGroupPath(this.fileName),
-      );
-
-      // Restrict using in theme layouts only
-      const themeFilePath = (ctx.environments as any).template.file_path;
-      if (!themeFilePath?.startsWith("theme/layouts")) {
-        throw new Error(
-          `The {% section %} tag can only be used in theme layout files.`,
-        );
-      }
+    *render(_ctx: Context): any {
+      const filePath = yield liquidSwell.getSectionGroupPath(this.fileName);
+      const themeConfig = yield liquidSwell.getThemeConfig(filePath);
 
       try {
         const sectionGroup = JSON.parse(themeConfig.file_data);
@@ -45,7 +36,7 @@ export default function bind(liquidSwell: LiquidSwell) {
             ${output}
           </div>`;
       } catch (err) {
-        return "";
+        return '';
       }
     }
   };

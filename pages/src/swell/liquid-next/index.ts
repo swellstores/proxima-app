@@ -3,16 +3,18 @@ import { bindTags } from "./tags";
 import { bindFilters } from "./filters";
 
 export * from "./color";
+export * from './font';
 
 export class LiquidSwell extends Liquid {
   public storefrontConfig: any;
   public getThemeConfig: GetThemeConfig;
+  public getThemeTemplateConfigByType: GetThemeTemplateConfigByType | undefined;
+  public getAssetUrl: GetAssetUrl;
   public renderTemplate: RenderTemplate;
   public renderTemplateString: RenderTemplateString;
   public renderTemplateSections: RenderTemplateSections;
   public renderLanguage: RenderLanguage;
   public renderCurrency: RenderCurrency;
-  public getAssetUrl: GetAssetUrl;
   public engine: Liquid;
 
   public isEditor: boolean;
@@ -23,17 +25,20 @@ export class LiquidSwell extends Liquid {
   public componentsDir: string | undefined;
   public sectionsDir: string | undefined;
 
+  public lastSchema: ThemeSectionSchema | undefined;
+
   public globals: ThemeSettings = {};
 
   constructor({
     storefrontConfig,
     getThemeConfig,
+    getThemeTemplateConfigByType,
+    getAssetUrl,
     renderTemplate,
     renderTemplateString,
     renderTemplateSections,
     renderLanguage,
     renderCurrency,
-    getAssetUrl,
     isEditor,
     locale,
     currency,
@@ -44,12 +49,13 @@ export class LiquidSwell extends Liquid {
   }: {
     storefrontConfig: ThemeSettings;
     getThemeConfig: GetThemeConfig;
+    getThemeTemplateConfigByType?: GetThemeTemplateConfigByType;
+    getAssetUrl: GetAssetUrl;
     renderTemplate: RenderTemplate;
     renderTemplateString: RenderTemplateString;
     renderTemplateSections: RenderTemplateSections;
     renderLanguage: RenderLanguage;
     renderCurrency: RenderCurrency;
-    getAssetUrl: GetAssetUrl;
     isEditor: boolean;
     locale?: string;
     currency?: string;
@@ -61,6 +67,7 @@ export class LiquidSwell extends Liquid {
     super();
     this.storefrontConfig = storefrontConfig;
     this.getThemeConfig = getThemeConfig;
+    this.getThemeTemplateConfigByType = getThemeTemplateConfigByType;
     this.getAssetUrl = getAssetUrl;
     this.renderTemplate = renderTemplate;
     this.renderTemplateString = renderTemplateString;
@@ -70,10 +77,10 @@ export class LiquidSwell extends Liquid {
     this.isEditor = isEditor;
     this.locale = locale || 'en-US';
     this.currency = currency || 'USD';
-    this.layoutName = layoutName || "theme";
-    this.extName = extName || "liquid";
-    this.componentsDir = componentsDir || "components";
-    this.sectionsDir = sectionsDir || "sections";
+    this.layoutName = layoutName || 'theme';
+    this.extName = extName || 'liquid';
+    this.componentsDir = componentsDir || 'components';
+    this.sectionsDir = sectionsDir || 'sections';
 
     this.engine = this.initLiquidEngine();
   }
@@ -83,6 +90,7 @@ export class LiquidSwell extends Liquid {
       cache: false,
       relativeReference: false,
       fs: this.getLiquidFS(),
+      ownPropertyOnly: false,
     });
 
     bindTags(this);
@@ -109,7 +117,7 @@ export class LiquidSwell extends Liquid {
       },
       /** read a file synchronously */
       readFileSync(_filePath: string): string {
-        return "";
+        return '';
       },
       /** check if a file exists synchronously */
       existsSync(_filePath: string): boolean {
@@ -134,15 +142,36 @@ export class LiquidSwell extends Liquid {
     return `theme/${fileName}.${extName || this.extName}`;
   }
 
-  getComponentPath(componentName: string): string {
-    return this.resolveFilePath(`${this.componentsDir}/${componentName}`);
+  async resolveFilePathByType(
+    type: string,
+    name: string,
+  ): Promise<string | undefined> {
+    if (this.getThemeTemplateConfigByType) {
+      const config = await this.getThemeTemplateConfigByType(type, name);
+      if (config?.file_path) {
+        return config.file_path;
+      }
+    }
   }
 
-  getSectionPath(sectionName: string): string {
-    return this.resolveFilePath(`${this.sectionsDir}/${sectionName}`);
+  async getComponentPath(componentName: string): Promise<string> {
+    return (
+      (await this.resolveFilePathByType('components', componentName)) ||
+      this.resolveFilePath(`${this.componentsDir}/${componentName}`)
+    );
   }
 
-  getSectionGroupPath(sectionName: string): string {
-    return this.resolveFilePath(`${this.sectionsDir}/${sectionName}`, "json");
+  async getSectionPath(sectionName: string): Promise<string> {
+    return (
+      (await this.resolveFilePathByType('components', sectionName)) ||
+      this.resolveFilePath(`${this.componentsDir}/${sectionName}`)
+    );
+  }
+
+  async getSectionGroupPath(sectionName: string): Promise<string> {
+    return (
+      (await this.resolveFilePathByType('sections', `${sectionName}.json`)) ||
+      this.resolveFilePath(`${this.componentsDir}/${sectionName}`, 'json')
+    );
   }
 }

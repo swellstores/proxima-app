@@ -1,23 +1,20 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { Swell } from "../../swell/api";
-import { getBlogs } from "../../swell/content";
-import { SwellTheme } from "../../swell/theme";
-
-const swell = new Swell({ Astro });
-const theme = new SwellTheme(swell);
-
-await theme.init(Astro, 'blogs/index');
-
-const blogs = await getBlogs(swell);
-
-const [ title, description, content ] = await Promise.all([
-	theme.lang('pages.blogs.title', 'Blogs'),
-	theme.lang('pages.blogs.description'),
-	theme.renderPage({ blogs })
-]);
+import { SwellStorefrontCollection } from '../../swell/api';
+import ThemePage from '../../components/ThemePage.astro';
 ---
 
-<Layout theme={theme} page_title={title} page_description={description}>
-	<div slot="content_for_layout" set:html={content} />
-</Layout>
+<ThemePage
+  id="blogs/index"
+  title="Blogs"
+  getData={async (swell: Swell, theme: SwellTheme) => {
+    const blogs = new SwellStorefrontCollection(
+      swell,
+      `content/blogs`,
+      theme.page?.query
+    );
+
+    return {
+      blogs,
+    };
+  }}
+/>

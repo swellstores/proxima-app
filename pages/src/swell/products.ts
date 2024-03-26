@@ -1,17 +1,16 @@
-import { Swell } from "./api";
+import { Swell, SwellStorefrontCollection, SwellStorefrontRecord } from './api';
 
-export async function getProducts(swell: Swell, query?: object): Promise<any> {
-  return await swell.getCached("products", [query], () =>
-    swell.storefront.products.list(query)
-  );
+export async function getProducts(
+  swell: Swell,
+  query?: SwellData,
+): Promise<any> {
+  return new SwellStorefrontCollection(swell, 'products', query);
 }
 
 export async function getProduct(
   swell: Swell,
   id: string,
-  query?: object
+  query?: SwellData,
 ): Promise<any> {
-  return await swell.getCached("product", [id, query], () =>
-    swell.storefront.products.get(id, query)
-  );
+  return new SwellStorefrontRecord(swell, 'products', id, query);
 }

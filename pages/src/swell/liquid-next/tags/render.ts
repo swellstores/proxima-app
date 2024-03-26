@@ -77,7 +77,7 @@ export default function bind(liquidSwell: LiquidSwell) {
       const { hash } = this;
 
       const themeConfig = yield liquidSwell.getThemeConfig(
-        liquidSwell.getComponentPath(this.fileName),
+        yield liquidSwell.getComponentPath(this.fileName),
       );
 
       const childCtx = new Context({}, ctx.opts, {

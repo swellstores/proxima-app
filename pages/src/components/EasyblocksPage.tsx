@@ -56,21 +56,25 @@ function getRootComponent(props: any, theme: any) {
         ? theme.renderSections(pageContent, pageProps)
         : undefined;
       
-      theme.renderLayout({
-        ...layoutProps,
-        content_for_header: "", // TODO: still don't know what this is for
-        content_for_layout: "<content-for-layout></content-for-layout>",
-      }).then((output: any) => {
-        const RootContext = createContext(null);
-        const RootElements = htmlToReactParser.parseWithInstructions(
-          output,
-          isValidNode,
-          getLayoutProcessingInstructions(RootContext, stringOutput)
-        );
-        const Content = (RootElements.find((element: any) => element.type === ContentWrapper) || <div />);
-        setContent(Content);
-        setRootContext(RootContext);
-      });
+      theme
+        .renderLayout({
+          ...layoutProps,
+          content_for_header: pageProps.content_for_header || '',
+          content_for_layout: '<content-for-layout></content-for-layout>',
+        })
+        .then((output: any) => {
+          const RootContext = createContext(null);
+          const RootElements = htmlToReactParser.parseWithInstructions(
+            output,
+            isValidNode,
+            getLayoutProcessingInstructions(RootContext, stringOutput),
+          );
+          const Content = RootElements.find(
+            (element: any) => element.type === ContentWrapper,
+          ) || <div />;
+          setContent(Content);
+          setRootContext(RootContext);
+        });
     }, [theme.liquidSwell.layoutName]);
 
     return (
@@ -111,17 +115,16 @@ function getPageSectionComponent(props: any, theme: SwellTheme, section: any) {
     };
 
     useEffect(() => {
-      theme.renderThemeTemplate(
-        `sections/${section.id}.liquid`,
-        sectionData,
-      ).then((output: any) => {
-        const SectionElements = htmlToReactParser.parseWithInstructions(
-          output,
-          isValidNode,
-          getPageBlockProcessingInstructions(Blocks)
-        );
-        setOutput(SectionElements);
-      });
+      theme
+        .renderThemeTemplate(`theme/sections/${section.id}.liquid`, sectionData)
+        .then((output: any) => {
+          const SectionElements = htmlToReactParser.parseWithInstructions(
+            output,
+            isValidNode,
+            getPageBlockProcessingInstructions(Blocks),
+          );
+          setOutput(SectionElements);
+        });
     }, [stringify(sectionData)]);
 
     return (

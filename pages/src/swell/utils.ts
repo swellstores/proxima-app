@@ -15,10 +15,15 @@ export async function getPageSections(allSections: SwellCollection): Promise<The
 
   const pageSectionConfigs = allSections.results.filter(
     (config: SwellRecord) =>
-      config.file_path?.endsWith('.json')
+      config.file_path?.endsWith('.json') &&
       // Page sections must have a liquid file
-      && allSections.results.find((c: any) => c.file_path === config.file_path.replace(/\.json$/, '.liquid')),
+      allSections.results.find(
+        (c: any) =>
+          c.file_path === config.file_path.replace(/\.json$/, '.liquid'),
+      ),
   );
+
+  // TODO: load {% schema %} from liquid files for Shopify compatibility
 
   return pageSectionConfigs.map((config: any) => {
     let schema;
@@ -30,7 +35,7 @@ export async function getPageSections(allSections: SwellCollection): Promise<The
     return {
       ...schema,
       id: config.name.split('.').pop(),
-    }
+    };
   });
 }
 

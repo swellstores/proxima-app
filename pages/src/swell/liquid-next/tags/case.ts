@@ -9,11 +9,9 @@ import {
   Value,
   ValueToken,
   ParseStream,
-  Emitter,
   evalToken,
   toValue,
-} from "liquidjs";
-import { QuotedToken } from "liquidjs/dist/tokens";
+} from 'liquidjs';
 
 /*
 {% case variable %}
