@@ -709,8 +709,9 @@ export function schemaToEasyblocksValue(
   }
 }
 
-export function getEasyblocksBackend(sectionConfigs: ThemeSectionGroupConfig[]) {
-  // TODO: client-side methods for saving etc
+export function getEasyblocksBackend(
+  sectionConfigs: ThemeSectionGroupConfig[],
+) {
   const easyblocksBackend: Backend = {
     documents: {
       get: async ({ id }) => {
@@ -720,43 +721,35 @@ export function getEasyblocksBackend(sectionConfigs: ThemeSectionGroupConfig[]) 
           entry: {
             _id: 'page',
             _component: `page_${id}`,
-          }
+          },
         } as Document;
-        console.log({ document })
         return document;
       },
       create: async (payload) => {
-        console.log("create document", payload);
         return {} as Document;
       },
       update: async (payload) => {
-        console.log("update document", payload);
         return {} as Document;
       },
     },
     templates: {
       get: async (payload) => {
-        console.log("get template", payload);
         return {} as UserDefinedTemplate;
       },
       getAll: async () => {
-        console.log("get all templates");
         return [] as UserDefinedTemplate[];
       },
       create: async (payload) => {
-        console.log("create template", payload);
         return {} as UserDefinedTemplate;
       },
       update: async (payload) => {
-        console.log("update template", payload);
         return {} as UserDefinedTemplate;
       },
       delete: async (payload) => {
-        console.log("delete template", payload);
         return;
       },
     },
   };
 
-  return easyblocksBackend
+  return easyblocksBackend;
 }

@@ -464,6 +464,11 @@ export class StorefrontResource implements StorefrontResource {
 
         return instance[prop];
       },
+
+      set(target: StorefrontResource, prop: any, value: any): boolean {
+        target[prop] = value;
+        return true;
+      },
     });
   }
 
@@ -488,7 +493,7 @@ export class StorefrontResource implements StorefrontResource {
 }
 
 export class SwellStorefrontResource extends StorefrontResource {
-  public _swell: Swell;
+  public _swell?: Swell = undefined;
   public _resource: any;
 
   public readonly _collection: string;
@@ -519,15 +524,14 @@ export class SwellStorefrontResource extends StorefrontResource {
   } {
     const { _swell, _collection } = this;
 
-    this._resource = (_swell.storefront as any)[_collection];
+    this._resource = (_swell?.storefront as any)[_collection];
 
-    if (_collection.startsWith('content/')) {
+    if (_swell && _collection.startsWith('content/')) {
       const type = _collection.split('/')[1];
       this._resource = {
-        list: (query: SwellData) =>
-          this._swell.storefront.content.list(type, query),
+        list: (query: SwellData) => _swell.storefront.content.list(type, query),
         get: (id: string, query: SwellData) =>
-          this._swell.storefront.content.get(type, id, query),
+          _swell.storefront.content.get(type, id, query),
       };
     }
 
@@ -584,21 +588,23 @@ export class SwellStorefrontCollection extends SwellStorefrontResource {
       ...query,
     };
 
-    this._result = await this._swell
-      .getCached('storefront-list', [this._collection, this._query], () =>
-        (this._getter as StorefrontResourceGetter)(),
-      )
-      .then((result: SwellCollection) => {
-        if (result) {
-          Object.assign(this, {
-            ...result,
-            length: result.results.length,
-          });
-          this.setCompatibilityProps(result);
-        }
+    if (this._swell) {
+      this._result = await this._swell
+        .getCached('storefront-list', [this._collection, this._query], () =>
+          (this._getter as StorefrontResourceGetter)(),
+        )
+        .then((result: SwellCollection) => {
+          if (result) {
+            Object.assign(this, {
+              ...result,
+              length: result.results.length,
+            });
+            this.setCompatibilityProps(result);
+          }
 
-        return result;
-      });
+          return result;
+        });
+    }
 
     return this;
   }
@@ -673,20 +679,22 @@ export class SwellStorefrontRecord extends SwellStorefrontResource {
       ...query,
     };
 
-    this._result = await this._swell
-      .getCached(
-        'storefront-record',
-        [this._collection, this._id, this._query],
-        () => (this._getter as StorefrontResourceGetter)(),
-      )
-      .then((result: SwellRecord) => {
-        if (result) {
-          Object.assign(this, result);
-          this.setCompatibilityProps(result);
-        }
+    if (this._swell) {
+      this._result = await this._swell
+        .getCached(
+          'storefront-record',
+          [this._collection, this._id, this._query],
+          () => (this._getter as StorefrontResourceGetter)(),
+        )
+        .then((result: SwellRecord) => {
+          if (result) {
+            Object.assign(this, result);
+            this.setCompatibilityProps(result);
+          }
 
-        return result;
-      });
+          return result;
+        });
+    }
 
     return this;
   }

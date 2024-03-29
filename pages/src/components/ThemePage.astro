@@ -7,6 +7,8 @@ import ThemeSections from './ThemeSections.astro';
 import EasyblocksPage from './EasyblocksPage.jsx';
 import { getThemeConfig } from '@/swell/easyblocks';
 
+import util from 'util';
+
 export interface Props {
   id: string;
   title?: string;
@@ -95,7 +97,7 @@ try {
     }
   }
 } catch (err: any) {
-  console.log('something went wrong!', err)
+  console.log('something went wrong!', err);
   if (err instanceof PageError) {
     pageTitle = err.title;
     pageContent = await theme.renderPageTemplate(err.template);
@@ -105,8 +107,6 @@ try {
     console.error(err);
   }
 }
-
-console.log({ pageTitle, pageContent });
 
 const pageProps = { ...props, ...pageData };
 const layoutProps = {
@@ -128,6 +128,24 @@ if (isEditor && pageContent && typeof pageContent !== 'string') {
   );
   themeGlobals = theme.globals;
 }
+
+// TODO: move this to utils
+function dehydrateSwellRefsInStorefrontResources(obj: any) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  for (const key in obj) {
+    if (key === '_swell') {
+      obj[key] = undefined;
+    } else {
+      dehydrateSwellRefsInStorefrontResources(obj[key]);
+    }
+  }
+}
+
+dehydrateSwellRefsInStorefrontResources(themeGlobals);
+dehydrateSwellRefsInStorefrontResources(swellClientProps);
 ---
 
 {
@@ -140,8 +158,8 @@ if (isEditor && pageContent && typeof pageContent !== 'string') {
         pageSections={pageSections}
         layoutProps={layoutProps}
         layoutSectionGroups={layoutSectionGroups}
-        themeGlobals={themeGlobals}
         sectionConfigs={sectionConfigs}
+        themeGlobals={themeGlobals}
         swellClientProps={swellClientProps}
         lang={lang}
         client:load

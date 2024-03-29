@@ -1,42 +1,65 @@
 import reduce from "lodash/reduce";
 import { LANG_TO_COUNTRY_CODES } from "./constants";
+import { has } from 'lodash';
 
-export function themeConfigQuery(swellHeaders: { [key: string]: any }): { [key: string]: any } {
+export function themeConfigQuery(swellHeaders: { [key: string]: any }): {
+  [key: string]: any;
+} {
   return {
-    parent_id: swellHeaders["theme-id"],
-    branch_id: swellHeaders["theme-branch-id"] || null,
+    parent_id: swellHeaders['theme-id'],
+    branch_id: swellHeaders['theme-branch-id'] || null,
     preview:
-      swellHeaders["deployment-mode"] === "preview" ? true : { $ne: true },
+      swellHeaders['deployment-mode'] === 'preview' ? true : { $ne: true },
   };
 }
 
-export async function getPageSections(allSections: SwellCollection): Promise<ThemePageSectionSchema[]> {
+export async function getPageSections(
+  allSections: SwellCollection,
+  renderTemplateSchema: (config: any) => Promise<any>,
+): Promise<ThemePageSectionSchema[]> {
   if (!allSections?.results) return [];
 
-  const pageSectionConfigs = allSections.results.filter(
-    (config: SwellRecord) =>
-      config.file_path?.endsWith('.json') &&
-      // Page sections must have a liquid file
-      allSections.results.find(
-        (c: any) =>
-          c.file_path === config.file_path.replace(/\.json$/, '.liquid'),
-      ),
+  const pageSectionConfigs = await Promise.all(
+    allSections.results
+      .filter((config: SwellRecord) => {
+        if (!config.file_path?.startsWith('theme/sections/')) return false;
+        const isLiquidFile = config.file_path.endsWith('.liquid');
+        const isJsonFile = config.file_path.endsWith('.json');
+
+        if (isLiquidFile) {
+          const hasJsonFile = allSections.results.find(
+            (c: any) =>
+              c.file_path === config.file_path.replace(/\.liquid$/, '.json'),
+          );
+          if (!hasJsonFile) {
+            return true;
+          }
+        } else if (isJsonFile) {
+          return true;
+        }
+      })
+      .map(async (config: SwellRecord) => {
+        let schema;
+
+        // Extract {% schema %} from liquid files for Shopify compatibility
+        if (config?.file_path?.endsWith('.liquid')) {
+          schema = await renderTemplateSchema(config);
+        } else {
+          try {
+            schema = JSON.parse(config.file_data);
+          } catch {
+            schema = {};
+          }
+        }
+
+        return {
+          ...schema,
+          id: config.name.split('.').pop(),
+        };
+      }),
   );
 
-  // TODO: load {% schema %} from liquid files for Shopify compatibility
-
-  return pageSectionConfigs.map((config: any) => {
-    let schema;
-    try {
-      schema = JSON.parse(config.file_data);
-    } catch {
-      // noop
-    }
-    return {
-      ...schema,
-      id: config.name.split('.').pop(),
-    };
-  });
+  return pageSectionConfigs;
 }
 
 export async function getLayoutSectionGroups(allSections: SwellCollection): Promise<ThemeLayoutSectionGroupSchema[]> {

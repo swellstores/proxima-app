@@ -5,8 +5,15 @@ import { EasyblocksEditor } from "@easyblocks/editor";
 import { Parser as HtmlToReactParser, ProcessNodeDefinitions } from 'html-to-react';
 import { stringify } from 'flatted';
 import { Swell } from "../swell/api";
-import { SwellTheme } from "../swell/theme";
-import { getEasyblocksBackend, getEasyblocksPagePropsWithConfigs, getEasyblocksComponentDefinitions } from "../swell/easyblocks";
+import {
+  SwellTheme,
+  SwellStorefrontShopifyCompatibility,
+} from '../swell/theme';
+import {
+  getEasyblocksBackend,
+  getEasyblocksPagePropsWithConfigs,
+  getEasyblocksComponentDefinitions,
+} from '../swell/easyblocks';
 
 // TODO: fix all the types
 
@@ -17,31 +24,23 @@ const processNodeDefinitions = ProcessNodeDefinitions();
 const isValidNode = () => true;
 
 function ContentWrapper({ children }: any) {
-  return (
-    <Fragment>
-      {children}
-    </Fragment>
-  );
+  return <Fragment>{children}</Fragment>;
 }
 
 function SectionGroup({ Root, Sections }: any) {
   return (
     <Root.type {...Root.props}>
-      {Sections.map((Section: any, index: number) => 
+      {Sections.map((Section: any, index: number) => (
         <Section.type {...Section.props} key={index} />
-      )}
+      ))}
     </Root.type>
   );
 }
 
 function Block({ Root, children }: any) {
-  return (
-    <Root.type {...Root.props}>
-      {children}
-    </Root.type>
-  );
+  return <Root.type {...Root.props}>{children}</Root.type>;
 }
- 
+
 function getRootComponent(props: any, theme: any) {
   const { layoutProps, pageProps, pageContent } = props;
 
@@ -52,10 +51,17 @@ function getRootComponent(props: any, theme: any) {
 
     useEffect(() => {
       // Render theme page directly when it's a raw liquid file
-      const stringOutput = typeof pageContent === "string"
-        ? theme.renderSections(pageContent, pageProps)
-        : undefined;
-      
+      const stringOutput =
+        typeof pageContent === 'string'
+          ? theme.renderTemplateString(pageContent, pageProps)
+          : undefined;
+
+      console.log('render root component output', {
+        pageContent,
+        pageProps,
+        stringOutput,
+      });
+
       theme
         .renderLayout({
           ...layoutProps,
@@ -86,7 +92,7 @@ function getRootComponent(props: any, theme: any) {
         )}
       </Root.type>
     );
-  }
+  };
 }
 
 function getPageSectionComponent(props: any, theme: SwellTheme, section: any) {
@@ -105,13 +111,15 @@ function getPageSectionComponent(props: any, theme: SwellTheme, section: any) {
         },
         ...(Blocks?.length
           ? {
-            blocks: Blocks?.filter((block: any) => block.props.compiled).map((block: any) => ({
-                type: block.props.compiled._component.split('__').pop(),
-                settings: block.props.compiled.props
-              }))
+              blocks: Blocks?.filter((block: any) => block.props.compiled).map(
+                (block: any) => ({
+                  type: block.props.compiled._component.split('__').pop(),
+                  settings: block.props.compiled.props,
+                }),
+              ),
             }
           : {}),
-      }
+      },
     };
 
     useEffect(() => {
@@ -127,15 +135,14 @@ function getPageSectionComponent(props: any, theme: SwellTheme, section: any) {
         });
     }, [stringify(sectionData)]);
 
-    return (
-      <Root.type {...Root.props}>
-        {SectionElements}
-      </Root.type>
-    );
-  }
+    return <Root.type {...Root.props}>{SectionElements}</Root.type>;
+  };
 }
 
-function getLayoutProcessingInstructions(RootContext: any, stringOutput?: string) {
+function getLayoutProcessingInstructions(
+  RootContext: any,
+  stringOutput?: string,
+) {
   let bodyItems: any;
 
   return [
@@ -157,19 +164,21 @@ function getLayoutProcessingInstructions(RootContext: any, stringOutput?: string
 
           //console.log(allSectionGroupComponents, sectionGroupId);
 
-          const SectionGroupSections = rootProps[`SectionGroup_${sectionGroupId}`];
+          const SectionGroupSections =
+            rootProps[`SectionGroup_${sectionGroupId}`];
 
           return (
             <div className={node.attribs.class} id={node.attribs.id}>
-              {SectionGroupSections && SectionGroupSections.map((Section: any, index: number) =>
-                <Section.type {...Section.props} key={index} />
-              )}
+              {SectionGroupSections &&
+                SectionGroupSections.map((Section: any, index: number) => (
+                  <Section.type {...Section.props} key={index} />
+                ))}
             </div>
           );
         }
 
         return React.createElement(SectionGroup);
-      }
+      },
     },
     {
       // Pull relevant tags out of head
@@ -177,10 +186,15 @@ function getLayoutProcessingInstructions(RootContext: any, stringOutput?: string
         return node.name === 'head';
       },
       processNode: function (_node: any, children: any) {
-        document.head.insertAdjacentHTML("beforeend", ReactDOMServer.renderToStaticMarkup(children));
+        document.head.insertAdjacentHTML(
+          'beforeend',
+          ReactDOMServer.renderToStaticMarkup(children),
+        );
         // Styles to fix easyblocks styles
         const selectable = `div[aria-roledescription="sortable"]`;
-        document.head.insertAdjacentHTML("beforeend", `
+        document.head.insertAdjacentHTML(
+          'beforeend',
+          `
           <style data-swell-editor-overrides>
             /* Make the selected borders more visible */
             ${selectable}::after {
@@ -213,9 +227,10 @@ function getLayoutProcessingInstructions(RootContext: any, stringOutput?: string
               display: block !important;
             }
           </style>
-        `);
+        `,
+        );
         return false;
-      }
+      },
     },
     {
       // Pull out body elements
@@ -226,7 +241,7 @@ function getLayoutProcessingInstructions(RootContext: any, stringOutput?: string
         bodyItems = children;
         document.body.className = node.attribs.class;
         return false;
-      }
+      },
     },
     {
       shouldProcessNode: function (node: any) {
@@ -241,15 +256,15 @@ function getLayoutProcessingInstructions(RootContext: any, stringOutput?: string
           const rootProps = useContext(RootContext);
           const { ContentSections }: any = rootProps;
 
-          return (
-            ContentSections.map((Section: any, index: number) =>
-              <Section.type {...Section.props} key={index} />
-            )
-          );
+          console.log('contentforlayout!', ContentSections);
+
+          return ContentSections.map((Section: any, index: number) => (
+            <Section.type {...Section.props} key={index} />
+          ));
         }
 
         return React.createElement(ContentForLayout);
-      }
+      },
     },
     {
       // Replace HTML tag with head and body elements
@@ -259,11 +274,14 @@ function getLayoutProcessingInstructions(RootContext: any, stringOutput?: string
       processNode: function () {
         // TODO: try getting rid of this
         document.documentElement.setAttribute('class', 'js');
-        
-        const children = bodyItems.filter((item: any) => item && typeof item !== 'string' && React.isValidElement(item));
+
+        const children = bodyItems.filter(
+          (item: any) =>
+            item && typeof item !== 'string' && React.isValidElement(item),
+        );
 
         return React.createElement(ContentWrapper, {}, children);
-      }
+      },
     },
     {
       // Process all other nodes
@@ -271,7 +289,7 @@ function getLayoutProcessingInstructions(RootContext: any, stringOutput?: string
         return true;
       },
       processNode: processNodeDefinitions.processDefaultNode,
-    }
+    },
   ];
 }
 
@@ -285,7 +303,7 @@ function getPageBlockProcessingInstructions(Blocks: any) {
       processNode: function (_node: any, children: any) {
         const Root = Blocks[blockIndex++];
         return React.createElement(Block, { Root }, children);
-      }
+      },
     },
     {
       // Process all other nodes
@@ -293,7 +311,7 @@ function getPageBlockProcessingInstructions(Blocks: any) {
         return true;
       },
       processNode: processNodeDefinitions.processDefaultNode,
-    }
+    },
   ];
 }
 
@@ -303,33 +321,73 @@ export function getEasyblocksComponents(swell: Swell, props: any) {
   const theme = new SwellTheme(swell);
   theme.setGlobals(themeGlobals);
 
-  return getEasyblocksComponentDefinitions(props, pageId, (type: string, data: any) => {
-    switch (type) {
-      case 'pageSection':
-        return getPageSectionComponent(props, theme, data)
-      case 'layoutSectionGroup':
-        return SectionGroup;
-      case 'block':
-        return Block;
-      case 'root':
-        return getRootComponent(props, theme);
-      default:
-        throw new Error(`Invalid component definition type: ${type}`);
+  if (themeGlobals?.shopify_compat) {
+    theme.shopifyCompatibility = new SwellStorefrontShopifyCompatibility(swell);
+  }
+
+  return getEasyblocksComponentDefinitions(
+    props,
+    pageId,
+    (type: string, data: any) => {
+      switch (type) {
+        case 'pageSection':
+          return getPageSectionComponent(props, theme, data);
+        case 'layoutSectionGroup':
+          return SectionGroup;
+        case 'block':
+          return Block;
+        case 'root':
+          return getRootComponent(props, theme);
+        default:
+          throw new Error(`Invalid component definition type: ${type}`);
+      }
+    },
+  );
+}
+
+function hydrateSwellRefsInStorefrontResources(swell: Swell, obj: any) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  for (const key in obj) {
+    if (key === '_swell') {
+      obj[key] = swell;
+    } else {
+      hydrateSwellRefsInStorefrontResources(swell, obj[key]);
     }
-  });
+  }
 }
 
 export default function EasyblocksPage(props: any) {
-  const { sectionConfigs, pageSections, layoutSectionGroups, pageId, lang, swellClientProps } = props;
+  const {
+    pageId,
+    lang,
+    pageSections,
+    layoutSectionGroups,
+    sectionConfigs,
+    themeGlobals,
+    swellClientProps,
+  } = props;
   const [easyblocksConfig, setEasyblocksConfig] = useState<any>(null);
   const [components, setComponents] = useState<any>(null);
 
   useEffect(() => {
     const swell = new Swell({ ...swellClientProps, isEditor: true });
+
+    hydrateSwellRefsInStorefrontResources(swell, themeGlobals);
+    hydrateSwellRefsInStorefrontResources(swell, swellClientProps);
+
     const components = getEasyblocksComponents(swell, props);
     setComponents(components);
 
-    const { easyblocksConfig } = getEasyblocksPagePropsWithConfigs(sectionConfigs, pageSections, layoutSectionGroups, pageId, lang);
+    const { easyblocksConfig } = getEasyblocksPagePropsWithConfigs(
+      sectionConfigs,
+      pageSections,
+      layoutSectionGroups,
+      pageId,
+      lang,
+    );
     setEasyblocksConfig(easyblocksConfig);
   }, []);
 

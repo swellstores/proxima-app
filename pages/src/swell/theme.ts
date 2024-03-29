@@ -337,12 +337,10 @@ export class SwellTheme {
                 ],
               },
               // Do not expand assets unless they end with .liquid.[ext]
-              file_path: {
-                $and: [
-                  { $regex: '^(?!theme/assets/)' },
-                  { $regex: '(?!.liquid.[a-zA-Z0-9]+)$' },
-                ],
-              },
+              $or: [
+                { file_path: { $regex: '^(?!theme/assets/)' } },
+                { file_path: { $regex: '(?!.liquid.[a-zA-Z0-9]+)$' } },
+              ],
             },
           },
         },
@@ -642,7 +640,17 @@ export class SwellTheme {
   async getPageSections(): Promise<any[]> {
     // TODO: type
     const configs = await this.getAllThemeConfigs();
-    return getPageSections(configs);
+    return getPageSections(configs, async (config: any) => {
+      if (this.shopifyCompatibility) {
+        this.liquidSwell.lastSchema = undefined;
+        await this.renderTemplate(config);
+        const schema = this.liquidSwell.lastSchema || {};
+        if (schema) {
+          return this.shopifyCompatibility.getSectionConfig(schema);
+        }
+      }
+      return {};
+    });
   }
 
   async getLayoutSectionGroups(): Promise<any[]> {
@@ -910,7 +918,7 @@ export function findEditorSetting(
 }
 
 // TODO: move this to a better location after the Swell theme API is made into a separate library
-class SwellStorefrontShopifyCompatibility extends ShopifyCompatibility {
+export class SwellStorefrontShopifyCompatibility extends ShopifyCompatibility {
   getPageType(pageId: string) {
     switch (pageId) {
       case 'index':

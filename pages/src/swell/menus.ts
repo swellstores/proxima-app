@@ -1,5 +1,5 @@
 import get from "lodash/get";
-import { SwellStorefrontRecord } from './api';
+import { SwellStorefrontRecord, SwellStorefrontCollection } from './api';
 import { arrayToObject } from './utils';
 
 export function resolveMenuSettings(
@@ -75,7 +75,10 @@ export function resolveMenuItemUrlAndResource(
   theme: SwellTheme,
   item: SwellMenuItem,
   options?: { trailingSlash?: boolean },
-): { url: string; resource?: SwellStorefrontRecord } {
+): {
+  url: string;
+  resource?: SwellStorefrontRecord | SwellStorefrontCollection;
+} {
   if (!item) return { url: '#invalid-link-item' };
 
   if (typeof item === 'object' && item !== null) {
@@ -132,7 +135,10 @@ export function getMenuItemSlug(value: any): string {
 export function getMenuItemUrlAndResource(
   theme: SwellTheme,
   menuItem: SwellMenuItem,
-): { url: string; resource?: SwellStorefrontRecord } {
+): {
+  url: string;
+  resource?: SwellStorefrontRecord | SwellStorefrontCollection;
+} {
   const { type, value, url, model } = menuItem;
 
   if (typeof type === 'undefined' && url) {
@@ -159,7 +165,7 @@ export function getMenuItemUrlAndResource(
           'categories/category',
           slug,
         ),
-        resource: new SwellStorefrontRecord(theme.swell, 'categories', slug),
+        //resource: new SwellStorefrontRecord(theme.swell, 'categories', slug),
       };
     case 'product':
       return {
@@ -168,38 +174,64 @@ export function getMenuItemUrlAndResource(
           'products/product',
           slug,
         ),
-        resource: new SwellStorefrontRecord(theme.swell, 'products', slug),
+        //resource: new SwellStorefrontRecord(theme.swell, 'products', slug),
       };
+    case 'page':
+      return {
+        url: getMenuItemStorefrontUrl(
+          theme.storefrontConfig,
+          'pages/page',
+          slug,
+        ),
+        //resource: new SwellStorefrontRecord(theme.swell, 'content/pages', slug),
+      };
+    case 'blog_list':
+      return {
+        url: getMenuItemStorefrontUrl(
+          theme.storefrontConfig,
+          'blogs/index',
+          slug,
+        ),
+        //resource: new SwellStorefrontRecord(theme.swell, 'content/blogs', slug),
+      };
+    case 'blog':
+      return {
+        url: getMenuItemStorefrontUrl(
+          theme.storefrontConfig,
+          'blogs/blog',
+          slug,
+        ),
+        /* resource: new SwellStorefrontRecord(
+          theme.swell,
+          'content/blogs:posts',
+          slug,
+        ), */
+      };
+    case 'content_list':
+      if (model) {
+        const collectionSlug = model?.replace('content/', '');
+        return {
+          url: getMenuItemStorefrontUrl(
+            theme.storefrontConfig,
+            'content/index',
+            slug,
+            collectionSlug,
+          ),
+          //resource: new SwellStorefrontCollection(theme.swell, model),
+        };
+      }
+      return { url: `/${slug}` };
     case 'content':
-      let contentUrl;
-      switch (model) {
-        case 'content/pages':
-          contentUrl = getMenuItemStorefrontUrl(
-            theme.storefrontConfig,
-            'pages/page',
-            slug,
-          );
-          break;
-        case 'content/blogs':
-          contentUrl = getMenuItemStorefrontUrl(
-            theme.storefrontConfig,
-            'blogs/blog',
-            slug,
-          );
-          break;
-        default:
-          contentUrl = getMenuItemStorefrontUrl(
+      if (model) {
+        const collectionSlug = model?.replace('content/', '');
+        return {
+          url: getMenuItemStorefrontUrl(
             theme.storefrontConfig,
             'content/content',
             slug,
-            model?.replace('content/', ''),
-          );
-          break;
-      }
-      if (model && contentUrl) {
-        return {
-          url: contentUrl,
-          resource: new SwellStorefrontRecord(theme.swell, model, slug),
+            collectionSlug,
+          ),
+          //resource: new SwellStorefrontRecord(theme.swell, model, slug),
         };
       }
       return { url: `/${slug}` };

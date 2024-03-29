@@ -47,13 +47,16 @@ type SwellMenu = {
 };
 
 enum SwellMenuItemType {
-  ProductList = 'product_all',
-  CategoryList = 'category_all',
-  Product = 'product',
-  Category = 'category',
-  Content = 'content',
   Home = 'home',
   Search = 'search',
+  ProductList = 'product_list',
+  Product = 'product',
+  Category = 'category',
+  Page = 'page',
+  BlogList = 'blog_list',
+  Blog = 'blog',
+  ContentList = 'content_list',
+  Content = 'content',
   Url = 'url',
   Heading = 'heading',
 }
@@ -75,7 +78,10 @@ type SwellMenuItem = {
     };
   };
   // Dynamic properties
-  resource?: SwellStorefrontRecord;
+  resource?:
+    | SwellStorefrontRecord
+    | SwellStorefrontCollection
+    | SwellStorefrontResource;
   levels: number;
   current?: boolean;
   active?: boolean;
@@ -183,11 +189,7 @@ declare class SwellBackendAPI {
     apiHost?: string;
   });
 
-  makeRequest(
-    method: string,
-    url: string,
-    data?: object,
-  ): Promise<SwellData>;
+  makeRequest(method: string, url: string, data?: object): Promise<SwellData>;
 
   stringifyQuery(queryObject: object, prefix?: string): string;
 
@@ -326,7 +328,7 @@ declare class StorefrontResource {
 }
 
 declare class SwellStorefrontResource extends StorefrontResource {
-  public _swell: Swell;
+  public _swell?: Swell;
   public _resource: any;
   public _compatibilityInstance: ShopifyCompatibility | null;
 
