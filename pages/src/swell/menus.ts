@@ -165,7 +165,7 @@ export function getMenuItemUrlAndResource(
           'categories/category',
           slug,
         ),
-        //resource: new SwellStorefrontRecord(theme.swell, 'categories', slug),
+        resource: new SwellStorefrontRecord(theme.swell, 'categories', slug),
       };
     case 'product':
       return {
@@ -174,7 +174,7 @@ export function getMenuItemUrlAndResource(
           'products/product',
           slug,
         ),
-        //resource: new SwellStorefrontRecord(theme.swell, 'products', slug),
+        resource: new SwellStorefrontRecord(theme.swell, 'products', slug),
       };
     case 'page':
       return {
@@ -183,7 +183,7 @@ export function getMenuItemUrlAndResource(
           'pages/page',
           slug,
         ),
-        //resource: new SwellStorefrontRecord(theme.swell, 'content/pages', slug),
+        resource: new SwellStorefrontRecord(theme.swell, 'content/pages', slug),
       };
     case 'blog_list':
       return {
@@ -192,7 +192,7 @@ export function getMenuItemUrlAndResource(
           'blogs/index',
           slug,
         ),
-        //resource: new SwellStorefrontRecord(theme.swell, 'content/blogs', slug),
+        resource: new SwellStorefrontRecord(theme.swell, 'content/blogs', slug),
       };
     case 'blog':
       return {
@@ -201,11 +201,11 @@ export function getMenuItemUrlAndResource(
           'blogs/blog',
           slug,
         ),
-        /* resource: new SwellStorefrontRecord(
+        resource: new SwellStorefrontRecord(
           theme.swell,
           'content/blogs:posts',
           slug,
-        ), */
+        ),
       };
     case 'content_list':
       if (model) {
@@ -217,7 +217,7 @@ export function getMenuItemUrlAndResource(
             slug,
             collectionSlug,
           ),
-          //resource: new SwellStorefrontCollection(theme.swell, model),
+          resource: new SwellStorefrontCollection(theme.swell, model),
         };
       }
       return { url: `/${slug}` };
@@ -231,7 +231,7 @@ export function getMenuItemUrlAndResource(
             slug,
             collectionSlug,
           ),
-          //resource: new SwellStorefrontRecord(theme.swell, model, slug),
+          resource: new SwellStorefrontRecord(theme.swell, model, slug),
         };
       }
       return { url: `/${slug}` };

@@ -2,7 +2,7 @@
 import { Swell } from '@/swell/api';
 import { SwellTheme } from '@/swell/theme';
 import EasyblocksEditor from '@/components/EasyblocksEditor.jsx';
-import { getThemeConfig } from '@/swell/easyblocks';
+import { getEditorLanguageConfig } from '@/swell/easyblocks';
 
 const initialPageId = 'index';
 
@@ -16,10 +16,9 @@ const theme = new SwellTheme(swell);
 
 await theme.init(Astro);
 
-const sectionGroup = getThemeConfig(
-  swell,
-  `pages/${initialPageId}`
-) as unknown as ThemeSectionGroup;
+const sectionGroup = (await theme.renderPageTemplate(
+  initialPageId
+)) as unknown as ThemeSectionGroup;
 
 if (!sectionGroup) {
   return Astro.redirect(`/404`);
@@ -31,7 +30,7 @@ const [sectionConfigs, pageSections, layoutSectionGroups] = await Promise.all([
   theme.getLayoutSectionGroups(),
 ]);
 
-const editorLang = await getThemeConfig(swell, `config/language-editor`);
+const editorLang = await getEditorLanguageConfig(swell);
 ---
 
 <html lang="en">

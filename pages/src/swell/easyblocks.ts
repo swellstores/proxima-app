@@ -188,8 +188,6 @@ export function getEasyblocksPagePropsWithConfigs(
       .map((sectionId: string) => `${sectionId}`);
   };
 
-  console.log({ pageSections, layoutSectionGroups });
-
   const components = [
     {
       id: `page_${pageId}`,
@@ -408,7 +406,7 @@ export function getEasyblocksPagePropsWithConfigs(
     },
   ];
 
-  console.log({ components, templates });
+  console.log({ components, templates, sectionConfigs });
 
   return {
     sectionConfigs,

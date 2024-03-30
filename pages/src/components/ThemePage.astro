@@ -5,9 +5,7 @@ import { PageError, PageNotFound, SwellTheme } from '../swell/theme';
 import Layout from '@/layouts/Layout.astro';
 import ThemeSections from './ThemeSections.astro';
 import EasyblocksPage from './EasyblocksPage.jsx';
-import { getThemeConfig } from '@/swell/easyblocks';
-
-import util from 'util';
+import { getEditorLanguageConfig } from '@/swell/easyblocks';
 
 export interface Props {
   id: string;
@@ -123,7 +121,7 @@ if (isEditor && pageContent && typeof pageContent !== 'string') {
       theme.getSectionGroupConfigs(pageContent as ThemeSectionGroup),
       theme.getPageSections(),
       theme.getLayoutSectionGroups(),
-      getThemeConfig(swell, `config/language-editor`),
+      getEditorLanguageConfig(swell),
     ]
   );
   themeGlobals = theme.globals;

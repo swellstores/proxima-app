@@ -40,7 +40,7 @@ export default function bind(liquidSwell: LiquidSwell) {
       ctx.push(scope);
 
       const themeConfig = yield liquidSwell.getThemeConfig(
-        liquidSwell.getComponentPath(this.fileName),
+        yield liquidSwell.getComponentPath(this.fileName),
       );
       const output = yield liquidSwell.renderTemplate(
         themeConfig,

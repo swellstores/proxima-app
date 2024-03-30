@@ -36,7 +36,13 @@ export default function Editor(props: any) {
     const components = getEasyblocksComponents(props);
     setComponents(components);
 
-    const { easyblocksConfig } = getEasyblocksPagePropsWithConfigs(sectionConfigs, pageSections, layoutSectionGroups, pageId, lang);
+    const { easyblocksConfig } = getEasyblocksPagePropsWithConfigs(
+      sectionConfigs,
+      pageSections,
+      layoutSectionGroups,
+      pageId,
+      lang,
+    );
     setEasyblocksConfig(easyblocksConfig);
   }, []);
 
