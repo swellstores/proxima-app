@@ -5,11 +5,12 @@ import ShopifyMedia from './media';
 
 export default function ShopifyProduct(
   instance: ShopifyCompatibility,
-  product: SwellStorefrontRecord,
+  product: StorefrontResource | SwellRecord,
 ): ShopifyResource {
   if (product instanceof ShopifyResource) {
     return product.clone();
   }
+
   return new ShopifyResource({
     available: defer(
       async () =>
@@ -24,11 +25,17 @@ export default function ShopifyProduct(
     content: defer(() => product.description),
     created_at: defer(() => product.date_created),
     description: defer(() => product.description),
-    featured_image: defer(async () =>
-      ShopifyImage(instance, product, (await product.images)?.[0]),
+    featured_image: defer(
+      async () =>
+        (await product.images) &&
+        product.images?.[0] &&
+        ShopifyImage(instance, product.images[0], product),
     ),
-    featured_media: defer(async () =>
-      ShopifyMedia(instance, (await product.images)?.[0]),
+    featured_media: defer(
+      async () =>
+        (await product.images) &&
+        (await product.images?.[0]) &&
+        ShopifyMedia(instance, product.images[0]),
     ),
     first_available_variant: defer(async () =>
       (await product.variants)?.results?.find(
@@ -41,8 +48,8 @@ export default function ShopifyProduct(
     has_only_default_variant: defer(() => !product.variable),
     id: defer(() => product.id),
     images: defer(async () =>
-      (await product.images)?.map((image: any) =>
-        ShopifyImage(instance, product, image),
+      (await product.images)?.map(
+        (image: any) => image && ShopifyImage(instance, image, product),
       ),
     ),
     media: defer(async () =>

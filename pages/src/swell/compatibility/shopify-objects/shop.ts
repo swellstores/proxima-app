@@ -7,6 +7,7 @@ export default function ShopifyShop(
   const moneyFormat = store.currencies.find(
     (currency: any) => currency.code === store.currency,
   );
+
   return new ShopifyResource({
     accepts_gift_cards: true, // TODO
     address: {}, // TODO

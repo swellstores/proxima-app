@@ -12,11 +12,7 @@
       "label": "Product list",
       "url": "/products",
       "group": "store",
-      "icon": "tag",
-      "query": {
-        "active": true,
-        "limit": 25
-      }
+      "icon": "tag"
     },
     {
       "id": "products/product",
@@ -25,20 +21,14 @@
       "group": "store",
       "icon": "tag",
       "templates": true,
-      "collection": "products",
-      "query": {
-        "active": true
-      }
+      "collection": "products"
     },
     {
       "id": "categories/index",
       "label": "Category list",
       "url": "/categories",
       "group": "store",
-      "icon": "tags",
-      "query": {
-        "active": true
-      }
+      "icon": "tags"
     },
     {
       "id": "categories/category",
@@ -47,10 +37,7 @@
       "group": "store",
       "icon": "tags",
       "templates": true,
-      "collection": "categories",
-      "query": {
-        "active": true
-      }
+      "collection": "categories"
     },
     {
       "id": "pages/page",
@@ -59,57 +46,44 @@
       "group": "store",
       "icon": "page",
       "templates": true,
-      "collection": "content/pages",
-      "query": {
-        "published": true
-      }
-    },
-    {
-      "id": "content/index",
-      "label": "Content list",
-      "url": "/content/{collection}",
-      "group": "store",
-      "icon": "cube",
-      "templates": true,
-      "expand_pages": true,
-      "collection": "content/{collection}",
-      "query": {
-        "published": true
-      }
-    },
-    {
-      "id": "content/content",
-      "label": "Content entry",
-      "url": "/content/{collection}/{slug}",
-      "group": "store",
-      "icon": "cube",
-      "templates": true,
-      "collection": "content/{collection}",
-      "query": {
-        "published": true
-      }
-    },
-    {
-      "id": "blogs/index",
-      "label": "Blog list",
-      "url": "/blogs",
-      "group": "store",
-      "icon": "rss",
-      "query": {
-        "published": true
-      }
+      "collection": "content/pages"
     },
     {
       "id": "blogs/blog",
       "label": "Blog post",
+      "url": "/blogs/{collection}/{slug}",
+      "group": "store",
+      "icon": "rss",
+      "templates": true,
+      "collection": "content/blogs"
+    },
+    {
+      "id": "blogs/category",
+      "label": "Blog category",
       "url": "/blogs/{slug}",
       "group": "store",
       "icon": "rss",
       "templates": true,
-      "collection": "content/blogs",
-      "query": {
-        "published": true
-      }
+      "collection": "content/blog-categories"
+    },
+    {
+      "id": "content/index",
+      "label": "Content list",
+      "url": "/content/{slug}",
+      "group": "store",
+      "icon": "cube",
+      "templates": true,
+      "expand_pages": true,
+      "collection": ":content"
+    },
+    {
+      "id": "content/content",
+      "label": "Content page",
+      "url": "/content/{collection}/{slug}",
+      "group": "store",
+      "icon": "cube",
+      "templates": true,
+      "collection": "content/{collection}"
     },
     {
       "id": "account/index",
@@ -215,6 +189,11 @@
       "url": "/search",
       "group": "other",
       "icon": "search"
+    },
+    {
+      "id": "search/suggest",
+      "url": "/search/suggest",
+      "ajax": true
     }
   ],
   "forms": [

@@ -6,7 +6,6 @@ export * from "./color";
 export * from './font';
 
 export class LiquidSwell extends Liquid {
-  public storefrontConfig: any;
   public getThemeConfig: GetThemeConfig;
   public getThemeTemplateConfigByType: GetThemeTemplateConfigByType | undefined;
   public getAssetUrl: GetAssetUrl;
@@ -30,7 +29,6 @@ export class LiquidSwell extends Liquid {
   public globals: ThemeSettings = {};
 
   constructor({
-    storefrontConfig,
     getThemeConfig,
     getThemeTemplateConfigByType,
     getAssetUrl,
@@ -47,7 +45,6 @@ export class LiquidSwell extends Liquid {
     componentsDir,
     sectionsDir,
   }: {
-    storefrontConfig: ThemeSettings;
     getThemeConfig: GetThemeConfig;
     getThemeTemplateConfigByType?: GetThemeTemplateConfigByType;
     getAssetUrl: GetAssetUrl;
@@ -65,7 +62,6 @@ export class LiquidSwell extends Liquid {
     sectionsDir?: string;
   }) {
     super();
-    this.storefrontConfig = storefrontConfig;
     this.getThemeConfig = getThemeConfig;
     this.getThemeTemplateConfigByType = getThemeTemplateConfigByType;
     this.getAssetUrl = getAssetUrl;

@@ -2,30 +2,32 @@ import get from "lodash/get";
 import { SwellStorefrontRecord, SwellStorefrontCollection } from './api';
 import { arrayToObject } from './utils';
 
-export function resolveMenuSettings(
+export async function resolveMenuSettings(
   theme: SwellTheme,
   menus: SwellMenu[],
   options?: { currentUrl?: string },
 ) {
-  const resolvedMenus =
-    menus
-      ?.map((menu: SwellMenu) => ({
-        ...menu,
-        items: resolveMenuItems(theme, menu.items, options),
-      }))
-      .map((menu) => {
-        if (theme.shopifyCompatibility) {
-          Object.assign(menu, theme.shopifyCompatibility.getMenuData(menu));
-        }
-        return menu;
-        // todo set handle-based menu ids if set
-      }) || [];
+  const resolvedMenus = await Promise.all(
+    menus?.map(async (menu: SwellMenu) => ({
+      ...menu,
+      items: await resolveMenuItems(theme, menu.items, options),
+    })),
+  );
+
+  const compatibleMenus =
+    resolvedMenus.map((menu) => {
+      if (theme.shopifyCompatibility) {
+        Object.assign(menu, theme.shopifyCompatibility.getMenuData(menu));
+      }
+      return menu;
+      // todo set handle-based menu ids if set
+    }) || [];
 
   return arrayToObject([
-    ...resolvedMenus,
+    ...compatibleMenus,
     // Add menus with id as handle for shopify compatibility
     ...(theme.shopifyCompatibility
-      ? resolvedMenus
+      ? compatibleMenus
           .map((menu) => {
             if ((menu as any).handle) {
               return {
@@ -39,50 +41,56 @@ export function resolveMenuSettings(
   ]);
 }
 
-export function resolveMenuItems(
+export async function resolveMenuItems(
   theme: SwellTheme,
   menuItems: SwellMenuItem[],
   options?: { currentUrl?: string },
-): SwellMenuItem[] {
-  return menuItems?.map((item) => {
-    const { url, resource } = resolveMenuItemUrlAndResource(theme, item, {
-      trailingSlash:
-        options?.currentUrl?.endsWith('/') && options.currentUrl !== '/',
-    });
+): Promise<SwellMenuItem[]> {
+  return Promise.all(
+    menuItems?.map(async (item) => {
+      const { url, resource } = await resolveMenuItemUrlAndResource(
+        theme,
+        item,
+        {
+          trailingSlash:
+            options?.currentUrl?.endsWith('/') && options.currentUrl !== '/',
+        },
+      );
 
-    const childItems =
-      item.items && resolveMenuItems(theme, item.items, options);
+      const childItems =
+        item.items && (await resolveMenuItems(theme, item.items, options));
 
-    return {
-      ...item,
-      url,
-      resource,
-      levels: countChildItemLevels(childItems),
-      current: options?.currentUrl === url,
-      active: options?.currentUrl?.startsWith(url),
-      ...(childItems
-        ? {
-            items: childItems,
-            child_current: isChildItemCurrent(childItems),
-            child_active: isChildItemActive(childItems),
-          }
-        : undefined),
-    };
-  });
+      return {
+        ...item,
+        url,
+        resource,
+        levels: countChildItemLevels(childItems),
+        current: options?.currentUrl === url,
+        active: options?.currentUrl?.startsWith(url),
+        ...(childItems
+          ? {
+              items: childItems,
+              child_current: isChildItemCurrent(childItems),
+              child_active: isChildItemActive(childItems),
+            }
+          : undefined),
+      };
+    }),
+  );
 }
 
-export function resolveMenuItemUrlAndResource(
+export async function resolveMenuItemUrlAndResource(
   theme: SwellTheme,
   item: SwellMenuItem,
   options?: { trailingSlash?: boolean },
-): {
+): Promise<{
   url: string;
   resource?: SwellStorefrontRecord | SwellStorefrontCollection;
-} {
+}> {
   if (!item) return { url: '#invalid-link-item' };
 
   if (typeof item === 'object' && item !== null) {
-    let { url, resource } = getMenuItemUrlAndResource(theme, item);
+    let { url, resource } = await getMenuItemUrlAndResource(theme, item);
 
     // Add/remove trailing slash
     const endsWithSlash = url.slice(-1) === '/';
@@ -124,21 +132,21 @@ function isChildItemActive(items: SwellMenuItem[]): boolean {
   );
 }
 
-export function getMenuItemSlug(value: any): string {
+export function getMenuItemValueId(value: any): string {
   // Get slug from linked object slug or id, fall back to value itself
   const fallback = typeof value === 'string' ? value : '';
-  const slug = get(value, 'slug', get(value, 'id', fallback)) || '';
+  const slug = get(value, 'id', get(value, 'slug', fallback)) || '';
 
   return slug;
 }
 
-export function getMenuItemUrlAndResource(
+export async function getMenuItemUrlAndResource(
   theme: SwellTheme,
   menuItem: SwellMenuItem,
-): {
+): Promise<{
   url: string;
   resource?: SwellStorefrontRecord | SwellStorefrontCollection;
-} {
+}> {
   const { type, value, url, model } = menuItem;
 
   if (typeof type === 'undefined' && url) {
@@ -150,109 +158,100 @@ export function getMenuItemUrlAndResource(
     return { url: typeof value === 'string' ? value : '' };
   }
 
-  const slug = getMenuItemSlug(value);
+  const id = getMenuItemValueId(value);
 
   // Build path based on content type of item
   switch (type) {
     case 'home':
       return {
-        url: getMenuItemStorefrontUrl(theme.storefrontConfig, 'index'),
+        url: getMenuItemStorefrontUrl(theme, 'index'),
       };
+
     case 'category':
-      return {
-        url: getMenuItemStorefrontUrl(
-          theme.storefrontConfig,
-          'categories/category',
-          slug,
-        ),
-        resource: new SwellStorefrontRecord(theme.swell, 'categories', slug),
-      };
+      if (!id) {
+        return {
+          url: getMenuItemStorefrontUrl(theme, 'categories/index'),
+        };
+      }
+      return await deferMenuItemUrlAndResource(
+        theme,
+        'categories/category',
+        id,
+      );
+
     case 'product':
-      return {
-        url: getMenuItemStorefrontUrl(
-          theme.storefrontConfig,
-          'products/product',
-          slug,
-        ),
-        resource: new SwellStorefrontRecord(theme.swell, 'products', slug),
-      };
+      if (!id) {
+        return {
+          url: getMenuItemStorefrontUrl(theme, 'products/index'),
+        };
+      }
+      return await deferMenuItemUrlAndResource(theme, 'products/product', id);
+
     case 'page':
-      return {
-        url: getMenuItemStorefrontUrl(
-          theme.storefrontConfig,
-          'pages/page',
-          slug,
-        ),
-        resource: new SwellStorefrontRecord(theme.swell, 'content/pages', slug),
-      };
-    case 'blog_list':
-      return {
-        url: getMenuItemStorefrontUrl(
-          theme.storefrontConfig,
-          'blogs/index',
-          slug,
-        ),
-        resource: new SwellStorefrontRecord(theme.swell, 'content/blogs', slug),
-      };
+      return await deferMenuItemUrlAndResource(theme, 'pages/page', id);
+
     case 'blog':
-      return {
-        url: getMenuItemStorefrontUrl(
-          theme.storefrontConfig,
-          'blogs/blog',
-          slug,
-        ),
-        resource: new SwellStorefrontRecord(
-          theme.swell,
-          'content/blogs:posts',
-          slug,
-        ),
-      };
+      return await deferMenuItemUrlAndResource(
+        theme,
+        'blogs/blog',
+        id,
+        async (blog: any) => {
+          const blogCategory = new SwellStorefrontRecord(
+            theme.swell,
+            'content/blog-categories',
+            blog.category_id,
+          );
+          return blogCategory.slug;
+        },
+      );
+
+    case 'blog_category':
+      return await deferMenuItemUrlAndResource(theme, 'blogs/category', id);
+
     case 'content_list':
       if (model) {
-        const collectionSlug = model?.replace('content/', '');
+        const slug = model?.replace('content/', '');
         return {
-          url: getMenuItemStorefrontUrl(
-            theme.storefrontConfig,
-            'content/index',
-            slug,
-            collectionSlug,
-          ),
+          url: getMenuItemStorefrontUrl(theme, 'content/index', slug),
           resource: new SwellStorefrontCollection(theme.swell, model),
         };
       }
-      return { url: `/${slug}` };
+      break;
+
     case 'content':
       if (model) {
         const collectionSlug = model?.replace('content/', '');
-        return {
-          url: getMenuItemStorefrontUrl(
-            theme.storefrontConfig,
-            'content/content',
-            slug,
-            collectionSlug,
-          ),
-          resource: new SwellStorefrontRecord(theme.swell, model, slug),
-        };
+        return await deferMenuItemUrlAndResource(
+          theme,
+          'content/content',
+          id,
+          collectionSlug,
+        );
       }
-      return { url: `/${slug}` };
+      break;
+
     case 'search':
       return {
-        url: getMenuItemStorefrontUrl(theme.storefrontConfig, 'search'),
+        url: getMenuItemStorefrontUrl(theme, 'search'),
       };
+
     default:
-      return {
-        url: `/${slug}`,
-      };
+      break;
   }
+
+  return {
+    url: `/${id}`,
+  };
 }
 
 export function getMenuItemStorefrontUrl(
-  storefrontConfig: SwellStorefrontConfig,
+  theme: SwellTheme,
   pageId: string,
   slug?: string,
   collectionSlug?: string,
 ): string {
-  let url = storefrontConfig.pages?.find((page) => page.id === pageId)?.url;
+  const { storefrontConfig } = theme;
+  let url = storefrontConfig?.pages?.find((page) => page.id === pageId)?.url;
 
   if (url?.includes('{collection}') && collectionSlug) {
     url = url.replace('{collection}', collectionSlug);
@@ -263,4 +262,36 @@ export function getMenuItemStorefrontUrl(
   }
 
   return url || `/${slug || ''}`;
+}
+
+export async function deferMenuItemUrlAndResource(
+  theme: SwellTheme,
+  pageId: string,
+  id: string,
+  collectionSlugOrHandler?: string | Function,
+): Promise<{ url: string; resource?: any }> {
+  const { storefrontConfig } = theme;
+
+  const collection = storefrontConfig?.pages?.find(
+    (page) => page.id === pageId,
+  )?.collection;
+
+  const resource =
+    collection && new SwellStorefrontRecord(theme.swell, collection, id);
+  const slug = (await (resource as any)?.slug) || id;
+
+  let collectionSlug = collectionSlugOrHandler;
+  if ((resource as any)?.id && typeof collectionSlugOrHandler === 'function') {
+    collectionSlug = await collectionSlugOrHandler(resource);
+  }
+
+  return {
+    url: getMenuItemStorefrontUrl(
+      theme,
+      pageId,
+      slug,
+      collectionSlug as string,
+    ),
+    resource,
+  };
 }

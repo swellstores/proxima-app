@@ -1,55 +1,23 @@
 import { SwellStorefrontCollection, SwellStorefrontRecord } from '@/swell/api';
+import ShopifyArticle from './article';
+import ShopifyBlog from './blog';
 import ShopifyCollection from './collection';
+import ShopifyFont from './font';
 import ShopifyProduct from './product';
 import ShopifyPage from './page';
 import ShopifyLink from './link';
-import ShopifyFont from './font';
+import ShopifySearch from './search';
 
-export function adaptShopifyData(
-  instance: ShopifyCompatibility,
-  resource: any,
-): SwellData {
-  if (resource instanceof SwellStorefrontCollection) {
-    // Products are always contained in a collection
-    if (resource?._collection === 'products') {
-      return {
-        collection: ShopifyCollection(instance, resource as any),
-      };
-    }
-  }
-
-  return {};
-}
-
-export function adaptShopifyProps(
-  instance: ShopifyCompatibility,
-  resource: any,
-): SwellData {
-  if (resource instanceof SwellStorefrontCollection) {
-    return {
-      size: resource.results.length,
-    };
-  } else if (resource instanceof SwellStorefrontRecord) {
-    if (resource?._collection === 'products') {
-      return ShopifyProduct(instance, resource as any);
-    }
-    if (resource?._collection === 'categories') {
-      const products = new SwellStorefrontCollection(
-        instance.swell,
-        'products',
-        {
-          categories: [resource._id],
-        },
-      );
-      return ShopifyCollection(instance, products);
-    }
-    if (resource?._collection === 'content/pages') {
-      return ShopifyPage(instance, resource as any);
-    }
-  }
-
-  return {};
-}
+export {
+  ShopifyArticle,
+  ShopifyBlog,
+  ShopifyCollection,
+  ShopifyFont,
+  ShopifyProduct,
+  ShopifyPage,
+  ShopifyLink,
+  ShopifySearch,
+};
 
 export function adaptShopifyMenuData(
   instance: ShopifyCompatibility,

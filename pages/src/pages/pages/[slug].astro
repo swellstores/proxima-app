@@ -1,5 +1,5 @@
 ---
-import { SwellStorefrontRecord } from '@/swell/api';
+import { Swell, SwellStorefrontRecord } from '@/swell/api';
 import ThemePage from '@/components/ThemePage.astro';
 
 const { slug } = Astro.params;
@@ -10,12 +10,11 @@ const { slug } = Astro.params;
   required="page.id"
   title="{{ page.meta_title | default: page.name }}"
   description="{{ page.meta_description | default: page.description }}"
-  getData={async (swell: Swell, theme: SwellTheme) => {
+  getData={async (swell: Swell) => {
     const page = new SwellStorefrontRecord(
       swell,
       'content/pages',
-      slug as string,
-      theme.page?.query
+      slug as string
     );
 
     return {

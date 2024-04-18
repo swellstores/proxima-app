@@ -3,7 +3,7 @@ import ShopifyProduct from './product';
 
 export default function ShopifyCollection(
   instance: ShopifyCompatibility,
-  products: SwellStorefrontCollection,
+  products: StorefrontResource | SwellRecord,
 ) {
   if (products instanceof ShopifyResource) {
     return products.clone();
@@ -16,12 +16,12 @@ export default function ShopifyCollection(
     ),
     all_products_count: defer(() => products.count),
     all_tags: defer(async () =>
-      (await products.results).reduce((types, product) => {
+      (await products.results).reduce((types: any[], product: SwellRecord) => {
         return types.concat(product.tags || []);
       }, []),
     ),
     all_types: defer(async () =>
-      (await products.results).reduce((types, product) => {
+      (await products.results).reduce((types: any[], product: SwellRecord) => {
         return types.concat(product.type || []);
       }, []),
     ),

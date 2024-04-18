@@ -28,11 +28,13 @@ export default function bind(liquidSwell: LiquidSwell) {
       const { tokenizer } = token;
       const formType = (tokenizer.readValue() as QuotedToken)?.content;
 
-      this.formConfig = liquidSwell.storefrontConfig?.forms?.find(
+      this.formConfig = liquidSwell.globals.storefrontConfig?.forms?.find(
         (form: any) => form.id === formType,
       );
       if (!this.formConfig) {
-        throw new Error(`form '${formType}' not found`);
+        throw new Error(
+          `form '${formType}' not found in global 'storefrontConfig.forms'`,
+        );
       }
 
       while (remainTokens.length) {

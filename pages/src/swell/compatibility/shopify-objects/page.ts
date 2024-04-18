@@ -1,4 +1,4 @@
-import { ShopifyResource } from './resource';
+import { ShopifyResource, defer } from './resource';
 
 export default function ShopifyPage(
   _instance: ShopifyCompatibility,
@@ -8,13 +8,17 @@ export default function ShopifyPage(
     return page.clone();
   }
   return new ShopifyResource({
-    author: page.author,
-    content: page.content,
-    handle: page.slug,
+    content: defer(() => page.content),
+    handle: defer(() => page.slug),
     metafields: null,
-    published_at: page.date_updated,
+    published_at: defer(
+      async () => (await page.date_published) || page.date_created,
+    ),
     template_suffix: null, // TODO
-    title: page.name,
-    url: `/pages/${page.slug}`,
+    title: defer(async () => (await page.title) || page.name), // Due to deprecated name field
+    url: defer(async () => (await page.slug) && `/pages/${page.slug}`),
+
+    // Not supported
+    author: null,
   });
 }

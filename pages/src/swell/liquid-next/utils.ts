@@ -153,10 +153,14 @@ export function stringify(value: any): string {
 
 export function paramsToProps(params: any[]) {
   // Convert array formatted params to props object
-  return params?.reduce((acc: any, param: any, index: number) => {
-    if (index % 2 === 0) {
-      acc[param] = params[index + 1];
-    }
-    return acc;
-  }, {});
+  if (Array.isArray(params)) {
+    return params?.reduce((acc: any, param: any, index: number) => {
+      if (index % 2 === 0) {
+        acc[param] = params[index + 1];
+      }
+      return acc;
+    }, {});
+  }
+
+  return {};
 }

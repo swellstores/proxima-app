@@ -1,17 +1,16 @@
 ---
-import { Swell } from "@/swell/api";
-import { SwellTheme } from "@/swell/theme";
-import ThemePage from "@/components/ThemePage.astro";
-import { getCategories } from "@/swell/categories";
+import { Swell } from '@/swell/api';
+import ThemePage from '@/components/ThemePage.astro';
+import { getCategories } from '@/swell/categories';
 ---
 
 <ThemePage
   id="categories/index"
-  getData={async (swell: Swell, theme: SwellTheme) => {
-    const categories = await getCategories(swell, theme.page?.query);
+  getData={async (swell: Swell) => {
+    const categories = await getCategories(swell);
 
-		return {
-			categories,
-		};
+    return {
+      categories,
+    };
   }}
 />

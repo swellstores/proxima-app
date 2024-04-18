@@ -1,5 +1,6 @@
 ---
-import { SwellStorefrontRecord } from '@/swell/api';
+import { Swell } from '@/swell/api';
+import ProductResource from '@/resources/product';
 import ThemePage from '@/components/ThemePage.astro';
 
 const { slug } = Astro.params;
@@ -10,16 +11,7 @@ const { slug } = Astro.params;
   required="product.id"
   title="{{ product.meta_title | default: product.name }}"
   description="{{ product.meta_description | default: product.description }}"
-  getData={async (swell: Swell, theme: SwellTheme) => {
-    const product = new SwellStorefrontRecord(
-      swell,
-      'products',
-      slug as string,
-      theme.page?.query
-    );
-
-    return {
-      product,
-    };
-  }}
+  getData={(swell: Swell) => ({
+    product: ProductResource(swell, slug as string),
+  })}
 />

@@ -5,15 +5,30 @@ import react from "@astrojs/react";
 
 // https://astro.build/config
 export default defineConfig({
-  output: "server",
+  output: 'server',
   adapter: cloudflare({
     runtime: {
-      mode: "local",
-      type: "pages"
-    }
+      mode: 'local',
+      type: 'pages',
+    },
   }),
   integrations: [react()],
   devToolbar: {
-    enabled: false
-  }
+    enabled: false,
+  },
+  vite: {
+    resolve: {
+      extensions: ['.ts', '.tsx', '.json', '.js', '.mjs', '.cjs'],
+    },
+    server: {
+      warmup: {
+        // Experimenting with warming up transforms
+        ssrFiles: ['./src/**/*'],
+        clientFiles: [
+          './src/components/EasyblocksEditor.tsx',
+          './src/swell/**/*',
+        ],
+      },
+    },
+  },
 });

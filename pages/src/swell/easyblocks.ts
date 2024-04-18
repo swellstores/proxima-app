@@ -359,6 +359,8 @@ export function getEasyblocksPagePropsWithConfigs(
     );
   };
 
+  console.log({ sectionConfigs });
+
   const templates = [
     {
       id: `page_${pageId}`,

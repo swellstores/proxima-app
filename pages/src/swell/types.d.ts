@@ -49,14 +49,14 @@ type SwellMenu = {
 enum SwellMenuItemType {
   Home = 'home',
   Search = 'search',
-  ProductList = 'product_list',
   Product = 'product',
+  ProductList = 'product_list',
   Category = 'category',
   Page = 'page',
-  BlogList = 'blog_list',
   Blog = 'blog',
-  ContentList = 'content_list',
+  BlogCatgory = 'blog_category',
   Content = 'content',
+  ContentList = 'content_list',
   Url = 'url',
   Heading = 'heading',
 }
@@ -93,14 +93,15 @@ type SwellStorefrontConfig = {
   editor?: boolean;
   pages?: Array<{
     id: string;
-    label: string;
     url: string;
+    label?: string;
     group?: string;
     icon?: string;
     templates?: boolean;
     expand_pages?: boolean;
     collection?: string;
     query?: SwellData;
+    ajax?: boolean;
   }>;
   forms?: Array<{
     id: string;
@@ -111,7 +112,6 @@ type SwellStorefrontConfig = {
 };
 
 declare class Swell {
-  public Astro?: AstroGlobal;
   public headers: { [key: string]: string };
   public swellHeaders: { [key: string]: string };
   public backend?: SwellBackendAPI;
@@ -122,9 +122,14 @@ declare class Swell {
   public cache: Map<string, any>;
   static cache: Map<string, any>;
 
-  constructor(options: { Astro?: AstroGlobal; [key: string]: any });
+  constructor(options: {
+    headers?: { [key: string]: any };
+    swellHeaders?: { [key: string]: any };
+    serverHeaders?: Headers; // Required on the server
+    [key: string]: any;
+  });
 
-  static getSwellHeaders(Astro: AstroGlobal): {
+  static getSwellHeaders(serverHeaders: Headers): {
     headers: { [key: string]: string };
     swellHeaders: { [key: string]: string };
   };
@@ -202,12 +207,17 @@ declare class SwellBackendAPI {
   delete(url: string, data?: SwellData): Promise<SwellData>;
 }
 
+interface SwellThemeInitOptions {
+  pageId?: string;
+  url?: URL;
+}
+
 declare class SwellTheme {
   public swell: Swell;
   public liquidSwell: LiquidSwell;
-  public storefrontConfig: SwellStorefrontConfig;
+  public storefrontConfig?: SwellStorefrontConfig;
 
-  public url: string | undefined;
+  public url: URL | undefined;
   public page: any;
   public pageId: string | undefined;
   public globals: ThemeGlobals | undefined;
@@ -215,9 +225,17 @@ declare class SwellTheme {
   public shopifyCompatibility: SwellStorefrontShopifyCompatibility | null;
   public shopifyCompatibilityClass: typeof ShopifyCompatibility;
 
-  constructor(swell: Swell);
+  constructor(
+    swell: Swell,
+    options?: {
+      storefrontConfig: SwellStorefrontConfig;
+      shopifyCompatibilityClass: typeof ShopifyCompatibility;
+    },
+  );
 
-  init(Astro: AstroGlobal, pageId?: string): Promise<void>;
+  initGlobals(options: SwellThemeInitOptions): Promise<void>;
+
+  setGlobals(globals: ThemeGlobals, url?: URL): void;
 
   getSettingsAndConfigs(): Promise<{ store: SwellData; configs: any }>;
 
@@ -228,10 +246,6 @@ declare class SwellTheme {
     settings: ThemeSettings;
     page: ThemeSettings;
   };
-
-  setShopifyCompatibilityClass(klass: typeof ShopifyCompatibility): void;
-
-  setGlobals(globals: ThemeGlobals, Astro?: AstroGlobal): void;
 
   setCompatibilityData(pageData: SwellData): void;
 
@@ -244,8 +258,6 @@ declare class SwellTheme {
   getThemeConfig(filePath: string): Promise<SwellThemeConfig | null>;
 
   getThemeTemplateConfig(filePath: string): Promise<SwellThemeConfig | null>;
-
-  getThemeFileValue(filePath: string): Promise<string | null>;
 
   getAssetUrl(filePath: string): string | null;
 
@@ -311,10 +323,12 @@ declare class SwellTheme {
   renderCurrency(amount: number, params: any): string;
 }
 
-type StorefrontResourceGetter = () => Promise<SwellData>;
+type StorefrontResourceGetter = () => Promise<SwellData> | SwellData;
 
 declare class StorefrontResource {
+  public _getter: StorefrontResourceGetter | undefined;
   public _result: SwellData | null | undefined;
+  [key: string]: any;
 
   constructor(getter?: StorefrontResourceGetter);
 
@@ -322,9 +336,13 @@ declare class StorefrontResource {
 
   _get(..._args: any): Promise<any>;
 
-  setCompatibilityData(..._any): void;
+  /* setCompatibilityData(
+    proxy: any,
+    compatibilityInstance: ShopifyCompatibility,
+    pageData: SwellData,
+  ): void;
 
-  setCompatibilityProps(result: SwellCollection): void;
+  setCompatibilityProps(result: any): void; */
 }
 
 declare class SwellStorefrontResource extends StorefrontResource {
@@ -345,10 +363,6 @@ declare class SwellStorefrontResource extends StorefrontResource {
     get: (id: string, query?: SwellData) => Promise<SwellData>;
     list: (query?: SwellData) => Promise<SwellData>;
   };
-
-  setCompatibilityData(..._args: any): void;
-
-  setCompatibilityProps(result: SwellCollection): void;
 }
 
 declare class SwellStorefrontCollection extends SwellStorefrontResource {
@@ -393,24 +407,33 @@ declare class SwellStorefrontRecord extends SwellStorefrontResource {
   ): SwellStorefrontRecord;
 
   _get(id: string, query: SwellData): Promise<any>;
-
-  setCompatibilityProps(result: SwellRecord): void;
 }
 
 declare class ShopifyCompatibility {
   public swell: Swell;
+  public pageId?: string;
+  public pageResourceMap?: ShopifyPageResourceMap;
+  public objectResourceMap?: ShopifyObjectResourceMap;
 
   constructor(swell: Swell);
 
   adaptGlobals: (globals: any, serverParams: any) => void;
 
-  getResourceData: (
-    resource: SwellStorefrontCollection | SwellStorefrontRecord,
-  ) => SwellData;
+  getPageType: (pageId: string) => string;
 
-  getResourceProps: (
-    resource: SwellStorefrontCollection | SwellStorefrontRecord,
-  ) => SwellData;
+  getPageRouteUrl: (pageId: string) => string;
+
+  getPageRouteMap: () => { [key: string]: string };
+
+  getThemeFilePath: (type: string, name: string) => string;
+
+  /* getResourceData: (resource: StorefrontResource) => SwellData;
+
+  getResourceProps: (resource: StorefrontResource) => SwellData; */
+
+  getPageResourceMap: () => ShopifyPageResourceMap;
+
+  getObjectResourceMap: () => ShopifyObjectResourceMap;
 
   getMenuData: (menu: SwellMenu) => SwellData;
 
@@ -427,4 +450,18 @@ declare class ShopifyCompatibility {
   getThemeConfig: (settingsData: ShopifySettingsData) => ThemeSettings;
   getPresetsConfig: (settingsData: ShopifySettingsData) => SwellData;
   getSectionConfig: (sectionSchema: ShopifySectionSchema) => ThemeSectionSchema;
-};
+}
+
+type ShopifyPageResourceMap = Array<{
+  page: string;
+  resources: Array<{
+    from: string;
+    to: string;
+    object: ShopifyResource;
+  }>;
+}>;
+
+type ShopifyObjectResourceMap = Array<{
+  from: any;
+  object: ShopifyResource;
+}>;

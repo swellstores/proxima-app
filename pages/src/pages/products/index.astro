@@ -1,25 +1,21 @@
 ---
-import { SwellStorefrontCollection, StorefrontResource } from '@/swell/api';
+import { Swell } from '@/swell/api';
+import ProductListResource from '@/resources/product-list';
 import ThemePage from '../../components/ThemePage.astro';
+
+const sort = Astro.url.searchParams.get('sort_by');
+const filter = Astro.url.searchParams.get('filter');
 ---
 
 <ThemePage
   id="products/index"
-  title="Catalog"
-  getData={async (swell: Swell, theme: SwellTheme) => {
-    const products = new SwellStorefrontCollection(
-      swell,
-      'products',
-      theme.page?.query
-    );
-
-    const filters = new StorefrontResource(() => {
-      return swell.storefront.products.filters(products);
-    });
-
-    return {
-      products,
-      filters,
-    };
-  }}
+  titleKey="pages.products.title"
+  descriptionKey="pages.products.description"
+  getData={(swell: Swell) => ({
+    products: ProductListResource(swell, {
+      sort,
+      filter,
+    }),
+  })}
+  }
 />

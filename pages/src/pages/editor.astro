@@ -3,6 +3,9 @@ import { Swell } from '@/swell/api';
 import { SwellTheme } from '@/swell/theme';
 import EasyblocksEditor from '@/components/EasyblocksEditor.jsx';
 import { getEditorLanguageConfig } from '@/swell/easyblocks';
+import storefrontConfig from '../../storefront.json';
+import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
+import { removeCircularReferences } from '@/swell/utils';
 
 const initialPageId = 'index';
 
@@ -11,10 +14,13 @@ if (!Astro.url.searchParams.get('rootTemplate')) {
   return Astro.redirect(`/editor?rootTemplate=page_${initialPageId}`);
 }
 
-const swell = new Swell({ Astro });
-const theme = new SwellTheme(swell);
+const swell = new Swell({ serverHeaders: Astro.request.headers });
+const theme = new SwellTheme(swell, {
+  storefrontConfig,
+  shopifyCompatibilityClass: StorefrontShopifyCompatibility,
+});
 
-await theme.init(Astro);
+await theme.initGlobals({ pageId: initialPageId, url: Astro.url });
 
 const sectionGroup = (await theme.renderPageTemplate(
   initialPageId
@@ -24,13 +30,17 @@ if (!sectionGroup) {
   return Astro.redirect(`/404`);
 }
 
-const [sectionConfigs, pageSections, layoutSectionGroups] = await Promise.all([
-  theme.getSectionGroupConfigs(sectionGroup),
-  theme.getPageSections(),
-  theme.getLayoutSectionGroups(),
-]);
+let [sectionConfigs, pageSections, layoutSectionGroups, editorLang] =
+  await Promise.all([
+    theme.getSectionGroupConfigs(sectionGroup),
+    theme.getPageSections(),
+    theme.getLayoutSectionGroups(),
+    getEditorLanguageConfig(swell),
+  ]);
 
-const editorLang = await getEditorLanguageConfig(swell);
+sectionConfigs = removeCircularReferences(sectionConfigs);
+pageSections = removeCircularReferences(pageSections);
+layoutSectionGroups = removeCircularReferences(layoutSectionGroups);
 ---
 
 <html lang="en">

@@ -17,7 +17,7 @@ export function defer(handler: Function) {
 }
 
 export class ShopifyResource {
-  constructor(props: any) {
+  constructor(props: any, stringProp?: string) {
     props.toJSON = () => {
       return props;
     };
@@ -25,6 +25,12 @@ export class ShopifyResource {
     props.clone = () => {
       return new ShopifyResource(cloneDeep(props));
     };
+
+    if (stringProp) {
+      props.toString = () => {
+        return props[stringProp];
+      };
+    }
 
     return new Proxy(props, {
       get: (target, prop) => {

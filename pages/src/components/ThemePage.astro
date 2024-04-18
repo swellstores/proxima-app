@@ -2,10 +2,19 @@
 import get from 'lodash/get';
 import { Swell } from '../swell/api';
 import { PageError, PageNotFound, SwellTheme } from '../swell/theme';
+import storefrontConfig from '../../storefront.json';
+import StorefrontShopifyCompatibility from '../resources/shopify-compatibility';
 import Layout from '@/layouts/Layout.astro';
 import ThemeSections from './ThemeSections.astro';
 import EasyblocksPage from './EasyblocksPage.jsx';
 import { getEditorLanguageConfig } from '@/swell/easyblocks';
+import {
+  dehydrateSwellRefsInStorefrontResources,
+  findCircularReferences,
+  removeCircularReferences,
+} from '@/swell/utils';
+
+const sectionId = Astro.url.searchParams.get('section_id');
 
 export interface Props {
   id: string;
@@ -21,10 +30,7 @@ export interface Props {
     [key: string]: any;
   };
   easyblocks?: boolean;
-  getData?: (
-    swell: Swell,
-    theme: SwellTheme
-  ) => Promise<{ [key: string]: any }>;
+  getData?: (swell: Swell, theme: SwellTheme) => Promise<SwellData> | SwellData;
 }
 
 const {
@@ -41,13 +47,17 @@ const {
   getData,
 } = Astro.props;
 
-const swell = new Swell({ Astro });
-const theme = new SwellTheme(swell);
+const swell = new Swell({ serverHeaders: Astro.request.headers });
+const theme = new SwellTheme(swell, {
+  storefrontConfig,
+  shopifyCompatibilityClass: StorefrontShopifyCompatibility,
+});
 
-await theme.init(Astro, id);
+await theme.initGlobals({ pageId: id, url: Astro.url });
 
 const isEditor = typeof Astro.url.searchParams.get('_editor') === 'string';
-const swellClientProps = isEditor && swell.getClientProps();
+
+let swellClientProps = isEditor && swell.getClientProps();
 
 let pageData, pageTitle, pageDescription, pageContent;
 
@@ -74,18 +84,22 @@ try {
           ? await description(pageData)
           : await get(pageData, descriptionPath),
 
-    content ??
-      theme.renderPage(
-        {
+    content ?? sectionId
+      ? theme.renderSection(sectionId as string, {
           ...props,
           ...pageData,
-        },
-        pageData?.theme_template
-      ),
+        })
+      : theme.renderPage(
+          {
+            ...props,
+            ...pageData,
+          },
+          pageData?.theme_template
+        ),
   ]);
 
   if (!pageContent && typeof pageContent !== 'string') {
-    throw new PageError();
+    throw new PageError('Invalid page content');
   }
 
   if (required) {
@@ -95,14 +109,17 @@ try {
     }
   }
 } catch (err: any) {
-  console.log('something went wrong!', err);
-  if (err instanceof PageError) {
-    pageTitle = err.title;
-    pageContent = await theme.renderPageTemplate(err.template);
-  } else {
-    pageTitle = 'Something went wrong';
-    pageContent = await theme.renderPageTemplate('500');
-    console.error(err);
+  console.log(err);
+  try {
+    if (err instanceof PageError) {
+      pageTitle = err.message;
+      pageContent = await theme.renderPageTemplate(err.template);
+    } else {
+      pageTitle = 'Something went wrong';
+      pageContent = await theme.renderPageTemplate('500');
+    }
+  } catch {
+    throw err;
   }
 }
 
@@ -127,23 +144,11 @@ if (isEditor && pageContent && typeof pageContent !== 'string') {
   themeGlobals = theme.globals;
 }
 
-// TODO: move this to utils
-function dehydrateSwellRefsInStorefrontResources(obj: any) {
-  if (typeof obj !== 'object' || obj === null) {
-    return obj;
-  }
-
-  for (const key in obj) {
-    if (key === '_swell') {
-      obj[key] = undefined;
-    } else {
-      dehydrateSwellRefsInStorefrontResources(obj[key]);
-    }
-  }
-}
-
 dehydrateSwellRefsInStorefrontResources(themeGlobals);
 dehydrateSwellRefsInStorefrontResources(swellClientProps);
+
+themeGlobals = removeCircularReferences(themeGlobals);
+swellClientProps = removeCircularReferences(swellClientProps);
 ---
 
 {
@@ -163,6 +168,8 @@ dehydrateSwellRefsInStorefrontResources(swellClientProps);
         client:load
       />
     </html>
+  ) : sectionId ? (
+    <Fragment set:html={pageContent} />
   ) : (
     <Layout theme={theme} {...layoutProps}>
       <div slot="content_for_layout">

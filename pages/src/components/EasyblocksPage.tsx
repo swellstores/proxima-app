@@ -1,14 +1,21 @@
-import reduce from "lodash/reduce";
-import React, { useState, useEffect, createContext, useContext, Fragment } from "react";
-import ReactDOMServer from "react-dom/server";
-import { EasyblocksEditor } from "@easyblocks/editor";
-import { Parser as HtmlToReactParser, ProcessNodeDefinitions } from 'html-to-react';
-import { stringify } from 'flatted';
-import { Swell } from "../swell/api";
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  Fragment,
+} from 'react';
+import ReactDOMServer from 'react-dom/server';
+import { EasyblocksEditor } from '@easyblocks/editor';
 import {
-  SwellTheme,
-  SwellStorefrontShopifyCompatibility,
-} from '../swell/theme';
+  Parser as HtmlToReactParser,
+  ProcessNodeDefinitions,
+} from 'html-to-react';
+import { stringify } from 'flatted';
+import { Swell } from '../swell/api';
+import { SwellTheme } from '../swell/theme';
+import storefrontConfig from '../../storefront.json';
+import StorefrontShopifyCompatibility from '../resources/shopify-compatibility';
 import {
   getEasyblocksBackend,
   getEasyblocksPagePropsWithConfigs,
@@ -318,11 +325,14 @@ function getPageBlockProcessingInstructions(Blocks: any) {
 export function getEasyblocksComponents(swell: Swell, props: any) {
   const { pageId, themeGlobals } = props;
 
-  const theme = new SwellTheme(swell);
+  const theme = new SwellTheme(swell, {
+    storefrontConfig,
+    shopifyCompatibilityClass: StorefrontShopifyCompatibility,
+  });
   theme.setGlobals(themeGlobals);
 
   if (themeGlobals?.shopify_compat) {
-    theme.shopifyCompatibility = new SwellStorefrontShopifyCompatibility(swell);
+    theme.shopifyCompatibility = new StorefrontShopifyCompatibility(swell);
   }
 
   return getEasyblocksComponentDefinitions(

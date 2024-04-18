@@ -1,18 +1,11 @@
 import { Swell, SwellStorefrontCollection, SwellStorefrontRecord } from './api';
 import { getProducts } from './products';
 
-export async function getCategories(
-  swell: Swell,
-  query?: SwellData,
-): Promise<any> {
+export function getCategories(swell: Swell, query?: SwellData) {
   return new SwellStorefrontCollection(swell, 'categories', query);
 }
 
-export async function getCategory(
-  swell: Swell,
-  id: string,
-  query?: SwellData,
-): Promise<any> {
+export function getCategory(swell: Swell, id: string, query?: SwellData) {
   return new SwellStorefrontRecord(swell, 'categories', id, query);
 }
 
@@ -20,11 +13,12 @@ export async function getCategoryWithProducts(
   swell: Swell,
   id: string,
   query?: SwellData,
-): Promise<any> {
-  const [category, products] = await Promise.all([
-    getCategory(swell, id, query),
-    getProducts(swell, { category: id }),
-  ]);
-  category.products = products;
+): Promise<SwellStorefrontRecord> {
+  const category = getCategory(swell, id, query);
+
+  const categoryId = await category.id;
+
+  category.products = getProducts(swell, { category: categoryId });
+
   return category;
 }

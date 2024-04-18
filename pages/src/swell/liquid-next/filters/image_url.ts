@@ -10,7 +10,14 @@ export default function bind(_liquidSwell: LiquidSwell) {
       imageField?.image ||
       imageField?.preview_image || // Shopify specific
       imageField;
-    const file = image?.file || image;
+    
+    const imageUrl = String(
+      image?.url ||
+        image?.file?.url ||
+        image?.src?.url || // Shopify specific
+        image,
+    );
+
     const props = paramsToProps(params);
 
     const query = [
@@ -20,6 +27,6 @@ export default function bind(_liquidSwell: LiquidSwell) {
       .filter(Boolean)
       .join('&');
 
-    return `${file?.url}${query ? `?${query}` : ''}`;
+    return `${imageUrl}${query ? `?${query}` : ''}`;
   };
 }

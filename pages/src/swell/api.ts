@@ -1,5 +1,4 @@
 import SwellJS from 'swell-js';
-import { AstroGlobal } from 'astro';
 import { toBase64 } from './utils';
 
 const DEFAULT_API_HOST = 'https://api.schema.io';
@@ -16,7 +15,6 @@ const SWELL_CLIENT_HEADERS = [
 ];
 
 export class Swell implements Swell {
-  public Astro?: AstroGlobal;
   public headers: { [key: string]: string };
   public swellHeaders: { [key: string]: string };
   public backend?: SwellBackendAPI;
@@ -32,16 +30,18 @@ export class Swell implements Swell {
   static cache: Map<string, any> = new Map();
 
   constructor({
-    Astro,
+    headers,
+    swellHeaders,
+    serverHeaders,
     ...clientProps
   }: {
-    Astro?: AstroGlobal;
+    headers?: { [key: string]: any };
+    swellHeaders?: { [key: string]: any };
+    serverHeaders?: Headers; // Required on the server
     [key: string]: any;
   }) {
-    this.Astro = Astro;
-
-    if (Astro) {
-      const { headers, swellHeaders } = Swell.getSwellHeaders(Astro);
+    if (serverHeaders) {
+      const { headers, swellHeaders } = Swell.getSwellHeaders(serverHeaders);
 
       this.headers = headers;
       this.swellHeaders = swellHeaders;
@@ -90,10 +90,13 @@ export class Swell implements Swell {
           swellHeaders['cache-modified'],
         );
       }
-    } else {
+    } else if (headers && swellHeaders) {
       // Set props from cache, typically used when hydrating client-side
-      const { headers, swellHeaders } = clientProps;
       Object.assign(this, clientProps);
+
+      if (clientProps.cache) {
+        this.setCacheValues(clientProps.cache);
+      }
 
       this.headers = headers;
       this.swellHeaders = swellHeaders;
@@ -113,18 +116,21 @@ export class Swell implements Swell {
         this.storefront.settings,
         clientProps.storefrontSettingStates,
       );
+    } else {
+      throw new Error(
+        'Swell client requires `serverHeaders` when initialized on the server-side, or `headers` and `swellHeaders` when initialized on the client-side.',
+      );
     }
   }
 
-  static getSwellHeaders(Astro: AstroGlobal): {
+  static getSwellHeaders(serverHeaders: Headers): {
     headers: { [key: string]: string };
     swellHeaders: { [key: string]: string };
   } {
     const headers: { [key: string]: string } = {};
     const swellHeaders: { [key: string]: string } = {};
-    const headersList = Astro.request.headers;
 
-    headersList.forEach((value: string, key: string) => {
+    serverHeaders.forEach((value: string, key: string) => {
       headers[key] = value;
       if (key.startsWith('swell-')) {
         swellHeaders[key.replace('swell-', '')] = value || '';
@@ -160,7 +166,7 @@ export class Swell implements Swell {
       instanceId: this.instanceId,
       isPreview: this.isPreview,
       isEditor: this.isEditor,
-      cache: this.cache,
+      cache: Array.from(this.getCacheInstance()),
       storefrontSettingStates: {
         state: storefrontSettings.state,
         menuState: storefrontSettings.menuState,
@@ -173,7 +179,12 @@ export class Swell implements Swell {
 
   getCacheInstance() {
     if (this.isPreview) {
-      return this.cache;
+      // TODO: this is only used to avoid cross-request cache
+      // for resources that might change in a preview mode,
+      // however if we use a different cache mechanism i.e. cloudflare KV
+      // then this shouldn't be necessary as we can invalid changed files instead
+      // For other resources like Swell settings we do not want to avoid cache this way however
+      // return this.cache;
     }
 
     let cacheInstance = Swell.cache.get(this.instanceId);
@@ -183,6 +194,21 @@ export class Swell implements Swell {
     }
 
     return cacheInstance;
+  }
+
+  setCacheValues(values: any) {
+    // TODO: fix type
+    if (this.isPreview) {
+      // TODO: this is only used to avoid cross-request cache
+      // for resources that might change in a preview mode,
+      // however if we use a different cache mechanism i.e. cloudflare KV
+      // then this shouldn't be necessary as we can invalid changed files instead
+      // For other resources like Swell settings we do not want to avoid cache this way however
+      // this.cache = new Map(values);
+      // return;
+    }
+
+    Swell.cache.set(this.instanceId, new Map(values));
   }
 
   getCachedSync(
@@ -200,11 +226,19 @@ export class Swell implements Swell {
     }
 
     if (cacheHandler) {
-      const result = cacheHandler();
-      if (result instanceof Promise) {
-        result.then((data) => cacheInstance.set(cacheKey, data));
-      } else {
-        cacheInstance.set(cacheKey, result);
+      let result;
+      try {
+        result = cacheHandler();
+        if (result instanceof Promise) {
+          result.then((data) => {
+            cacheInstance.set(cacheKey, data);
+            return data;
+          });
+        } else {
+          cacheInstance.set(cacheKey, result);
+        }
+      } catch (err) {
+        console.error(err);
       }
 
       // Clear live cache only, since preview lives just for the duration of the request
@@ -231,7 +265,44 @@ export class Swell implements Swell {
   async getStorefrontSettings(): Promise<SwellRecord> {
     return await this.getCached('storefront-settings', async () => {
       // Load all settings including menus, payments, etc
-      await this.storefront.settings.load();
+
+      try {
+        // Note: Logic pulled from swell.js because we need to pass storefront_id explicitly
+        const { settings, menus, payments, subscriptions, session } =
+          await this.storefront.request(
+            'get',
+            `/settings/all?storefront_id=${this.swellHeaders['storefront-id']}`,
+          );
+
+        this.storefront.settings.localizedState = {};
+
+        this.storefront.settings.set({
+          value: settings,
+        });
+
+        this.storefront.settings.set({
+          model: 'menus',
+          value: menus,
+        });
+
+        this.storefront.settings.set({
+          model: 'payments',
+          value: payments,
+        });
+
+        this.storefront.settings.set({
+          model: 'subscriptions',
+          value: subscriptions,
+        });
+
+        this.storefront.settings.set({
+          model: 'session',
+          value: session,
+        });
+      } catch (err) {
+        console.error(`Swell: unable to load settings (${err})`);
+      }
+
       const settings = await this.storefront.settings.get();
       return settings;
     });
@@ -322,11 +393,9 @@ export class SwellBackendAPI implements SwellBackendAPI {
     }
 
     const endpointUrl = String(url).startsWith('/') ? url.substring(1) : url;
+    const requestUrl = `${this.apiHost}/${endpointUrl}${query}`;
 
-    const response = await fetch(
-      `${this.apiHost}/${endpointUrl}${query}`,
-      requestOptions,
-    );
+    const response = await fetch(requestUrl, requestOptions);
 
     const responseText = await response.text();
 
@@ -482,14 +551,33 @@ export class StorefrontResource implements StorefrontResource {
 
   async _get(..._args: any): Promise<any> {
     if (this._getter) {
-      this._result = this._getter();
+      this._result = Promise.resolve(this._getter()).then((result: any) => {
+        if (result) {
+          Object.assign(this, result);
+          //this.setCompatibilityProps(result);
+        }
+        return result;
+      });
     }
     return this._result;
   }
 
-  setCompatibilityData(..._args: any): void {}
+  /* setCompatibilityData(
+    proxy: any,
+    compatibilityInstance: ShopifyCompatibility,
+    pageData: SwellData,
+  ) {
+    this._compatibilityInstance = compatibilityInstance;
+    Object.assign(pageData, compatibilityInstance.getResourceData(proxy));
+  }
 
-  setCompatibilityProps(result: any): void {}
+  setCompatibilityProps(result: any) {
+    if (this._compatibilityInstance) {
+      const resourceProps = this._compatibilityInstance.getResourceProps(this);
+      Object.assign(this, resourceProps);
+      Object.assign(result, resourceProps);
+    }
+  } */
 }
 
 export class SwellStorefrontResource extends StorefrontResource {
@@ -536,7 +624,6 @@ export class SwellStorefrontResource extends StorefrontResource {
     }
 
     if (!this._resource || !this._resource.get || !this._resource.list) {
-      console.log(_collection, this._resource);
       throw new Error(
         `Swell storefront resource for collection '${_collection}' does not exist.`,
       );
@@ -599,7 +686,7 @@ export class SwellStorefrontCollection extends SwellStorefrontResource {
               ...result,
               length: result.results.length,
             });
-            this.setCompatibilityProps(result);
+            //this.setCompatibilityProps(result);
           }
 
           return result;
@@ -616,23 +703,6 @@ export class SwellStorefrontCollection extends SwellStorefrontResource {
   *iterator() {
     for (const result of this.results) {
       yield result;
-    }
-  }
-
-  setCompatibilityData(
-    proxy: any,
-    compatibilityInstance: ShopifyCompatibility,
-    pageData: SwellData,
-  ) {
-    this._compatibilityInstance = compatibilityInstance;
-    Object.assign(pageData, compatibilityInstance.getResourceData(proxy));
-  }
-
-  setCompatibilityProps(result: SwellCollection) {
-    if (this._compatibilityInstance) {
-      const resourceProps = this._compatibilityInstance.getResourceProps(this);
-      Object.assign(this, resourceProps);
-      Object.assign(result, resourceProps);
     }
   }
 }
@@ -689,7 +759,7 @@ export class SwellStorefrontRecord extends SwellStorefrontResource {
         .then((result: SwellRecord) => {
           if (result) {
             Object.assign(this, result);
-            this.setCompatibilityProps(result);
+            //this.setCompatibilityProps(result);
           }
 
           return result;
@@ -697,22 +767,5 @@ export class SwellStorefrontRecord extends SwellStorefrontResource {
     }
 
     return this;
-  }
-
-  setCompatibilityData(
-    proxy: any,
-    compatibilityInstance: ShopifyCompatibility,
-    pageData: SwellData,
-  ) {
-    this._compatibilityInstance = compatibilityInstance;
-    Object.assign(pageData, compatibilityInstance.getResourceData(proxy));
-  }
-
-  setCompatibilityProps(result: SwellRecord) {
-    if (this._compatibilityInstance) {
-      const resourceProps = this._compatibilityInstance.getResourceProps(this);
-      Object.assign(this, resourceProps);
-      Object.assign(result, resourceProps);
-    }
   }
 }

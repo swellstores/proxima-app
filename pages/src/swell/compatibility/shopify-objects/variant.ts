@@ -2,8 +2,8 @@ import { ShopifyResource, defer } from './resource';
 
 export default function ShopifyVariant(
   _instance: ShopifyCompatibility,
-  product: SwellStorefrontRecord,
-  variant: SwellStorefrontRecord,
+  product: StorefrontResource | SwellRecord,
+  variant: StorefrontResource | SwellRecord,
 ) {
   if (variant instanceof ShopifyResource) {
     return variant.clone();

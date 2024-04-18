@@ -26,6 +26,7 @@
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "strftime": "^0.10.2",
     "swell-js": "^4.0.3",
     "textdiff-patch": "^1.1.8",
     "typescript": "^5.3.3"

@@ -14,3 +14,22 @@ export async function getProduct(
 ): Promise<any> {
   return new SwellStorefrontRecord(swell, 'products', id, query);
 }
+
+export async function getProductsFiltered(
+  swell: Swell,
+  {
+    search,
+    filter,
+    sort,
+  }: {
+    search?: string | null;
+    filter?: any;
+    sort?: string | null;
+  },
+): Promise<any> {
+  return new SwellStorefrontCollection(swell, 'products', {
+    search,
+    filter,
+    sort,
+  });
+}

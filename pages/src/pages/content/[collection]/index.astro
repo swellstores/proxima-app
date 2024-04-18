@@ -1,5 +1,5 @@
 ---
-import { SwellStorefrontCollection } from '../../../swell/api';
+import { Swell, SwellStorefrontCollection } from '../../../swell/api';
 import ThemePage from '../../../components/ThemePage.astro';
 import { getContentModel } from '../../../swell/content';
 
@@ -11,12 +11,11 @@ const { collection } = Astro.params;
   required="model.id"
   title="{{ model.name }}"
   description="{{ model.description }}"
-  getData={async (swell: Swell, theme: SwellTheme) => {
+  getData={async (swell: Swell) => {
     const model = await getContentModel(swell, collection);
     const entries = new SwellStorefrontCollection(
       swell,
-      `content/${collection}`,
-      theme.page?.query
+      `content/${collection}`
     );
 
     return {

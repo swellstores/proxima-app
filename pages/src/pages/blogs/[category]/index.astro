@@ -1,0 +1,35 @@
+---
+import {
+  Swell,
+  SwellStorefrontCollection,
+  SwellStorefrontRecord,
+} from '../../../swell/api';
+import ThemePage from '../../../components/ThemePage.astro';
+
+const { category: categorySlug } = Astro.params;
+---
+
+<ThemePage
+  id="blogs/category"
+  title="Blogs"
+  getData={async (swell: Swell) => {
+    const category = new SwellStorefrontRecord(
+      swell,
+      `content/blog-categories`,
+      categorySlug
+    );
+
+    const categoryId = await category.id;
+
+    const blogs = new SwellStorefrontCollection(swell, `content/blogs`, {
+      category_id: categoryId,
+    });
+
+    category.blogs = blogs;
+
+    return {
+      category,
+      blogs,
+    };
+  }}
+/>

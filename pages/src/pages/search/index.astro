@@ -1,0 +1,24 @@
+---
+import { Swell } from '@/swell/api';
+import SearchResource from '@/resources/search';
+import ThemePage from '@/components/ThemePage.astro';
+
+const search = Astro.url.searchParams.get('q');
+const sort = Astro.url.searchParams.get('sort_by');
+const filter = Astro.url.searchParams.get('filter');
+
+console.log('(index) search query?', { search, filter, sort });
+---
+
+<ThemePage
+  id="search"
+  titleKey="pages.search.title"
+  descriptionKey="pages.search.description"
+  getData={(swell: Swell) => ({
+    search: SearchResource(swell, {
+      search,
+      sort,
+      filter,
+    }),
+  })}
+/>

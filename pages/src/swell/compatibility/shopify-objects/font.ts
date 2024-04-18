@@ -7,6 +7,7 @@ export default function ShopifyFont(
   if (font instanceof ShopifyResource) {
     return font.clone();
   }
+
   return new ShopifyResource({
     baseline_ratio: null, // TODO
     fallback_families: font.fallback_families,

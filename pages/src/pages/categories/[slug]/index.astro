@@ -1,0 +1,22 @@
+---
+import { Swell } from '../../../swell/api';
+import ThemePage from '../../../components/ThemePage.astro';
+import { getCategoryWithProducts } from '../../../swell/categories';
+
+const { slug } = Astro.params;
+---
+
+<ThemePage
+  id="categories/category"
+  required="category.id"
+  title="{{ category.meta_title | default: category.name }}"
+  description="{{ category.meta_description | default: category.description }}"
+  getData={async (swell: Swell) => {
+    const category = await getCategoryWithProducts(swell, slug as string);
+
+    return {
+      category,
+      products: category.products,
+    };
+  }}
+/>

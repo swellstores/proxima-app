@@ -16,6 +16,7 @@ import color_saturate from './color_saturate';
 import color_to_hex from './color_to_hex';
 import color_to_hsl from './color_to_hsl';
 import color_to_rgb from './color_to_rgb';
+import date from './date';
 import font_face from './font_face';
 import font_modify from './font_modify';
 import font_url from './font_url';
@@ -27,6 +28,7 @@ import money_with_currency from './money_with_currency';
 import money_without_currency from './money_without_currency';
 import money_without_trailing_zeros from './money_without_trailing_zeros';
 import stylesheet_tag from './stylesheet_tag';
+import time_tag from './time_tag';
 import translate from './translate';
 import where from './where';
 
@@ -50,6 +52,7 @@ export const filters = {
   color_to_hex,
   color_to_hsl,
   color_to_rgb,
+  date,
   font_face,
   font_modify,
   font_url,
@@ -61,6 +64,7 @@ export const filters = {
   money_without_currency,
   money_without_trailing_zeros,
   stylesheet_tag,
+  time_tag,
   translate,
   t: translate, // alias
   where,
