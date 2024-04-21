@@ -1,11 +1,13 @@
 ---
-import { Swell } from '@/swell/api';
-import { SwellTheme } from '@/swell/theme';
+import {
+  Swell,
+  SwellTheme,
+  getEditorLanguageConfig,
+  removeCircularReferences,
+} from '@swell/storefrontjs';
 import EasyblocksEditor from '@/components/EasyblocksEditor.jsx';
-import { getEditorLanguageConfig } from '@/swell/easyblocks';
 import storefrontConfig from '../../storefront.json';
 import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
-import { removeCircularReferences } from '@/swell/utils';
 
 const initialPageId = 'index';
 

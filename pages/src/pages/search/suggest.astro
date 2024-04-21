@@ -1,7 +1,6 @@
 ---
-import { Swell } from '../../swell/api';
+import { Swell, getProductsFiltered } from '@swell/storefrontjs';
 import ThemePage from '../../components/ThemePage.astro';
-import { getProductsFiltered } from '../../swell/products';
 
 const search = Astro.url.searchParams.get('q');
 const filter = Astro.url.searchParams.get('filter');

@@ -11,11 +11,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "baseUrl": "/Users/eric/swell-apps/astro-poc-storefront/pages",
+    "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "verbatimModuleSyntax": false,
     "jsxImportSource": "react"

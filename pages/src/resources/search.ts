@@ -2,7 +2,7 @@ import {
   Swell,
   StorefrontResource,
   SwellStorefrontCollection,
-} from '@/swell/api';
+} from '@swell/storefrontjs';
 
 export type SearchParams = {
   search?: string | null;

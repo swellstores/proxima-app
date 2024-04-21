@@ -2,6 +2,9 @@
   "name": "astro-poc-storefront",
   "type": "module",
   "version": "0.0.1",
+  "description": "An official Swell storefront app.",
+  "author": "Swell",
+  "license": "MIT",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -16,8 +19,7 @@
     "@astrojs/react": "^3.0.10",
     "@easyblocks/core": "^1.0.5-alpha.0",
     "@easyblocks/editor": "^1.0.5-alpha.0",
-    "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21",
+    "@swell/storefrontjs": "file:~/swell-storefrontjs",
     "astro": "^4.4.6",
     "color": "^4.2.3",
     "flatted": "^3.3.1",
@@ -32,6 +34,8 @@
     "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@types/color": "^3.0.6"
+    "@types/color": "^3.0.6",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21"
   }
 }

@@ -1,16 +1,14 @@
-import { SwellStorefrontRecord, SwellStorefrontCollection } from '@/swell/api';
-import { ProductResource, ProductListResource, SearchResource } from './';
-import { ShopifyCompatibility } from '@/swell/compatibility/shopify';
-import storefrontConfig from '../../storefront.json';
-
 import {
+  ShopifyCompatibility,
   ShopifyArticle,
   ShopifyBlog,
   ShopifyCollection,
   ShopifyProduct,
   ShopifyPage,
   ShopifySearch,
-} from '@/swell/compatibility/shopify-objects';
+} from '@swell/storefrontjs';
+import { ProductResource, ProductListResource, SearchResource } from './';
+import storefrontConfig from '../../storefront.json';
 
 export default class StorefrontShopifyCompatibility extends ShopifyCompatibility {
   getPageType(pageId: string) {

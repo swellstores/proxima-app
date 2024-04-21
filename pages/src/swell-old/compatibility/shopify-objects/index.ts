@@ -1,4 +1,7 @@
-import { SwellStorefrontCollection, SwellStorefrontRecord } from '@/swell/api';
+import {
+  SwellStorefrontCollection,
+  SwellStorefrontRecord,
+} from '@/swell-old/api';
 import ShopifyArticle from './article';
 import ShopifyBlog from './blog';
 import ShopifyCollection from './collection';

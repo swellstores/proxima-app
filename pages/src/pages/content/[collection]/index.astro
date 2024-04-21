@@ -1,7 +1,10 @@
 ---
-import { Swell, SwellStorefrontCollection } from '../../../swell/api';
+import {
+  Swell,
+  SwellStorefrontCollection,
+  getContentModel,
+} from '@swell/storefrontjs';
 import ThemePage from '../../../components/ThemePage.astro';
-import { getContentModel } from '../../../swell/content';
 
 const { collection } = Astro.params;
 ---

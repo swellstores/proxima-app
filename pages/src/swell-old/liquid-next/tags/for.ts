@@ -1,4 +1,4 @@
-import { LiquidSwell } from "..";
+import { LiquidSwell } from '..';
 import {
   Liquid,
   Tag,
@@ -11,9 +11,9 @@ import {
   ParseStream,
   evalToken,
   Emitter,
-} from "liquidjs";
-import { ForloopDrop, toEnumerable } from "../utils";
-import { SwellStorefrontCollection } from '@/swell/api';
+} from 'liquidjs';
+import { ForloopDrop, toEnumerable } from '../utils';
+import { SwellStorefrontCollection } from '@/swell-old/api';
 
 const MODIFIERS = ['offset', 'limit', 'reversed'];
 

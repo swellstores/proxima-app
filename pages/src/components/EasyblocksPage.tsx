@@ -12,15 +12,15 @@ import {
   ProcessNodeDefinitions,
 } from 'html-to-react';
 import { stringify } from 'flatted';
-import { Swell } from '../swell/api';
-import { SwellTheme } from '../swell/theme';
-import storefrontConfig from '../../storefront.json';
-import StorefrontShopifyCompatibility from '../resources/shopify-compatibility';
 import {
+  Swell,
+  SwellTheme,
   getEasyblocksBackend,
   getEasyblocksPagePropsWithConfigs,
   getEasyblocksComponentDefinitions,
-} from '../swell/easyblocks';
+} from '@swell/storefrontjs';
+import storefrontConfig from '../../storefront.json';
+import StorefrontShopifyCompatibility from '../resources/shopify-compatibility';
 
 // TODO: fix all the types
 

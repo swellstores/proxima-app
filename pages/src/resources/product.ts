@@ -1,4 +1,4 @@
-import { Swell, SwellStorefrontRecord } from '@/swell/api';
+import { Swell, SwellStorefrontRecord } from '@swell/storefrontjs';
 import { Product } from 'swell-js';
 
 export class ProductResource extends SwellStorefrontRecord {

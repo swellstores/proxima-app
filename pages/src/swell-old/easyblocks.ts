@@ -1,34 +1,37 @@
-import get from "lodash/get";
-import reduce from "lodash/reduce";
-import { Swell } from "./api";
+import get from 'lodash/get';
+import reduce from 'lodash/reduce';
+import { Swell } from './api';
 
-import {
-  Backend,
-  Document,
-  UserDefinedTemplate,
-} from "@easyblocks/core";
-import { themeConfigQuery } from "@/swell/utils";
+import { Backend, Document, UserDefinedTemplate } from '@easyblocks/core';
+import { themeConfigQuery } from '@/swell-old/utils';
 
-export async function getThemeConfig(swell: Swell, themePath: string): Promise<SwellRecord | null> {
-  if (!swell.swellHeaders["theme-id"]) {
+export async function getThemeConfig(
+  swell: Swell,
+  themePath: string,
+): Promise<SwellRecord | null> {
+  if (!swell.swellHeaders['theme-id']) {
     return null;
   }
 
-  const config = await swell.getCached("editor-theme-config", [themePath], async () => {
-    return await swell.get("/:themes:configs/:last", {
-      ...themeConfigQuery(swell.swellHeaders),
-      file_path: `theme/${themePath}.json`,
-      fields: "type, name, file, file_path, file_data",
-      include: {
-        file_data: {
-          url: "/:themes:configs/{id}/file/data",
-          conditions: {
-            type: "theme",
+  const config = await swell.getCached(
+    'editor-theme-config',
+    [themePath],
+    async () => {
+      return await swell.get('/:themes:configs/:last', {
+        ...themeConfigQuery(swell.swellHeaders),
+        file_path: `theme/${themePath}.json`,
+        fields: 'type, name, file, file_path, file_data',
+        include: {
+          file_data: {
+            url: '/:themes:configs/{id}/file/data',
+            conditions: {
+              type: 'theme',
+            },
           },
         },
-      },
-    });
-  });
+      });
+    },
+  );
 
   try {
     return JSON.parse(config.file_data);
@@ -37,39 +40,47 @@ export async function getThemeConfig(swell: Swell, themePath: string): Promise<S
   }
 }
 
-export async function getThemeSectionConfigs(swell: Swell): Promise<SwellCollection> {
-  const configs = await swell.getCached("editor-theme-section-configs", async () => {
-    return await swell.get("/:themes:configs", {
-      ...themeConfigQuery(swell.swellHeaders),
-      file_path: { $regex: "^theme/sections/" },
-      limit: 1000,
-      fields: "type, name, file, file_path, file_data",
-      include: {
-        file_data: {
-          url: "/:themes:configs/{id}/file/data",
-          conditions: {
-            type: "theme",
+export async function getThemeSectionConfigs(
+  swell: Swell,
+): Promise<SwellCollection> {
+  const configs = await swell.getCached(
+    'editor-theme-section-configs',
+    async () => {
+      return await swell.get('/:themes:configs', {
+        ...themeConfigQuery(swell.swellHeaders),
+        file_path: { $regex: '^theme/sections/' },
+        limit: 1000,
+        fields: 'type, name, file, file_path, file_data',
+        include: {
+          file_data: {
+            url: '/:themes:configs/{id}/file/data',
+            conditions: {
+              type: 'theme',
+            },
           },
         },
-      },
-    });
-  });
+      });
+    },
+  );
 
   return configs;
 }
 
 export async function getEditorLanguageConfig(swell: Swell) {
   let editorLang = await getThemeConfig(swell, `config/language-editor`);
-  
+
   // Fallback to shopify theme locales
   // TODO: put this logic in ShopifyCompatibility class
   if (!editorLang) {
     const storefrontSettings = await swell.getStorefrontSettings();
-    const localeCode = storefrontSettings?.locale || "en-US";
+    const localeCode = storefrontSettings?.locale || 'en-US';
     editorLang = await getThemeConfig(swell, `locales/${localeCode}.schema`);
     if (!editorLang) {
-      const localeBaseCode = (localeCode as string).split("-")[0];
-      editorLang = await getThemeConfig(swell, `locales/${localeBaseCode}.schema`);
+      const localeBaseCode = (localeCode as string).split('-')[0];
+      editorLang = await getThemeConfig(
+        swell,
+        `locales/${localeBaseCode}.schema`,
+      );
     }
   }
 

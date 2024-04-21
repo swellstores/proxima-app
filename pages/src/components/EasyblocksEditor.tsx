@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { EasyblocksEditor } from "@easyblocks/editor";
-import { getEasyblocksBackend, getEasyblocksPagePropsWithConfigs, getEasyblocksComponentDefinitions } from "../swell/easyblocks";
+import {
+  getEasyblocksBackend,
+  getEasyblocksPagePropsWithConfigs,
+  getEasyblocksComponentDefinitions,
+} from '@swell/storefrontjs';
 
 // TODO: fix all the types
 
