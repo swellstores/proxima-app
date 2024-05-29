@@ -7,12 +7,14 @@ import {
 export type ListParams = {
   sort?: string | null;
   filter?: any;
+  [key: string]: any;
 };
 
 export class ProductListResource extends StorefrontResource {
-  constructor(swell: Swell, { sort, filter }: ListParams) {
+  constructor(swell: Swell, { sort, filter, ...query }: ListParams) {
     super(async () => {
       const products = new SwellStorefrontCollection(swell, 'products', {
+        ...query,
         sort,
         // TODO: Implement filters
         filter,

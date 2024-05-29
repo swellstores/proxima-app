@@ -2,12 +2,20 @@ import {
   ShopifyCompatibility,
   ShopifyArticle,
   ShopifyBlog,
+  ShopifyCart,
   ShopifyCollection,
   ShopifyProduct,
   ShopifyPage,
   ShopifySearch,
+  ShopifyVariant,
 } from '@swell/storefrontjs';
-import { ProductResource, ProductListResource, SearchResource } from './';
+import {
+  CartResource,
+  ProductResource,
+  ProductListResource,
+  SearchResource,
+  VariantResource,
+} from './';
 import storefrontConfig from '../../storefront.json';
 
 export default class StorefrontShopifyCompatibility extends ShopifyCompatibility {
@@ -45,7 +53,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         return 'customers/register';
       case 'account/recover':
         return 'customers/reset_password';
-      case 'cart':
+      case 'cart/index':
         return 'cart';
       case '404':
         return '404';
@@ -92,11 +100,11 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       account_register_url: this.getPageRouteUrl('account/signup'),
       account_url: this.getPageRouteUrl('account/index'),
       all_products_collection_url: this.getPageRouteUrl('products/index'),
-      cart_add_url: this.getPageRouteUrl('cart'),
-      cart_change_url: this.getPageRouteUrl('cart'),
-      cart_clear_url: this.getPageRouteUrl('cart'),
-      cart_update_url: this.getPageRouteUrl('cart'),
-      cart_url: this.getPageRouteUrl('cart'),
+      cart_add_url: this.getPageRouteUrl('cart/add'),
+      cart_change_url: this.getPageRouteUrl('cart/change'),
+      cart_clear_url: this.getPageRouteUrl('cart/clear'),
+      cart_update_url: this.getPageRouteUrl('cart/update'),
+      cart_url: this.getPageRouteUrl('cart/index'),
       collections_url: this.getPageRouteUrl('categories/index'),
       predictive_search_url: this.getPageRouteUrl('search/suggest'),
       product_recommendations_url: this.getPageRouteUrl('products/index'),
@@ -153,6 +161,10 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
   getObjectResourceMap() {
     return [
       {
+        from: CartResource,
+        object: ShopifyCart,
+      },
+      {
         from: ProductResource,
         object: ShopifyProduct,
       },
@@ -160,87 +172,61 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         from: ProductListResource,
         object: ShopifyCollection,
       },
+      {
+        from: VariantResource,
+        object: ShopifyVariant,
+      },
     ];
   }
 
-  /* getResourceData(resource: StorefrontResource): SwellData {
-    const instance = this as ShopifyCompatibility;
-
-    if (resource instanceof ProductListResource) {
-      return {
-        collection: ShopifyCollection(instance, resource as any),
-      };
-    }
-
-    if (resource instanceof SwellStorefrontCollection) {
-      // Products are always contained in a collection
-      if (resource?._collection === 'products') {
-        return {
-          collection: ShopifyCollection(instance, resource as any),
-        };
-      }
-    } else if (resource instanceof SwellStorefrontRecord) {
-      if (resource?._collection === 'content/blogs') {
-        return {
-          article: ShopifyArticle(instance, resource as any),
-        };
-      }
-
-      if (resource?._collection === 'content/blog-categories') {
-        return {
-          blog: ShopifyBlog(instance, resource as any),
-        };
-      }
-    }
-
-    return {};
-  }
-
-  getResourceProps(resource: StorefrontResource): SwellData {
-    if (resource instanceof ProductResource) {
-      return ShopifyProduct(this, resource);
-    }
-    if (resource instanceof SearchResource) {
-      return ShopifySearch(this, resource);
-    }
-
-    // Old stuff
-
-    if (resource instanceof SwellStorefrontCollection) {
-      return {
-        size: resource.results.length,
-        results: resource.results.map((result: SwellRecord) => {
-          if (resource?._collection === 'products') {
-            return ShopifyProduct(this, result);
+  getFormResourceMap() {
+    return [
+      {
+        formType: 'product',
+        clientHtml: () => {
+          return `
+            <input type="hidden" name="product_id" value="{{ product.id }}" />
+            <input type="hidden" name="variant_id" value="{{ product.selected_or_first_available_variant.id }}" />
+          `;
+        },
+        response: async ({ response: cart }: any) => {
+          if (cart) {
+            // Return last added/updated item
+            const item = cart.items?.find(
+              (item: any) => item.id === cart.$item_id,
+            );
+            return item;
           }
-          return result;
-        }),
-      };
-    } else if (resource instanceof SwellStorefrontRecord) {
-      if (resource?._collection === 'products') {
-        return ShopifyProduct(this, resource);
-      }
-
-      if (resource?._collection === 'categories') {
-        const products = new SwellStorefrontCollection(this.swell, 'products', {
-          categories: [resource._id],
-        });
-        return ShopifyCollection(this, products);
-      }
-
-      if (resource?._collection === 'content/pages') {
-        return ShopifyPage(this, resource);
-      }
-
-      if (resource?._collection === 'content/blogs') {
-        return ShopifyArticle(this, resource);
-      }
-
-      if (resource?._collection === 'content/blog-categories') {
-        return ShopifyBlog(this, resource);
-      }
-    }
-
-    return {};
-  } */
+        },
+      },
+      {
+        pageId: 'cart/change',
+        params: async ({ params, theme }: any) => {
+          // Convert line number to item_id
+          const prevCartItems = await theme.globals.cart?.items;
+          const prevItem = prevCartItems?.[params.line - 1];
+          return {
+            ...params,
+            prevItem,
+            item_id: prevItem?.id,
+            quantity: Number(params.quantity),
+          };
+        },
+        response: async ({ params, response: cart }: any) => {
+          if (cart) {
+            const { prevItem, item_id, quantity } = params;
+            const updatedCartItem = cart.items?.find(
+              (item: any) => item.id === item_id,
+            );
+            // Indicate which item was updated or removed
+            return {
+              ...cart,
+              items_added: prevItem && quantity > 0 ? [updatedCartItem] : [],
+              items_removed: prevItem && quantity === 0 ? [prevItem] : [],
+            };
+          }
+        },
+      },
+    ];
+  }
 }

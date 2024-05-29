@@ -24,6 +24,11 @@
       "collection": "products"
     },
     {
+      "id": "variants/variant",
+      "url": "/variants/{slug}",
+      "ajax": true
+    },
+    {
       "id": "categories/index",
       "label": "Category list",
       "url": "/categories",
@@ -153,12 +158,32 @@
       "collection": "subscriptions"
     },
     {
-      "id": "cart",
+      "id": "cart/index",
       "label": "Cart",
       "url": "/cart",
       "group": "checkout",
       "icon": "shopping-cart",
       "collection": "carts"
+    },
+    {
+      "id": "cart/add",
+      "url": "/cart/add",
+      "ajax": true
+    },
+    {
+      "id": "cart/change",
+      "url": "/cart/change",
+      "ajax": true
+    },
+    {
+      "id": "cart/clear",
+      "url": "/cart/clear",
+      "ajax": true
+    },
+    {
+      "id": "cart/update",
+      "url": "/cart/update",
+      "ajax": true
     },
     {
       "id": "checkout",
@@ -204,8 +229,7 @@
     },
     {
       "id": "cart",
-      "url": "/cart",
-      "params": ["cart"]
+      "url": "/cart/checkout"
     },
     {
       "id": "contact",
@@ -227,8 +251,7 @@
     },
     {
       "id": "customer_address",
-      "url": "/account/addresses",
-      "params": ["address"]
+      "url": "/account/addresses"
     },
     {
       "id": "customer_login",
@@ -245,14 +268,8 @@
       "url": "/localization"
     },
     {
-      "id": "new_comment",
-      "url": "#comment_form",
-      "params": ["blog"]
-    },
-    {
       "id": "product",
-      "url": "/cart/add",
-      "params": ["product"]
+      "url": "/cart/add"
     },
     {
       "id": "recover_customer_password",

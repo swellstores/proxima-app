@@ -1,6 +1,6 @@
 ---
+import { initSwell } from '@/swell';
 import {
-  Swell,
   SwellTheme,
   getEditorLanguageConfig,
   removeCircularReferences,
@@ -16,7 +16,7 @@ if (!Astro.url.searchParams.get('rootTemplate')) {
   return Astro.redirect(`/editor?rootTemplate=page_${initialPageId}`);
 }
 
-const swell = new Swell({ serverHeaders: Astro.request.headers });
+const swell = initSwell(Astro);
 const theme = new SwellTheme(swell, {
   storefrontConfig,
   shopifyCompatibilityClass: StorefrontShopifyCompatibility,

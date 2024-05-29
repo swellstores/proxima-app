@@ -1,7 +1,6 @@
 ---
 import get from 'lodash/get';
-//import { Swell } from '../swell/api';
-//import { PageError, PageNotFound, SwellTheme } from '../swell/theme';
+import { initSwell } from '@/swell';
 import {
   Swell,
   PageError,
@@ -13,12 +12,18 @@ import {
   removeCircularReferences,
 } from '@swell/storefrontjs';
 import storefrontConfig from '../../storefront.json';
-import StorefrontShopifyCompatibility from '../resources/shopify-compatibility';
+import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
 import Layout from '@/layouts/Layout.astro';
 import ThemeSections from './ThemeSections.astro';
 import EasyblocksPage from './EasyblocksPage.jsx';
 
+const sections = Astro.url.searchParams.get('sections');
 const sectionId = Astro.url.searchParams.get('section_id');
+const sectionIds = sections
+  ? sections.split(',')
+  : sectionId
+    ? [sectionId]
+    : null;
 
 export interface Props {
   id: string;
@@ -51,7 +56,7 @@ const {
   getData,
 } = Astro.props;
 
-const swell = new Swell({ serverHeaders: Astro.request.headers });
+const swell = initSwell(Astro);
 const theme = new SwellTheme(swell, {
   storefrontConfig,
   shopifyCompatibilityClass: StorefrontShopifyCompatibility,
@@ -88,8 +93,8 @@ try {
           ? await description(pageData)
           : await get(pageData, descriptionPath),
 
-    content ?? sectionId
-      ? theme.renderSection(sectionId as string, {
+    content ?? sectionIds
+      ? theme.renderAllSections(sectionIds, {
           ...props,
           ...pageData,
         })
@@ -156,7 +161,11 @@ swellClientProps = removeCircularReferences(swellClientProps);
 ---
 
 {
-  isEditor ? (
+  sections ? (
+    JSON.stringify(pageContent)
+  ) : sectionId ? (
+    <Fragment set:html={pageContent[sectionId]} />
+  ) : isEditor ? (
     <html>
       <EasyblocksPage
         pageId={theme.pageId}
@@ -172,8 +181,6 @@ swellClientProps = removeCircularReferences(swellClientProps);
         client:load
       />
     </html>
-  ) : sectionId ? (
-    <Fragment set:html={pageContent} />
   ) : (
     <Layout theme={theme} {...layoutProps}>
       <div slot="content_for_layout">

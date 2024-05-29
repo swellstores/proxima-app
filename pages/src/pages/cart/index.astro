@@ -1,0 +1,20 @@
+---
+import { Swell } from '@swell/storefrontjs';
+import { CartResource } from '@/resources/cart';
+import ThemePage from '../../components/ThemePage.astro';
+import { POST as submitCheckout } from './checkout';
+
+if (Astro.request.method === 'POST') {
+  return submitCheckout(Astro);
+}
+---
+
+<ThemePage
+  id="cart/index"
+  titleKey="pages.cart.title"
+  descriptionKey="pages.cart.description"
+  getData={(swell: Swell) => ({
+    cart: new CartResource(swell),
+  })}
+  }
+/>
