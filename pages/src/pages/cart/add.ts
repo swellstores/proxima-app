@@ -5,7 +5,7 @@ export const POST = handleServerRequest(
   async ({ params, swell, theme }: any) => {
     const { product_id, variant_id, options, quantity } = params;
 
-    const result = await swell.storefront.cart.addItem({
+    await swell.storefront.cart.addItem({
       product_id,
       variant_id,
       options,
@@ -14,14 +14,8 @@ export const POST = handleServerRequest(
 
     const cart = theme.fetchCart();
 
-    // Make sure cart params are loaded
+    // Make sure cart items are loaded
     await cart.items;
-
-    // Pass $item_id in result for compatibility handler
-    const cartResult = await cart._resolve();
-    if (cartResult) {
-      cartResult.$item_id = result.$item_id;
-    }
 
     theme.setGlobals({ cart });
 

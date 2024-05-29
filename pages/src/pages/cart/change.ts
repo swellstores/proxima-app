@@ -16,7 +16,7 @@ export const POST = handleServerRequest(
 
       const cart = theme.fetchCart();
 
-      // Make sure cart params are loaded
+      // Make sure cart items are loaded
       await cart.items;
 
       theme.setGlobals({ cart });

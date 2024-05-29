@@ -182,19 +182,32 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
   getFormResourceMap() {
     return [
       {
+        pageId: 'cart/add',
         formType: 'product',
         clientHtml: () => {
           return `
             <input type="hidden" name="product_id" value="{{ product.id }}" />
-            <input type="hidden" name="variant_id" value="{{ product.selected_or_first_available_variant.id }}" />
           `;
         },
-        response: async ({ response: cart }: any) => {
+        params: async ({ params, theme }: any) => {
+          const { id, product_id } = params;
+          const prevItems = await theme.globals.cart?.items;
+
+          // Shopify uses id as variant_id, or product_id if no variant selected
+          const variant_id = id && id !== product_id ? id : undefined;
+
+          return {
+            ...params,
+            prevItems,
+            variant_id,
+          };
+        },
+        response: async ({ params, response: cart }: any) => {
+          const { prevItems } = params;
+
           if (cart) {
             // Return last added/updated item
-            const item = cart.items?.find(
-              (item: any) => item.id === cart.$item_id,
-            );
+            const item = findUpdatedCartItem(prevItems, cart.items);
             return item;
           }
         },
@@ -202,19 +215,22 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         pageId: 'cart/change',
         params: async ({ params, theme }: any) => {
+          const { line, quantity } = params;
+
           // Convert line number to item_id
           const prevCartItems = await theme.globals.cart?.items;
-          const prevItem = prevCartItems?.[params.line - 1];
+          const prevItem = prevCartItems?.[line - 1];
           return {
             ...params,
             prevItem,
             item_id: prevItem?.id,
-            quantity: Number(params.quantity),
+            quantity: Number(quantity),
           };
         },
         response: async ({ params, response: cart }: any) => {
+          const { prevItem, item_id, quantity } = params;
+
           if (cart) {
-            const { prevItem, item_id, quantity } = params;
             const updatedCartItem = cart.items?.find(
               (item: any) => item.id === item_id,
             );
@@ -229,4 +245,11 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       },
     ];
   }
+}
+
+function findUpdatedCartItem(prevItems: any[], newItems: any[]) {
+  return (newItems || []).find((newItem) => {
+    const prevItem = (prevItems || []).find((item) => item.id === newItem.id);
+    return !prevItem || prevItem.quantity !== newItem.quantity;
+  });
 }
