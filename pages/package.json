@@ -20,7 +20,7 @@
     "@easyblocks/core": "^1.0.5-alpha.0",
     "@easyblocks/editor": "^1.0.5-alpha.0",
     "@swell/storefrontjs": "file:~/swell-storefrontjs",
-    "astro": "^4.4.6",
+    "astro": "^4.9.2",
     "color": "^4.2.3",
     "flatted": "^3.3.1",
     "html-to-react": "^1.7.0",

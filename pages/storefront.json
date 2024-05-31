@@ -113,6 +113,11 @@
       "icon": "user"
     },
     {
+      "id": "account/logout",
+      "url": "/account/logout",
+      "ajax": true
+    },
+    {
       "id": "account/signup",
       "label": "Customer signup",
       "url": "/account/signup",
@@ -135,14 +140,7 @@
       "collection": "accounts"
     },
     {
-      "id": "account/orders/index",
-      "label": "Customer orders",
-      "url": "/account/orders",
-      "group": "customer",
-      "icon": "shopping-cart"
-    },
-    {
-      "id": "account/orders/order",
+      "id": "account/order",
       "label": "Customer order",
       "url": "/account/orders/{id}",
       "group": "customer",
@@ -150,7 +148,7 @@
       "collection": "orders"
     },
     {
-      "id": "account/orders/subscription",
+      "id": "account/subscription",
       "label": "Customer subscription",
       "url": "/account/subscriptions/{id}",
       "group": "customer",

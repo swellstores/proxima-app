@@ -1,0 +1,17 @@
+---
+import { Swell } from '@swell/storefrontjs';
+import OrderResource from '@/resources/order';
+import ThemePage from '@/components/ThemePage.astro';
+
+const { id } = Astro.params;
+---
+
+<ThemePage
+  id="account/order"
+  required="order.id"
+  titleKey="pages.account_order.title"
+  descriptionKey="pages.account_order.description"
+  getData={(swell: Swell) => ({
+    order: OrderResource(swell, id as string),
+  })}
+/>

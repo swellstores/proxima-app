@@ -55,11 +55,14 @@ const {
   getData,
 } = Astro.props;
 
-const swell = initSwell(Astro);
-const theme = new SwellTheme(swell, {
-  storefrontConfig,
-  shopifyCompatibilityClass: StorefrontShopifyCompatibility,
-});
+const swell = Astro.locals.swell || initSwell(Astro);
+
+const theme =
+  Astro.locals.theme ||
+  new SwellTheme(swell, {
+    storefrontConfig,
+    shopifyCompatibilityClass: StorefrontShopifyCompatibility,
+  });
 
 await theme.initGlobals({ pageId: id, url: Astro.url });
 

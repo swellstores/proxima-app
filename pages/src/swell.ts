@@ -6,6 +6,7 @@ export function initSwell(
   options?: { [key: string]: any },
 ) {
   return new Swell({
+    locals: Astro.locals,
     serverHeaders: Astro.request.headers,
     getCookie: (name: string) => {
       return Astro.cookies.get(name)?.value;
@@ -21,7 +22,11 @@ export function initSwell(
           samesite: 'lax',
           ...options,
         };
-        return Astro.cookies.set(name, value, cookieOptions);
+        try {
+          return Astro.cookies.set(name, value, cookieOptions);
+        } catch (err) {
+          console.error('Error setting cookie', err);
+        }
       }
     },
     ...options,

@@ -4,18 +4,25 @@ import {
   ShopifyBlog,
   ShopifyCart,
   ShopifyCollection,
+  ShopifyCustomer,
+  ShopifyOrder,
   ShopifyProduct,
   ShopifyPage,
   ShopifySearch,
   ShopifyVariant,
 } from '@swell/storefrontjs';
+
 import {
+  AccountResource,
   CartResource,
+  OrderResource,
   ProductResource,
   ProductListResource,
   SearchResource,
+  SubscriptionResource,
   VariantResource,
 } from './';
+
 import storefrontConfig from '../../storefront.json';
 
 export default class StorefrontShopifyCompatibility extends ShopifyCompatibility {
@@ -47,7 +54,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         return 'customers/addresses';
       case 'account/login':
         return 'customers/login';
-      case 'account/orders/order':
+      case 'account/order':
         return 'customers/order';
       case 'account/signup':
         return 'customers/register';
@@ -102,14 +109,16 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       all_products_collection_url: this.getPageRouteUrl('products/index'),
       cart_add_url: this.getPageRouteUrl('cart/add'),
       cart_change_url: this.getPageRouteUrl('cart/change'),
-      cart_clear_url: this.getPageRouteUrl('cart/clear'),
-      cart_update_url: this.getPageRouteUrl('cart/update'),
       cart_url: this.getPageRouteUrl('cart/index'),
       collections_url: this.getPageRouteUrl('categories/index'),
       predictive_search_url: this.getPageRouteUrl('search/suggest'),
       product_recommendations_url: this.getPageRouteUrl('products/index'),
       root_url: this.getPageRouteUrl('index'),
       search_url: this.getPageRouteUrl('search'),
+
+      // TODO: implement support for these
+      // cart_clear_url: this.getPageRouteUrl('cart/clear'),
+      // cart_update_url: this.getPageRouteUrl('cart/update'),
     };
   }
 
@@ -165,6 +174,14 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         object: ShopifyCart,
       },
       {
+        from: AccountResource,
+        object: ShopifyCustomer,
+      },
+      {
+        from: OrderResource,
+        object: ShopifyOrder,
+      },
+      {
         from: ProductResource,
         object: ShopifyProduct,
       },
@@ -189,7 +206,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             <input type="hidden" name="product_id" value="{{ product.id }}" />
           `;
         },
-        params: async ({ params, theme }: any) => {
+        serverParams: async ({ params, theme }: any) => {
           const { id, product_id } = params;
           const prevItems = await theme.globals.cart?.items;
 
@@ -202,7 +219,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             variant_id,
           };
         },
-        response: async ({ params, response: cart }: any) => {
+        serverResponse: async ({ params, response: cart }: any) => {
           const { prevItems } = params;
 
           if (cart) {
@@ -214,7 +231,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       },
       {
         pageId: 'cart/change',
-        params: async ({ params, theme }: any) => {
+        serverParams: async ({ params, theme }: any) => {
           const { line, quantity } = params;
 
           // Convert line number to item_id
@@ -227,7 +244,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             quantity: Number(quantity),
           };
         },
-        response: async ({ params, response: cart }: any) => {
+        serverResponse: async ({ params, response: cart }: any) => {
           const { prevItem, item_id, quantity } = params;
 
           if (cart) {
@@ -241,6 +258,17 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
               items_removed: prevItem && quantity === 0 ? [prevItem] : [],
             };
           }
+        },
+      },
+      {
+        formType: 'customer_login',
+        serverParams: ({ params }: any) => {
+          const { customer } = params;
+          return {
+            ...params,
+            email: customer?.email,
+            password: customer?.password,
+          };
         },
       },
     ];

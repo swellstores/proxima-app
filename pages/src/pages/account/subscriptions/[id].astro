@@ -1,0 +1,17 @@
+---
+import { Swell } from '@swell/storefrontjs';
+import SubscriptionResource from '@/resources/subscription';
+import ThemePage from '@/components/ThemePage.astro';
+
+const { id } = Astro.params;
+---
+
+<ThemePage
+  id="account/subscription"
+  required="subscription.id"
+  titleKey="pages.account_subscription.title"
+  descriptionKey="pages.account_subscription.description"
+  getData={(swell: Swell) => ({
+    subscription: SubscriptionResource(swell, id as string),
+  })}
+/>

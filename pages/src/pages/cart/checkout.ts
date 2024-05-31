@@ -2,7 +2,8 @@ import { handleServerRequest } from '@/utils/server';
 
 export const POST = handleServerRequest(
   'cart/checkout',
-  async ({ params, swell, theme, redirect }: any) => {
+  async (context: any) => {
+    const { params, swell, theme, redirect } = context;
     const { updates } = params;
 
     const cart = theme.globals.cart;
@@ -30,7 +31,7 @@ export const POST = handleServerRequest(
         }
 
         if (cart.checkout_url) {
-          return redirect(cart.checkout_url, 307);
+          return redirect(cart.checkout_url, 303);
         }
       }
     }
