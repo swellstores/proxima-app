@@ -5,7 +5,7 @@ import {
   // removeCircularReferences,
   dehydrateSwellRefsInStorefrontResources,
 } from '@swell/storefrontjs';
-import { initSwell } from '@/swell';
+import { initSwell, getCookie, setCookie, deleteCookie } from '@/swell';
 import storefrontConfig from '../../storefront.json';
 import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
 import qs from 'qs';
@@ -173,28 +173,26 @@ export function handleMiddlewareRequest(
     }
 
     const swell = context.locals.swell || initSwell(context);
+    context.locals.swell = swell;
 
     const theme =
-      pageId &&
-      (context.locals.theme ||
-        new SwellTheme(swell, {
-          storefrontConfig,
-          shopifyCompatibilityClass: StorefrontShopifyCompatibility,
-        }));
+      context.locals.theme ||
+      new SwellTheme(swell, {
+        storefrontConfig,
+        shopifyCompatibilityClass: StorefrontShopifyCompatibility,
+      });
+    context.locals.theme = theme;
 
-    if (theme) {
+    if (pageId) {
       await theme.initGlobals({ pageId, url: context.url });
     }
-
-    context.locals.swell = swell;
-    context.locals.theme = theme;
 
     let params = await getFormParams(context.request, context.url.searchParams);
 
     try {
       let response: any;
 
-      if (theme?.shopifyCompatibility) {
+      if (theme.shopifyCompatibility) {
         const compatParams =
           await theme.shopifyCompatibility.getAdaptedFormServerParams(
             pageId,
@@ -220,12 +218,15 @@ export function handleMiddlewareRequest(
       });
 
       if (result instanceof Response) {
+        await preserveThemeRequestData(context, theme);
         return result;
-      } else if (result === undefined) {
+      }
+
+      if (result === undefined) {
         return next();
       }
 
-      if (theme?.shopifyCompatibility) {
+      if (theme.shopifyCompatibility) {
         theme.setCompatibilityData(result);
       }
 
@@ -233,7 +234,7 @@ export function handleMiddlewareRequest(
 
       dehydrateSwellRefsInStorefrontResources(response);
 
-      if (theme?.shopifyCompatibility) {
+      if (theme.shopifyCompatibility) {
         const compatResponse =
           await theme.shopifyCompatibility.getAdaptedFormServerResponse(
             pageId,
@@ -360,6 +361,56 @@ export async function getFormParams(
 
 export function jsonResponse(values: SwellData, options?: ResponseInit) {
   return new Response(JSON.stringify(values), options);
+}
+
+export function restoreThemeRequestData(
+  context: APIContext,
+  theme: SwellTheme,
+) {
+  const serializedFormData = getCookie(context, 'swell-form-data');
+  if (serializedFormData) {
+    try {
+      const formData = JSON.parse(serializedFormData);
+      for (const [formId, data] of Object.entries(formData)) {
+        theme.setFormData(formId, data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    deleteCookie(context, 'swell-form-data');
+  } else {
+    const serializedGlobalData = getCookie(context, 'swell-global-data');
+    if (serializedGlobalData) {
+      try {
+        const globalData = JSON.parse(serializedGlobalData);
+        theme.setGlobals(globalData);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    deleteCookie(context, 'swell-global-data');
+  }
+}
+
+export async function preserveThemeRequestData(
+  context: APIContext,
+  theme: SwellTheme,
+) {
+  let serializedFormData = theme.serializeFormData();
+  if (serializedFormData) {
+    serializedFormData = await resolveAsyncResources(serializedFormData);
+    setCookie(context, 'swell-form-data', JSON.stringify(serializedFormData));
+  } else {
+    let serializedGlobalData = theme.serializeGlobalData();
+    if (serializedGlobalData) {
+      serializedGlobalData = await resolveAsyncResources(serializedGlobalData);
+      setCookie(
+        context,
+        'swell-global-data',
+        JSON.stringify(serializedGlobalData),
+      );
+    }
+  }
 }
 
 function wrapSectionContent(

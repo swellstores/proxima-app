@@ -1,8 +1,22 @@
 import { sequence } from 'astro:middleware';
-import { performLogin, performLogout, ensureAccountLoggedIn } from './account';
+import {
+  postLogin,
+  postLogout,
+  postCreateAccount,
+  validateAccountResetKey,
+  postAccountReset,
+  ensureAccountLoggedIn,
+  postCreateOrUpdateAddress,
+} from './account';
+import { restoreThemeRequestData } from './form';
 
 export const onRequest = sequence(
-  performLogin,
-  performLogout,
+  postLogin,
+  postLogout,
+  postCreateAccount,
+  validateAccountResetKey,
+  postAccountReset,
   ensureAccountLoggedIn,
+  postCreateOrUpdateAddress,
+  restoreThemeRequestData,
 );

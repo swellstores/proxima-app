@@ -57,6 +57,11 @@ const {
 
 const swell = Astro.locals.swell || initSwell(Astro);
 
+// Indicate response was sent to avoid mutating cookies
+if (Astro.locals.swell) {
+  swell.sentResponse = true;
+}
+
 const theme =
   Astro.locals.theme ||
   new SwellTheme(swell, {
@@ -64,7 +69,9 @@ const theme =
     shopifyCompatibilityClass: StorefrontShopifyCompatibility,
   });
 
-await theme.initGlobals({ pageId: id, url: Astro.url });
+if (!theme.pageId) {
+  await theme.initGlobals({ pageId: id, url: Astro.url });
+}
 
 const isEditor = typeof Astro.url.searchParams.get('_editor') === 'string';
 

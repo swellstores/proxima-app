@@ -1,5 +1,6 @@
 import { handleServerRequest } from '@/utils/server';
 
+// TODO: move this to a middleware
 export const POST = handleServerRequest(
   'cart/add',
   async ({ params, swell, theme }: any) => {

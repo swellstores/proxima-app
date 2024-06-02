@@ -270,12 +270,12 @@
       "url": "/cart/add"
     },
     {
-      "id": "recover_customer_password",
+      "id": "reset_customer_password",
       "url": "/account/recover"
     },
     {
-      "id": "reset_customer_password",
-      "url": "/account/reset"
+      "id": "recover_customer_password",
+      "url": "/account/recover"
     },
     {
       "id": "storefront_password",

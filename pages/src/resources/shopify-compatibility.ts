@@ -24,6 +24,7 @@ import {
 } from './';
 
 import storefrontConfig from '../../storefront.json';
+import { first } from 'lodash';
 
 export default class StorefrontShopifyCompatibility extends ShopifyCompatibility {
   getPageType(pageId: string) {
@@ -268,6 +269,65 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             ...params,
             email: customer?.email,
             password: customer?.password,
+          };
+        },
+      },
+      {
+        formType: 'create_customer',
+        serverParams: ({ params }: any) => {
+          const { customer } = params;
+
+          return {
+            first_name: customer?.first_name,
+            last_name: customer?.last_name,
+            email: customer?.email,
+            password: customer?.email,
+          };
+        },
+      },
+      {
+        formType: 'reset_customer_password',
+        clientHtml: () => {
+          return `
+            <input type="hidden" name="password_reset_key" value="{{ password_reset_key }}" />
+          `;
+        },
+        serverParams: ({ params }: any) => {
+          const { customer } = params;
+
+          return {
+            ...params,
+            password: customer?.password,
+            password_confirmation: customer?.password_confirmation,
+          };
+        },
+      },
+      {
+        formType: 'customer_address',
+        clientHtml: (_scope: any, arg: any) => {
+          if (arg?.id) {
+            return `
+              <input type="hidden" name="account_address_id" value="${arg?.id}" />
+            `;
+          }
+        },
+        serverParams: ({ params }: any) => {
+          const { address } = params;
+
+          const hasName = address?.first_name || address?.last_name;
+
+          return {
+            ...params,
+            first_name: address?.first_name || (!hasName ? 'test' : ''),
+            last_name: address?.last_name || (!hasName ? 'test' : ''),
+            company: address?.company,
+            address1: address?.address1,
+            address2: address?.address2,
+            city: address?.city,
+            country: address?.country,
+            state: address?.province,
+            zip: address?.zip,
+            phone: address?.phone,
           };
         },
       },
