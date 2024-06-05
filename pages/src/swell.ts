@@ -10,7 +10,7 @@ export function initSwell(
   options?: { [key: string]: any },
 ) {
   return new Swell({
-    locals: Astro.locals,
+    url: Astro.url,
     serverHeaders: Astro.request.headers,
     getCookie: (name: string) => {
       return getCookie(Astro, name);

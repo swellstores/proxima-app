@@ -1,4 +1,5 @@
 import { sequence } from 'astro:middleware';
+import { shopifyRouteCompatibility } from './route';
 import {
   postLogin,
   postLogout,
@@ -11,6 +12,7 @@ import {
 import { restoreThemeRequestData } from './form';
 
 export const onRequest = sequence(
+  shopifyRouteCompatibility,
   postLogin,
   postLogout,
   postCreateAccount,

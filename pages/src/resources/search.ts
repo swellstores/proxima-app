@@ -10,6 +10,10 @@ export type SearchParams = {
   filter?: any;
 };
 
+export default function getSearchResource(swell: Swell, params: SearchParams) {
+  return new SearchResource(swell, params);
+}
+
 export class SearchResource extends StorefrontResource {
   constructor(swell: Swell, { search, sort, filter }: SearchParams) {
     super(async () => {
@@ -32,8 +36,4 @@ export class SearchResource extends StorefrontResource {
       };
     });
   }
-}
-
-export default function getSearchResource(swell: Swell, params: SearchParams) {
-  return new SearchResource(swell, params);
 }

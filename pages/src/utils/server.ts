@@ -31,7 +31,7 @@ export function handleServerRequest(
         shopifyCompatibilityClass: StorefrontShopifyCompatibility,
       });
 
-    await theme.initGlobals({ pageId, url: context.url });
+    await theme.initGlobals(pageId);
 
     let params = await getFormParams(context.request, context.url.searchParams);
 
@@ -184,7 +184,7 @@ export function handleMiddlewareRequest(
     context.locals.theme = theme;
 
     if (pageId) {
-      await theme.initGlobals({ pageId, url: context.url });
+      await theme.initGlobals(pageId);
     }
 
     let params = await getFormParams(context.request, context.url.searchParams);

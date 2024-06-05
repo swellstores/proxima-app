@@ -2,9 +2,6 @@
 import { Swell } from '@swell/storefrontjs';
 import ProductListResource from '@/resources/product-list';
 import ThemePage from '../../components/ThemePage.astro';
-
-const sort = Astro.url.searchParams.get('sort_by');
-const filter = Astro.url.searchParams.get('filter');
 ---
 
 <ThemePage
@@ -12,10 +9,6 @@ const filter = Astro.url.searchParams.get('filter');
   titleKey="pages.products.title"
   descriptionKey="pages.products.description"
   getData={(swell: Swell) => ({
-    products: ProductListResource(swell, {
-      sort,
-      filter,
-    }),
+    products: ProductListResource(swell),
   })}
-  }
 />

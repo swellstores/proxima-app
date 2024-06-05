@@ -331,7 +331,7 @@ export function getEasyblocksComponents(swell: Swell, props: any) {
   });
   theme.setGlobals(themeGlobals);
 
-  if (themeGlobals?.shopify_compat) {
+  if (themeGlobals?.shopify_compatibility) {
     theme.shopifyCompatibility = new StorefrontShopifyCompatibility(swell);
   }
 

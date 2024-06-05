@@ -70,7 +70,7 @@ const theme =
   });
 
 if (!theme.pageId) {
-  await theme.initGlobals({ pageId: id, url: Astro.url });
+  await theme.initGlobals(id);
 }
 
 const isEditor = typeof Astro.url.searchParams.get('_editor') === 'string';

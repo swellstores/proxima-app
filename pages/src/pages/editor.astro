@@ -22,7 +22,7 @@ const theme = new SwellTheme(swell, {
   shopifyCompatibilityClass: StorefrontShopifyCompatibility,
 });
 
-await theme.initGlobals({ pageId: initialPageId, url: Astro.url });
+await theme.initGlobals(initialPageId);
 
 const sectionGroup = (await theme.renderPageTemplate(
   initialPageId

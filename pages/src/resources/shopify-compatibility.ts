@@ -24,9 +24,12 @@ import {
 } from './';
 
 import storefrontConfig from '../../storefront.json';
-import { first } from 'lodash';
 
 export default class StorefrontShopifyCompatibility extends ShopifyCompatibility {
+  constructor(swell: Swell) {
+    super(swell);
+  }
+
   getPageType(pageId: string) {
     switch (pageId) {
       case 'index':
@@ -65,7 +68,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         return 'cart';
       case '404':
         return '404';
-      case 'giftcard':
+      case 'gift-card':
         return 'gift_card';
       case 'search':
         return 'search';
@@ -99,7 +102,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
     );
   }
 
-  getPageRouteMap() {
+  getPageRoutes() {
     return {
       account_addresses_url: this.getPageRouteUrl('account/addresses'),
       account_login_url: this.getPageRouteUrl('account/login'),
@@ -281,7 +284,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             first_name: customer?.first_name,
             last_name: customer?.last_name,
             email: customer?.email,
-            password: customer?.email,
+            password: customer?.password,
           };
         },
       },
