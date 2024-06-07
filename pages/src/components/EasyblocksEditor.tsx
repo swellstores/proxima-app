@@ -6,21 +6,34 @@ import {
   getEasyblocksComponentDefinitions,
 } from '@swell/storefrontjs';
 
+import { TestMenuWidget } from './TestMenuWidget';
+
 // TODO: fix all the types
 
 export function getEasyblocksComponents(props: any) {
   const { pageId } = props;
 
-  return getEasyblocksComponentDefinitions(props, pageId, (_type: string, _data: any) => {
-    // Use placeholders for all types
-    return function PlaceholderComponent() {
-      return <div />;
-    }
-  });
+  return getEasyblocksComponentDefinitions(
+    props,
+    pageId,
+    (_type: string, _data: any) => {
+      // Use placeholders for all types
+      return function PlaceholderComponent() {
+        return <div />;
+      };
+    },
+  );
 }
 
 export default function Editor(props: any) {
-  const { sectionConfigs, pageSections, layoutSectionGroups, pageId, lang } = props;
+  const {
+    allSections,
+    pageSections,
+    layoutSectionGroups,
+    pageId,
+    pageRoute,
+    lang,
+  } = props;
   const [easyblocksConfig, setEasyblocksConfig] = useState<any>(null);
   const [components, setComponents] = useState<any>(null);
 
@@ -30,7 +43,7 @@ export default function Editor(props: any) {
       setTimeout(() => {
         const iframe = document.getElementById('shopstory-canvas');
         if (iframe) {
-          (iframe as any).src = `/?_editor&_editorFrame&rootComponent=page_${props.pageId}`;
+          (iframe as any).src = `${pageRoute}?_editor&rootComponent=swell_page`;
         }
       }, 1000);
     }, []);
@@ -41,7 +54,7 @@ export default function Editor(props: any) {
     setComponents(components);
 
     const { easyblocksConfig } = getEasyblocksPagePropsWithConfigs(
-      sectionConfigs,
+      allSections,
       pageSections,
       layoutSectionGroups,
       pageId,
@@ -54,13 +67,14 @@ export default function Editor(props: any) {
     return 'Loading...';
   }
 
-  //console.log('render first', easyblocksConfig, components);
-
   return (
     <EasyblocksEditor
       config={{
         ...easyblocksConfig,
-        backend: getEasyblocksBackend(props.sectionConfigs),
+        backend: getEasyblocksBackend(),
+      }}
+      widgets={{
+        menu: TestMenuWidget,
       }}
       components={components}
       __debug={true}

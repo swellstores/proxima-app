@@ -77,25 +77,6 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
     }
   }
 
-  getThemeFilePath(type: string, name: string) {
-    switch (type) {
-      case 'assets':
-        return `assets/${name}`;
-      case 'components':
-        return `snippets/${name}`;
-      case 'config':
-        return `config/${name}`;
-      case 'layouts':
-        return `layout/${name}`;
-      case 'pages':
-        return `templates/${this.getPageType(name)}`;
-      case 'sections':
-        return `sections/${name}`;
-      default:
-        throw new Error(`Theme file type not supported: ${type}`);
-    }
-  }
-
   getPageRouteUrl(pageId: string) {
     return (
       storefrontConfig.pages?.find((page) => page.id === pageId)?.url || ''

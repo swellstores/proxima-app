@@ -63,12 +63,6 @@ function getRootComponent(props: any, theme: any) {
           ? theme.renderTemplateString(pageContent, pageProps)
           : undefined;
 
-      console.log('render root component output', {
-        pageContent,
-        pageProps,
-        stringOutput,
-      });
-
       theme
         .renderLayout({
           ...layoutProps,
@@ -164,13 +158,6 @@ function getLayoutProcessingInstructions(
         function SectionGroup() {
           const rootProps = useContext(RootContext) as any;
 
-          /* const allSectionGroupComponents = reduce(rootProps as any, (acc: any, prop: any, key: string) => ([
-            ...acc,
-            ...(key.startsWith('SectionGroup_prop instanceof Array ? [prop] : []),
-          ]), []); */
-
-          //console.log(allSectionGroupComponents, sectionGroupId);
-
           const SectionGroupSections =
             rootProps[`SectionGroup_${sectionGroupId}`];
 
@@ -263,8 +250,6 @@ function getLayoutProcessingInstructions(
           const rootProps = useContext(RootContext);
           const { ContentSections }: any = rootProps;
 
-          console.log('contentforlayout!', ContentSections);
-
           return ContentSections.map((Section: any, index: number) => (
             <Section.type {...Section.props} key={index} />
           ));
@@ -355,28 +340,13 @@ export function getEasyblocksComponents(swell: Swell, props: any) {
   );
 }
 
-function hydrateSwellRefsInStorefrontResources(swell: Swell, obj: any) {
-  if (typeof obj !== 'object' || obj === null) {
-    return obj;
-  }
-
-  for (const key in obj) {
-    if (key === '_swell') {
-      obj[key] = swell;
-    } else {
-      hydrateSwellRefsInStorefrontResources(swell, obj[key]);
-    }
-  }
-}
-
 export default function EasyblocksPage(props: any) {
   const {
     pageId,
     lang,
+    allSections,
     pageSections,
     layoutSectionGroups,
-    sectionConfigs,
-    themeGlobals,
     swellClientProps,
   } = props;
   const [easyblocksConfig, setEasyblocksConfig] = useState<any>(null);
@@ -385,19 +355,17 @@ export default function EasyblocksPage(props: any) {
   useEffect(() => {
     const swell = new Swell({ ...swellClientProps, isEditor: true });
 
-    hydrateSwellRefsInStorefrontResources(swell, themeGlobals);
-    hydrateSwellRefsInStorefrontResources(swell, swellClientProps);
-
     const components = getEasyblocksComponents(swell, props);
     setComponents(components);
 
     const { easyblocksConfig } = getEasyblocksPagePropsWithConfigs(
-      sectionConfigs,
+      allSections,
       pageSections,
       layoutSectionGroups,
       pageId,
       lang,
     );
+
     setEasyblocksConfig(easyblocksConfig);
   }, []);
 
@@ -409,7 +377,7 @@ export default function EasyblocksPage(props: any) {
     <EasyblocksEditor
       config={{
         ...easyblocksConfig,
-        backend: getEasyblocksBackend(props.sectionConfigs),
+        backend: getEasyblocksBackend(),
       }}
       components={components}
       __debug={true}

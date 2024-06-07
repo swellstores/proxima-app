@@ -6,15 +6,12 @@ import {
   PageError,
   PageNotFound,
   SwellTheme,
-  getEditorLanguageConfig,
-  dehydrateSwellRefsInStorefrontResources,
-  removeCircularReferences,
 } from '@swell/storefrontjs';
 import storefrontConfig from '../../storefront.json';
 import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
 import Layout from '@/layouts/Layout.astro';
 import ThemeSections from './ThemeSections.astro';
-import EasyblocksPage from './EasyblocksPage.jsx';
+import EditorPage from './EditorPage.astro';
 
 const sections = Astro.url.searchParams.get('sections');
 const sectionId = Astro.url.searchParams.get('section_id');
@@ -26,12 +23,13 @@ const sectionIds = sections
 
 export interface Props {
   id: string;
-  title?: string;
+  title?: string | ((data: SwellData | undefined) => string);
   titleKey?: string;
   titlePath?: string;
   description?: string;
   descriptionKey?: string;
   descriptionPath?: string;
+  required?: string;
   requiredPath?: string;
   content?: string;
   props?: {
@@ -75,8 +73,6 @@ if (!theme.pageId) {
 
 const isEditor = typeof Astro.url.searchParams.get('_editor') === 'string';
 
-let swellClientProps = isEditor && swell.getClientProps();
-
 let pageData, pageTitle, pageDescription, pageContent;
 
 try {
@@ -92,7 +88,7 @@ try {
         ? await theme.renderTemplateString(title, pageData)
         : typeof title === 'function'
           ? await title(pageData)
-          : await get(pageData, titlePath),
+          : await get(pageData, titlePath as string),
 
     descriptionKey
       ? await theme.lang(descriptionKey)
@@ -148,25 +144,6 @@ const layoutProps = {
   content_for_header: theme.getContentForHeader(),
   props,
 };
-
-let sectionConfigs, pageSections, layoutSectionGroups, lang, themeGlobals;
-if (isEditor && pageContent && typeof pageContent !== 'string') {
-  [sectionConfigs, pageSections, layoutSectionGroups, lang] = await Promise.all(
-    [
-      theme.getSectionGroupConfigs(pageContent as ThemeSectionGroup),
-      theme.getPageSections(),
-      theme.getLayoutSectionGroups(),
-      getEditorLanguageConfig(swell),
-    ]
-  );
-  themeGlobals = theme.globals;
-}
-
-dehydrateSwellRefsInStorefrontResources(themeGlobals);
-dehydrateSwellRefsInStorefrontResources(swellClientProps);
-
-themeGlobals = removeCircularReferences(themeGlobals);
-swellClientProps = removeCircularReferences(swellClientProps);
 ---
 
 {
@@ -176,23 +153,19 @@ swellClientProps = removeCircularReferences(swellClientProps);
     <Fragment set:html={pageContent[sectionId]} />
   ) : isEditor ? (
     <html>
-      <EasyblocksPage
-        pageId={theme.pageId}
+      <script>document.domain = 'swell.test';</script>
+      <EditorPage
+        swell={swell}
+        theme={theme}
         pageProps={pageProps}
         pageContent={pageContent}
-        pageSections={pageSections}
         layoutProps={layoutProps}
-        layoutSectionGroups={layoutSectionGroups}
-        sectionConfigs={sectionConfigs}
-        themeGlobals={themeGlobals}
-        swellClientProps={swellClientProps}
-        lang={lang}
-        client:load
       />
     </html>
   ) : (
     <Layout theme={theme} {...layoutProps}>
       <div slot="content_for_layout">
+        <script>document.domain = 'swell.test';</script>
         {typeof pageContent === 'string' ? (
           <Fragment set:html={pageContent} />
         ) : (

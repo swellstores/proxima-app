@@ -430,6 +430,7 @@ function wrapSectionContent(
   }
 }
 
+// TODO: replace with util from storefrontjs
 export async function resolveAsyncResources(response: any) {
   if (response instanceof StorefrontResource) {
     return await response.resolve();

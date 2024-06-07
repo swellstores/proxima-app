@@ -21,6 +21,7 @@ export default defineConfig({
       extensions: ['.ts', '.tsx', '.json', '.js', '.mjs', '.cjs'],
     },
     server: {
+      sourcemapIgnoreList: false,
       warmup: {
         // Experimenting with warming up transforms
         ssrFiles: ['./src/**/*'],

@@ -4,16 +4,15 @@ import {
   SwellTheme,
   getEditorLanguageConfig,
   removeCircularReferences,
+  resolveAsyncResources,
 } from '@swell/storefrontjs';
 import EasyblocksEditor from '@/components/EasyblocksEditor.jsx';
 import storefrontConfig from '../../storefront.json';
 import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
 
-const initialPageId = 'index';
-
 // Editor requires rootComponent param
 if (!Astro.url.searchParams.get('rootTemplate')) {
-  return Astro.redirect(`/editor?rootTemplate=page_${initialPageId}`);
+  return Astro.redirect(`/editor?rootTemplate=swell_page`);
 }
 
 const swell = initSwell(Astro);
@@ -22,25 +21,28 @@ const theme = new SwellTheme(swell, {
   shopifyCompatibilityClass: StorefrontShopifyCompatibility,
 });
 
-await theme.initGlobals(initialPageId);
+const { pageId = 'index', pageRoute = '/' } = swell.queryParams;
 
-const sectionGroup = (await theme.renderPageTemplate(
-  initialPageId
-)) as unknown as ThemeSectionGroup;
+await theme.initGlobals(pageId);
+
+const sectionGroup = (await theme.renderPageTemplate(pageId)) as unknown;
 
 if (!sectionGroup) {
   return Astro.redirect(`/404`);
 }
 
-let [sectionConfigs, pageSections, layoutSectionGroups, editorLang] =
+let [allSections, pageSections, layoutSectionGroups, editorLang] =
   await Promise.all([
-    theme.getSectionGroupConfigs(sectionGroup),
-    theme.getPageSections(),
+    theme.getAllSections(),
+    theme.getPageSections(sectionGroup),
     theme.getLayoutSectionGroups(),
     getEditorLanguageConfig(swell),
   ]);
 
-sectionConfigs = removeCircularReferences(sectionConfigs);
+pageSections = await resolveAsyncResources(pageSections);
+layoutSectionGroups = await resolveAsyncResources(layoutSectionGroups);
+
+allSections = removeCircularReferences(allSections);
 pageSections = removeCircularReferences(pageSections);
 layoutSectionGroups = removeCircularReferences(layoutSectionGroups);
 ---
@@ -48,15 +50,19 @@ layoutSectionGroups = removeCircularReferences(layoutSectionGroups);
 <html lang="en">
   <head>
     <title>Swell Theme Editor</title>
+    <script>
+      document.domain = 'swell.test';
+    </script>
   </head>
   <body style={{ margin: 0, padding: 0 }}>
     {
       (
         <EasyblocksEditor
-          pageId={initialPageId}
+          pageId={pageId}
+          pageRoute={pageRoute}
+          allSections={allSections}
           pageSections={pageSections}
           layoutSectionGroups={layoutSectionGroups}
-          sectionConfigs={sectionConfigs}
           lang={editorLang}
           client:only="react"
         />

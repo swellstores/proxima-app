@@ -1,0 +1,52 @@
+---
+import {
+  SwellTheme,
+  getEasyblocksPropsFromThemeConfigs,
+  resolveAsyncResources,
+  removeCircularReferences,
+} from '@swell/storefrontjs';
+import EasyblocksPage from './EasyblocksPage.jsx';
+
+export interface Props {
+  swell: Swell;
+  theme: SwellTheme;
+  pageProps: SwellData;
+  pageContent: SwellData;
+  layoutProps: SwellData;
+}
+
+let { swell, theme, pageProps, pageContent, layoutProps } = Astro.props;
+
+/* const themeConfigs = await theme.getAllThemeConfigs();
+const { allSections, pageSections, layoutSectionGroups } =
+  await getEasyblocksPropsFromThemeConfigs(theme, themeConfigs, theme.pageId); */
+
+let [allSections, pageSections, layoutSectionGroups] = await Promise.all([
+  theme.getAllSections(),
+  theme.getPageSections(pageContent),
+  theme.getLayoutSectionGroups(),
+]);
+
+let themeGlobals = theme.globals;
+let swellClientProps = swell.getClientProps();
+
+pageProps = await resolveAsyncResources(pageProps);
+
+themeGlobals = removeCircularReferences(themeGlobals);
+pageSections = removeCircularReferences(pageSections);
+layoutSectionGroups = removeCircularReferences(layoutSectionGroups);
+swellClientProps = removeCircularReferences(swellClientProps);
+---
+
+<EasyblocksPage
+  pageId={theme.pageId}
+  pageProps={pageProps}
+  pageContent={pageContent}
+  allSections={allSections}
+  pageSections={pageSections}
+  layoutSectionGroups={layoutSectionGroups}
+  layoutProps={layoutProps}
+  themeGlobals={themeGlobals}
+  swellClientProps={swellClientProps}
+  client:load
+/>
