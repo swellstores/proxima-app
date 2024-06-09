@@ -30,6 +30,7 @@ export const GET = handleServerRequest(
       pageSections,
       layoutSectionGroups,
       editorLang,
+      pages: theme.storefrontConfig.pages,
     };
   },
 );

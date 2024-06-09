@@ -73,25 +73,6 @@
       "collection": "content/blog-categories"
     },
     {
-      "id": "content/index",
-      "label": "Content list",
-      "url": "/content/{slug}",
-      "group": "store",
-      "icon": "cube",
-      "templates": true,
-      "expand_pages": true,
-      "collection": ":content"
-    },
-    {
-      "id": "content/content",
-      "label": "Content page",
-      "url": "/content/{collection}/{slug}",
-      "group": "store",
-      "icon": "cube",
-      "templates": true,
-      "collection": "content/{collection}"
-    },
-    {
       "id": "account/index",
       "label": "Customer account",
       "url": "/account",

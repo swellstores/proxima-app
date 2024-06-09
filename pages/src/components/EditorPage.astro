@@ -17,10 +17,6 @@ export interface Props {
 
 let { swell, theme, pageProps, pageContent, layoutProps } = Astro.props;
 
-/* const themeConfigs = await theme.getAllThemeConfigs();
-const { allSections, pageSections, layoutSectionGroups } =
-  await getEasyblocksPropsFromThemeConfigs(theme, themeConfigs, theme.pageId); */
-
 let [allSections, pageSections, layoutSectionGroups] = await Promise.all([
   theme.getAllSections(),
   theme.getPageSections(pageContent),

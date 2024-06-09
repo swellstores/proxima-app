@@ -10,7 +10,7 @@ import EasyblocksEditor from '@/components/EasyblocksEditor.jsx';
 import storefrontConfig from '../../storefront.json';
 import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
 
-// Editor requires rootComponent param
+// Editor requires rootTemplate param
 if (!Astro.url.searchParams.get('rootTemplate')) {
   return Astro.redirect(`/editor?rootTemplate=swell_page`);
 }
@@ -50,9 +50,6 @@ layoutSectionGroups = removeCircularReferences(layoutSectionGroups);
 <html lang="en">
   <head>
     <title>Swell Theme Editor</title>
-    <script>
-      document.domain = 'swell.test';
-    </script>
   </head>
   <body style={{ margin: 0, padding: 0 }}>
     {

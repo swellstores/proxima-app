@@ -43,7 +43,7 @@ export default function Editor(props: any) {
       setTimeout(() => {
         const iframe = document.getElementById('shopstory-canvas');
         if (iframe) {
-          (iframe as any).src = `${pageRoute}?_editor&rootComponent=swell_page`;
+          (iframe as any).src = `${pageRoute}?_editor&rootTemplate=swell_page`;
         }
       }, 1000);
     }, []);
