@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { EasyblocksEditor } from "@easyblocks/editor";
 import {
-  getEasyblocksBackend,
   getEasyblocksPagePropsWithConfigs,
   getEasyblocksComponentDefinitions,
 } from '@swell/storefrontjs';
@@ -69,10 +68,7 @@ export default function Editor(props: any) {
 
   return (
     <EasyblocksEditor
-      config={{
-        ...easyblocksConfig,
-        backend: getEasyblocksBackend(),
-      }}
+      config={easyblocksConfig}
       widgets={{
         menu: TestMenuWidget,
       }}

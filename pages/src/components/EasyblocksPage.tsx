@@ -15,7 +15,6 @@ import { stringify } from 'flatted';
 import {
   Swell,
   SwellTheme,
-  getEasyblocksBackend,
   getEasyblocksPagePropsWithConfigs,
   getEasyblocksComponentDefinitions,
 } from '@swell/storefrontjs';
@@ -375,10 +374,7 @@ export default function EasyblocksPage(props: any) {
 
   return (
     <EasyblocksEditor
-      config={{
-        ...easyblocksConfig,
-        backend: getEasyblocksBackend(),
-      }}
+      config={easyblocksConfig}
       components={components}
       __debug={true}
     />
