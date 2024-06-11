@@ -2,7 +2,6 @@ import EasyblocksEditor from '@/components/EasyblocksEditor.jsx';
 import {
   Swell,
   SwellTheme,
-  getEditorLanguageConfig,
   getEasyblocksPagePropsWithConfigs,
   removeCircularReferences,
 } from '@swell/storefrontjs';
@@ -43,14 +42,11 @@ export async function GET({ params, request, url }) {
   pageSections = removeCircularReferences(pageSections);
   layoutSectionGroups = removeCircularReferences(layoutSectionGroups);
 
-  const editorLang = await getEditorLanguageConfig(swell);
-
   const { easyblocksConfig } = getEasyblocksPagePropsWithConfigs(
     sectionConfigs,
     pageSections,
     layoutSectionGroups,
     'index',
-    editorLang,
   );
 
   const json = JSON.stringify({

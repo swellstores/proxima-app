@@ -10,11 +10,8 @@ import { TestMenuWidget } from './TestMenuWidget';
 // TODO: fix all the types
 
 export function getEasyblocksComponents(props: any) {
-  const { pageId } = props;
-
   return getEasyblocksComponentDefinitions(
     props,
-    pageId,
     (_type: string, _data: any) => {
       // Use placeholders for all types
       return function PlaceholderComponent() {
@@ -25,14 +22,8 @@ export function getEasyblocksComponents(props: any) {
 }
 
 export default function Editor(props: any) {
-  const {
-    allSections,
-    pageSections,
-    layoutSectionGroups,
-    pageId,
-    pageRoute,
-    lang,
-  } = props;
+  const { allSections, pageSections, layoutSectionGroups, pageId, pageRoute } =
+    props;
   const [easyblocksConfig, setEasyblocksConfig] = useState<any>(null);
   const [components, setComponents] = useState<any>(null);
 
@@ -42,7 +33,8 @@ export default function Editor(props: any) {
       setTimeout(() => {
         const iframe = document.getElementById('shopstory-canvas');
         if (iframe) {
-          (iframe as any).src = `${pageRoute}?_editor&rootTemplate=swell_page`;
+          (iframe as any).src =
+            `${pageRoute}?_editor&rootTemplate=swell_page&child=true`;
         }
       }, 1000);
     }, []);
@@ -57,7 +49,6 @@ export default function Editor(props: any) {
       pageSections,
       layoutSectionGroups,
       pageId,
-      lang,
     );
     setEasyblocksConfig(easyblocksConfig);
   }, []);

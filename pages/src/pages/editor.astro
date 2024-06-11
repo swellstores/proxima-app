@@ -2,7 +2,6 @@
 import { initSwell } from '@/swell';
 import {
   SwellTheme,
-  getEditorLanguageConfig,
   removeCircularReferences,
   resolveAsyncResources,
 } from '@swell/storefrontjs';
@@ -36,7 +35,6 @@ let [allSections, pageSections, layoutSectionGroups, editorLang] =
     theme.getAllSections(),
     theme.getPageSections(sectionGroup),
     theme.getLayoutSectionGroups(),
-    getEditorLanguageConfig(swell),
   ]);
 
 pageSections = await resolveAsyncResources(pageSections);
@@ -60,7 +58,6 @@ layoutSectionGroups = removeCircularReferences(layoutSectionGroups);
           allSections={allSections}
           pageSections={pageSections}
           layoutSectionGroups={layoutSectionGroups}
-          lang={editorLang}
           client:only="react"
         />
       )

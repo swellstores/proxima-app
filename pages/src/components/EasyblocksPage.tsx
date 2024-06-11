@@ -307,7 +307,7 @@ function getPageBlockProcessingInstructions(Blocks: any) {
 }
 
 export function getEasyblocksComponents(swell: Swell, props: any) {
-  const { pageId, themeGlobals } = props;
+  const { themeGlobals } = props;
 
   const theme = new SwellTheme(swell, {
     storefrontConfig,
@@ -319,30 +319,25 @@ export function getEasyblocksComponents(swell: Swell, props: any) {
     theme.shopifyCompatibility = new StorefrontShopifyCompatibility(swell);
   }
 
-  return getEasyblocksComponentDefinitions(
-    props,
-    pageId,
-    (type: string, data: any) => {
-      switch (type) {
-        case 'pageSection':
-          return getPageSectionComponent(props, theme, data);
-        case 'layoutSectionGroup':
-          return SectionGroup;
-        case 'block':
-          return Block;
-        case 'root':
-          return getRootComponent(props, theme);
-        default:
-          throw new Error(`Invalid component definition type: ${type}`);
-      }
-    },
-  );
+  return getEasyblocksComponentDefinitions(props, (type: string, data: any) => {
+    switch (type) {
+      case 'pageSection':
+        return getPageSectionComponent(props, theme, data);
+      case 'layoutSectionGroup':
+        return SectionGroup;
+      case 'block':
+        return Block;
+      case 'root':
+        return getRootComponent(props, theme);
+      default:
+        throw new Error(`Invalid component definition type: ${type}`);
+    }
+  });
 }
 
 export default function EasyblocksPage(props: any) {
   const {
     pageId,
-    lang,
     allSections,
     pageSections,
     layoutSectionGroups,
@@ -362,7 +357,6 @@ export default function EasyblocksPage(props: any) {
       pageSections,
       layoutSectionGroups,
       pageId,
-      lang,
     );
 
     setEasyblocksConfig(easyblocksConfig);
