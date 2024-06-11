@@ -371,6 +371,7 @@ export default function EasyblocksPage(props: any) {
       config={easyblocksConfig}
       components={components}
       __debug={true}
+      isCanvas={true}
     />
   );
 }
