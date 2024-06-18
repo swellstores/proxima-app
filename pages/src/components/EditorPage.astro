@@ -1,7 +1,6 @@
 ---
 import {
   SwellTheme,
-  getEasyblocksPropsFromThemeConfigs,
   resolveAsyncResources,
   removeCircularReferences,
 } from '@swell/storefrontjs';
@@ -26,7 +25,7 @@ let [allSections, pageSections, layoutSectionGroups] = await Promise.all([
 let themeGlobals = theme.globals;
 let swellClientProps = swell.getClientProps();
 
-pageProps = await resolveAsyncResources(pageProps);
+pageProps = await resolveAsyncResources({ ...themeGlobals, pageProps });
 
 themeGlobals = removeCircularReferences(themeGlobals);
 pageSections = removeCircularReferences(pageSections);

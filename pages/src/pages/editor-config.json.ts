@@ -5,7 +5,7 @@ const defaultPageId = 'index';
 
 export const GET = handleServerRequest(
   defaultPageId,
-  async ({ theme, params }: any) => {
+  async ({ swell, theme, params }: any) => {
     const pageTemplate = (await theme.renderPageTemplate(
       params.pageId || defaultPageId,
     )) as unknown;
@@ -19,24 +19,35 @@ export const GET = handleServerRequest(
     pageSections = await resolveAsyncResources(pageSections);
     layoutSectionGroups = await resolveAsyncResources(layoutSectionGroups);
 
+    const swellClientProps = swell.getClientProps();
+
     return {
       pageTemplate,
       allSections,
       pageSections,
       layoutSectionGroups,
       globals: getEditorThemeGlobals(theme.globals),
+      swellClientProps: getSwellClientProps(swellClientProps),
     };
   },
 );
 
 function getEditorThemeGlobals(globals: SwellData) {
-  const { menus, configs, settings, storefrontConfig, shopify_compatibility } =
-    globals;
+  const {
+    menus,
+    page,
+    localeCode,
+    storefrontConfig,
+    shopify_compatibility,
+    configs,
+  } = globals;
+
   const { editor, language, theme, presets } = configs;
 
   return {
     menus,
-    settings,
+    page,
+    localeCode,
     storefrontConfig,
     shopify_compatibility,
     configs: {
@@ -45,5 +56,19 @@ function getEditorThemeGlobals(globals: SwellData) {
       theme,
       presets,
     },
+  };
+}
+
+function getSwellClientProps(swellClientProps: any) {
+  const { url, instanceId, isEditor, isPreview, headers, swellHeaders } =
+    swellClientProps;
+
+  return {
+    url,
+    instanceId,
+    isEditor,
+    isPreview,
+    headers,
+    swellHeaders,
   };
 }

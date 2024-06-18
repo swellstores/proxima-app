@@ -30,12 +30,11 @@ if (!sectionGroup) {
   return Astro.redirect(`/404`);
 }
 
-let [allSections, pageSections, layoutSectionGroups, editorLang] =
-  await Promise.all([
-    theme.getAllSections(),
-    theme.getPageSections(sectionGroup),
-    theme.getLayoutSectionGroups(),
-  ]);
+let [allSections, pageSections, layoutSectionGroups] = await Promise.all([
+  theme.getAllSections(),
+  theme.getPageSections(sectionGroup),
+  theme.getLayoutSectionGroups(),
+]);
 
 pageSections = await resolveAsyncResources(pageSections);
 layoutSectionGroups = await resolveAsyncResources(layoutSectionGroups);
