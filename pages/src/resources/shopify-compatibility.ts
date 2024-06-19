@@ -4,6 +4,7 @@ import {
   ShopifyBlog,
   ShopifyCart,
   ShopifyCollection,
+  ShopifyCollections,
   ShopifyCustomer,
   ShopifyOrder,
   ShopifyProduct,
@@ -15,9 +16,9 @@ import {
 import {
   AccountResource,
   CartResource,
+  CategoryResource,
   OrderResource,
   ProductResource,
-  ProductListResource,
   SearchResource,
   SubscriptionResource,
   VariantResource,
@@ -114,12 +115,12 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         resources: [
           {
             object: ShopifyCollection,
-            from: 'products',
+            from: 'category',
             to: 'collection',
           },
         ],
       },
-      /* {
+      {
         page: 'list-collections',
         resources: [
           {
@@ -128,7 +129,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             to: 'collections',
           },
         ],
-      }, */
+      },
       {
         page: 'article',
         resources: [
@@ -155,12 +156,16 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
   getObjectResourceMap() {
     return [
       {
+        from: AccountResource,
+        object: ShopifyCustomer,
+      },
+      {
         from: CartResource,
         object: ShopifyCart,
       },
       {
-        from: AccountResource,
-        object: ShopifyCustomer,
+        from: CategoryResource,
+        object: ShopifyCollection,
       },
       {
         from: OrderResource,
@@ -169,10 +174,6 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         from: ProductResource,
         object: ShopifyProduct,
-      },
-      {
-        from: ProductListResource,
-        object: ShopifyCollection,
       },
       {
         from: VariantResource,

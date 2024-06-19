@@ -124,7 +124,8 @@ function getPageSectionComponent(props: any, theme: SwellTheme, section: any) {
 
     useEffect(() => {
       console.log('render section', section.id, {
-        sectionData: sectionData.section,
+        section: sectionData.section,
+        global: sectionData,
       });
       theme
         .renderThemeTemplate(`theme/sections/${section.id}.liquid`, sectionData)

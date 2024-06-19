@@ -1,15 +1,12 @@
 ---
-import { Swell, getCategories } from '@swell/storefrontjs';
+import { Swell } from '@swell/storefrontjs';
+import CategoryListResource from '@/resources/category-list';
 import ThemePage from '@/components/ThemePage.astro';
 ---
 
 <ThemePage
   id="categories/index"
-  getData={async (swell: Swell) => {
-    const categories = await getCategories(swell);
-
-    return {
-      categories,
-    };
-  }}
+  getData={(swell: Swell) => ({
+    categories: CategoryListResource(swell),
+  })}
 />

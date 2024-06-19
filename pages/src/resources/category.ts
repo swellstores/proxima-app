@@ -1,32 +1,54 @@
 import {
   Swell,
-  StorefrontResource,
+  SwellStorefrontRecord,
   SwellStorefrontCollection,
 } from '@swell/storefrontjs';
+import { Category } from 'swell-js';
 
-export default function getProductCollectionResource(swell: Swell) {
-  return new ProductListResource(swell);
+export default function getCategoryResource(
+  swell: Swell,
+  slug: string,
+  query: SwellData = {},
+) {
+  return new CategoryResource(
+    swell,
+    slug,
+    query,
+  ) as any as SwellStorefrontRecord & Category;
 }
 
-export class ProductListResource extends StorefrontResource {
+export class CategoryResource extends SwellStorefrontRecord {
   public sort_options = SORT_OPTIONS.map(({ value, name }) => ({
     value,
     name,
   }));
 
-  constructor(swell: Swell, query: SwellData = {}) {
-    super(async () => {
+  constructor(swell: Swell, slug: string, query: SwellData = {}) {
+    super(swell, 'category', slug, query, async () => {
+      const category = new SwellStorefrontRecord(swell, 'categories', slug);
+
+      await category.id;
+
+      // TODO: remove this once backend is implemented for "all"
+      if (slug === 'all') {
+        category.name = 'Products';
+      }
+
       const filterQuery = productQueryWithFilters(swell, query);
       const products = new SwellStorefrontCollection(swell, 'products', {
         ...filterQuery,
+        // TODO: remove this once backend is implemented for "all"
+        category: category.id || (slug === 'all' ? undefined : slug),
       });
 
-      const count = await products.count;
+      await products.results;
 
       const filter_options =
-        count < 5000 ? await getProductFiltersByQuery(swell, filterQuery) : [];
+        (products.count as number) < 5000
+          ? await getProductFiltersByQuery(swell, filterQuery)
+          : [];
 
-      return {
+      category.products = {
         results: products.results,
         count: products.count,
         limit: products.limit,
@@ -35,6 +57,8 @@ export class ProductListResource extends StorefrontResource {
         page_count: products.page_count,
         filter_options,
       };
+
+      return category;
     });
   }
 }
