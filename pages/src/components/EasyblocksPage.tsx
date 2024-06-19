@@ -122,9 +122,10 @@ function getPageSectionComponent(props: any, theme: SwellTheme, section: any) {
       },
     };
 
-    //console.log('render section', section.id, sectionData, { props });
-
     useEffect(() => {
+      console.log('render section', section.id, {
+        sectionData: sectionData.section,
+      });
       theme
         .renderThemeTemplate(`theme/sections/${section.id}.liquid`, sectionData)
         .then((output: any) => {
@@ -135,7 +136,7 @@ function getPageSectionComponent(props: any, theme: SwellTheme, section: any) {
           );
           setOutput(SectionElements);
         });
-    }, [stringify(sectionData)]);
+    }, [stringify(sectionData.section)]);
 
     return <Root.type {...Root.props}>{SectionElements}</Root.type>;
   };

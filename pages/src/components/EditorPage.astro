@@ -18,8 +18,8 @@ let { swell, theme, pageProps, pageContent, layoutProps } = Astro.props;
 
 let [allSections, pageSections, layoutSectionGroups] = await Promise.all([
   theme.getAllSections(),
-  theme.getPageSections(pageContent),
-  theme.getLayoutSectionGroups(),
+  theme.getPageSections(pageContent, false),
+  theme.getLayoutSectionGroups(false),
 ]);
 
 let themeGlobals = theme.globals;
