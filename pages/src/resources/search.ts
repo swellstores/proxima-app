@@ -29,7 +29,7 @@ export class SearchResource extends StorefrontResource {
       return {
         performed: String(search || '').length > 0 ? true : false,
         products: products,
-        terms: search,
+        query: search,
         sort,
         // TODO:
         filters: [],

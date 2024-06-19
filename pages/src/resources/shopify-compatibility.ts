@@ -176,6 +176,10 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         object: ShopifyProduct,
       },
       {
+        from: SearchResource,
+        object: ShopifySearch,
+      },
+      {
         from: VariantResource,
         object: ShopifyVariant,
       },
