@@ -34,6 +34,7 @@ export const GET = handleServerRequest(
 
 function getEditorThemeGlobals(globals: SwellData) {
   const {
+    settings,
     menus,
     page,
     localeCode,
@@ -45,6 +46,7 @@ function getEditorThemeGlobals(globals: SwellData) {
   const { editor, language, theme, presets } = configs;
 
   return {
+    settings,
     menus,
     page,
     localeCode,

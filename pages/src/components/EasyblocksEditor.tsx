@@ -22,7 +22,7 @@ export function getEasyblocksComponents(props: any) {
 }
 
 export default function Editor(props: any) {
-  const { allSections, pageSections, layoutSectionGroups, pageId, pageRoute } =
+  const { pageId, pageRoute, allSections, pageSections, layoutSectionGroups } =
     props;
   const [easyblocksConfig, setEasyblocksConfig] = useState<any>(null);
   const [components, setComponents] = useState<any>(null);
@@ -45,6 +45,7 @@ export default function Editor(props: any) {
     setComponents(components);
 
     const { easyblocksConfig } = getEasyblocksPagePropsWithConfigs(
+      themeGlobals,
       allSections,
       pageSections,
       layoutSectionGroups,

@@ -15,8 +15,12 @@ import { stringify } from 'flatted';
 import {
   Swell,
   SwellTheme,
+  resolveThemeSettings,
+  resolveSectionSettings,
   getEasyblocksPagePropsWithConfigs,
   getEasyblocksComponentDefinitions,
+  getThemeSettingsFromProps,
+  getSectionSettingsFromProps,
 } from '@swell/storefrontjs';
 import storefrontConfig from '../../storefront.json';
 import StorefrontShopifyCompatibility from '../resources/shopify-compatibility';
@@ -47,7 +51,7 @@ function Block({ Root, children }: any) {
   return <Root.type {...Root.props}>{children}</Root.type>;
 }
 
-function getRootComponent(props: any, theme: any) {
+function getRootComponent(props: any, theme: SwellTheme) {
   const { layoutProps, pageProps, pageContent } = props;
 
   return function RootContainer(props: any) {
@@ -55,7 +59,15 @@ function getRootComponent(props: any, theme: any) {
     const [Content, setContent] = useState(<div />);
     const [RootContext, setRootContext] = useState<any>(null);
 
+    const editorSchema = pageProps.configs?.editor?.settings;
+    const settingProps = getThemeSettingsFromProps(props, editorSchema);
+
     useEffect(() => {
+      const settings = resolveThemeSettings(theme, settingProps, editorSchema);
+      console.log('render layout', { settings });
+
+      theme.setGlobals({ settings });
+
       // Render theme page directly when it's a raw liquid file
       const stringOutput =
         typeof pageContent === 'string'
@@ -65,7 +77,7 @@ function getRootComponent(props: any, theme: any) {
       theme
         .renderLayout({
           ...layoutProps,
-          content_for_header: pageProps.content_for_header || '',
+          content_for_header: theme.getContentForHeader(),
           content_for_layout: '<content-for-layout></content-for-layout>',
         })
         .then((output: any) => {
@@ -81,7 +93,7 @@ function getRootComponent(props: any, theme: any) {
           setContent(Content);
           setRootContext(RootContext);
         });
-    }, [theme.liquidSwell.layoutName]);
+    }, [theme.liquidSwell.layoutName, stringify(settingProps)]);
 
     return (
       <Root.type {...Root.props}>
@@ -95,40 +107,30 @@ function getRootComponent(props: any, theme: any) {
   };
 }
 
-function getPageSectionComponent(props: any, theme: SwellTheme, section: any) {
-  const { pageProps } = props;
-
+function getPageSectionComponent(
+  _props: any,
+  theme: SwellTheme,
+  sectionSchema: any,
+) {
   return function Section(props: any) {
-    const { Root, Blocks, ...settingProps } = props;
-
+    const { Root, Blocks } = props;
     const [SectionElements, setOutput] = useState(null);
 
-    const sectionData = {
-      ...pageProps,
-      section: {
-        settings: {
-          ...settingProps,
-        },
-        ...(Blocks?.length
-          ? {
-              blocks: Blocks?.filter((block: any) => block.props.compiled).map(
-                (block: any) => ({
-                  type: block.props.compiled._component.split('__').pop(),
-                  settings: block.props.compiled.props,
-                }),
-              ),
-            }
-          : {}),
-      },
-    };
+    const settingProps = getSectionSettingsFromProps(props, sectionSchema);
 
     useEffect(() => {
-      console.log('render section', section.id, {
-        section: sectionData.section,
-        global: sectionData,
+      const sectionData = resolveSectionSettings(theme, {
+        settings: { section: settingProps },
+        schema: sectionSchema,
       });
+
+      console.log('render section', sectionSchema.id, sectionData);
+
       theme
-        .renderThemeTemplate(`theme/sections/${section.id}.liquid`, sectionData)
+        .renderThemeTemplate(
+          `theme/sections/${sectionSchema.id}.liquid`,
+          sectionData,
+        )
         .then((output: any) => {
           const SectionElements = htmlToReactParser.parseWithInstructions(
             output,
@@ -137,7 +139,7 @@ function getPageSectionComponent(props: any, theme: SwellTheme, section: any) {
           );
           setOutput(SectionElements);
         });
-    }, [stringify(sectionData.section)]);
+    }, [stringify(settingProps)]);
 
     return <Root.type {...Root.props}>{SectionElements}</Root.type>;
   };
@@ -346,6 +348,7 @@ export default function EasyblocksPage(props: any) {
     pageSections,
     layoutSectionGroups,
     swellClientProps,
+    themeGlobals,
   } = props;
   const [easyblocksConfig, setEasyblocksConfig] = useState<any>(null);
   const [components, setComponents] = useState<any>(null);
@@ -357,6 +360,7 @@ export default function EasyblocksPage(props: any) {
     setComponents(components);
 
     const { easyblocksConfig } = getEasyblocksPagePropsWithConfigs(
+      themeGlobals,
       allSections,
       pageSections,
       layoutSectionGroups,
