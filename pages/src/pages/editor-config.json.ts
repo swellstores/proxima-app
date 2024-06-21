@@ -10,11 +10,9 @@ export const GET = handleServerRequest(
       params.pageId || defaultPageId,
     )) as unknown;
 
-    let [allSections, pageSections, layoutSectionGroups] = await Promise.all([
-      theme.getAllSections(),
-      theme.getPageSections(pageTemplate, false),
-      theme.getLayoutSectionGroups(false),
-    ]);
+    let allSections = await theme.getAllSections();
+    let pageSections = await theme.getPageSections(pageTemplate, false);
+    let layoutSectionGroups = await theme.getLayoutSectionGroups(false);
 
     pageSections = await resolveAsyncResources(pageSections);
     layoutSectionGroups = await resolveAsyncResources(layoutSectionGroups);

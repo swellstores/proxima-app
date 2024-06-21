@@ -16,11 +16,9 @@ export interface Props {
 
 let { swell, theme, pageProps, pageContent, layoutProps } = Astro.props;
 
-let [allSections, pageSections, layoutSectionGroups] = await Promise.all([
-  theme.getAllSections(),
-  theme.getPageSections(pageContent, false),
-  theme.getLayoutSectionGroups(false),
-]);
+let allSections = await theme.getAllSections();
+let pageSections = await theme.getPageSections(pageContent, false);
+let layoutSectionGroups = await theme.getLayoutSectionGroups(false);
 
 let themeGlobals = theme.globals;
 let swellClientProps = swell.getClientProps();
