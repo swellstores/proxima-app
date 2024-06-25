@@ -95,7 +95,7 @@ export function productQueryWithFilters(swell: Swell, query: SwellData = {}) {
     (acc: any, [key, value]: any) => {
       if (key.startsWith('filter_')) {
         const qkey = key.replace('filter_', '');
-        if (value?.gte !== undefined || value?.let !== undefined) {
+        if (value?.gte !== undefined || value?.lte !== undefined) {
           acc[qkey] = [value.gte || 0, value.lte || undefined];
         } else {
           acc[qkey] = value;
