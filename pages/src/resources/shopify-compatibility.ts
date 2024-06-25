@@ -1,4 +1,5 @@
 import {
+  Swell,
   ShopifyCompatibility,
   ShopifyArticle,
   ShopifyBlog,
@@ -7,6 +8,9 @@ import {
   ShopifyCollections,
   ShopifyCustomer,
   ShopifyOrder,
+  ShopifyPaginate,
+  SwellStorefrontPagination,
+  ShopifyPredictiveSearch,
   ShopifyProduct,
   ShopifyPage,
   ShopifySearch,
@@ -18,6 +22,7 @@ import {
   CartResource,
   CategoryResource,
   OrderResource,
+  PredictiveSearchResource,
   ProductResource,
   SearchResource,
   SubscriptionResource,
@@ -172,12 +177,20 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         object: ShopifyOrder,
       },
       {
+        from: PredictiveSearchResource,
+        object: ShopifyPredictiveSearch,
+      },
+      {
         from: ProductResource,
         object: ShopifyProduct,
       },
       {
         from: SearchResource,
         object: ShopifySearch,
+      },
+      {
+        from: SwellStorefrontPagination,
+        object: ShopifyPaginate,
       },
       {
         from: VariantResource,

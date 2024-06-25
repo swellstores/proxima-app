@@ -1,38 +1,14 @@
 ---
-import { Swell, getProductsFiltered } from '@swell/storefrontjs';
+import { Swell } from '@swell/storefrontjs';
+import { PredictiveSearchResource } from '@/resources/predictive-search';
 import ThemePage from '../../components/ThemePage.astro';
 
-const search = Astro.url.searchParams.get('q');
-const filter = Astro.url.searchParams.get('filter');
-const sort = Astro.url.searchParams.get('sort_by');
-
-console.log('(suggest) search query?', { search, filter, sort });
+const query = Astro.url.searchParams.get('q');
 ---
 
 <ThemePage
   id="search"
-  getData={async (swell: Swell) => {
-    const products = await getProductsFiltered(swell, {
-      search,
-      filter,
-      sort,
-    });
-
-    await products.results;
-    const props = {
-      products,
-      predictive_search: {
-        performed: String(search || '').length > 0 ? true : false,
-        resources: {
-          products: products.results,
-        },
-        terms: search,
-        types: ['products'],
-      },
-    };
-
-    console.log(props);
-
-    return props;
-  }}
+  getData={(swell: Swell) => ({
+    predictive_search: new PredictiveSearchResource(swell, query),
+  })}
 />

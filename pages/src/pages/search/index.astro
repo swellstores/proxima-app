@@ -1,13 +1,9 @@
 ---
 import { Swell } from '@swell/storefrontjs';
-import SearchResource from '@/resources/search';
+import { SearchResource } from '@/resources/search';
 import ThemePage from '@/components/ThemePage.astro';
 
-const search = Astro.url.searchParams.get('q');
-const sort = Astro.url.searchParams.get('sort_by');
-const filter = Astro.url.searchParams.get('filter');
-
-console.log('(index) search query?', { search, filter, sort });
+const query = Astro.url.searchParams.get('q');
 ---
 
 <ThemePage
@@ -15,10 +11,6 @@ console.log('(index) search query?', { search, filter, sort });
   titleKey="pages.search.title"
   descriptionKey="pages.search.description"
   getData={(swell: Swell) => ({
-    search: SearchResource(swell, {
-      search,
-      sort,
-      filter,
-    }),
+    search: new SearchResource(swell, query),
   })}
 />
