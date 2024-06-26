@@ -29,22 +29,28 @@ export class CategoryResource extends SwellStorefrontRecord {
       );
 
       await category.id;
-      const categoryId = category.id || (slug === 'all' ? undefined : slug);
 
+      if (!category.id && slug !== 'all') {
+        return null; // Not found
+      }
+
+      const categoryFilter = category.id || (slug === 'all' ? undefined : slug);
       const filteredProps = await getFilteredProducts(
         swell,
-        categoryId
+        categoryFilter
           ? {
-              category: categoryId,
+              category: categoryFilter,
             }
           : {},
       );
+
+      console.log('found category', category.id);
 
       return {
         ...(category.id
           ? category._result
           : // TODO: remove this once backend is implemented for "all"
-            { name: 'Products', slug: 'all' }),
+            { name: 'Products', id: 'all', slug: 'all' }),
         ...filteredProps,
       };
     });

@@ -1,0 +1,23 @@
+---
+export interface Props {
+  status: number;
+  title?: string;
+  description?: string;
+}
+
+const {
+  status = 500,
+  title = 'Internal Server Error',
+  description,
+} = Astro.props;
+---
+
+<html>
+  <head>
+    <title>{title}</title>
+  </head>
+  <body>
+    <h1>{status} {title}</h1>
+    {description && description !== title && <p>{description}</p>}
+  </body>
+</html>
