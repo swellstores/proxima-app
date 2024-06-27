@@ -12,6 +12,7 @@ import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
 import Layout from '@/layouts/Layout.astro';
 import ThemeSections from './ThemeSections.astro';
 import EditorPage from './EditorPage.astro';
+import ErrorPage from './ErrorPage.astro';
 
 const sections = Astro.url.searchParams.get('sections');
 const sectionId = Astro.url.searchParams.get('section_id');
@@ -73,7 +74,7 @@ if (!theme.pageId) {
 
 const isEditor = typeof Astro.url.searchParams.get('_editor') === 'string';
 
-let pageData, pageTitle, pageDescription, pageContent;
+let pageData, pageTitle, pageDescription, pageContent, pageError;
 
 try {
   // Rendering page content
@@ -123,17 +124,27 @@ try {
     }
   }
 } catch (err: any) {
-  console.log(err);
   try {
-    if (err instanceof PageError) {
-      pageTitle = err.message;
-      pageContent = await theme.renderPageTemplate(err.template);
+    if (err instanceof PageNotFound) {
+      try {
+        pageTitle = err.message;
+        pageContent = await theme.renderPageTemplate('404');
+        Astro.response.status = 404;
+      } catch (renderErr: any) {
+        throw err;
+      }
     } else {
-      pageTitle = 'Something went wrong';
-      pageContent = await theme.renderPageTemplate('500');
+      throw err;
     }
   } catch {
-    throw err;
+    console.error(err);
+    pageError = {
+      title: err.title,
+      status: err.status,
+      description: swell.isDevelopment
+        ? err.description || err.message
+        : undefined,
+    };
   }
 }
 
@@ -147,7 +158,9 @@ const layoutProps = {
 ---
 
 {
-  sections ? (
+  pageError ? (
+    <ErrorPage {...pageError} />
+  ) : sections ? (
     JSON.stringify(pageContent)
   ) : sectionId ? (
     <Fragment set:html={pageContent[sectionId]} />

@@ -1,8 +1,4 @@
-import {
-  Swell,
-  StorefrontResource,
-  SwellStorefrontCollection,
-} from '@swell/storefrontjs';
+import { Swell, SwellStorefrontCollection } from '@swell/storefrontjs';
 
 export const SORT_OPTIONS = [
   { value: ``, name: 'Featured' },
@@ -35,7 +31,7 @@ export async function getFilteredProducts(
       }
 
       const filter_options =
-        ((result?.count as number) || 0) < 5000
+        result !== undefined && ((result?.count as number) || 0) < 5000
           ? await getProductFiltersByQuery(swell, filterQuery)
           : [];
 
