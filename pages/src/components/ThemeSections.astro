@@ -21,7 +21,6 @@ interface Section {
   };
   output: string;
   tag: AllowedTags;
-  attributes?: Record<string, string>;
 }
 
 const { theme, content, data } = Astro.props;
@@ -29,15 +28,9 @@ const sections = (await theme.renderPageSections(content, data)) as Section[];
 ---
 
 {
-  sections.map(({ section, output, tag: Tag, attributes }: Section) => {
+  sections.map(({ section, output, tag: Tag }: Section) => {
     const { type = 'unknown' } = section;
     const TagComponent = Tag as keyof JSX.IntrinsicElements;
-    return (
-      <TagComponent
-        data-swell-section={type}
-        set:html={output}
-        {...attributes}
-      />
-    );
+    return <TagComponent data-swell-section={type} set:html={output} />;
   })
 }
