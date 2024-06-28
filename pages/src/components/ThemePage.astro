@@ -109,7 +109,7 @@ try {
             ...props,
             ...pageData,
           },
-          pageData?.theme_template
+          pageData?.theme_template,
         ),
   ]);
 
@@ -176,13 +176,13 @@ const layoutProps = {
     </html>
   ) : (
     <Layout theme={theme} {...layoutProps}>
-      <div slot="content_for_layout">
+      <Fragment slot="content_for_layout">
         {typeof pageContent === 'string' ? (
           <Fragment set:html={pageContent} />
         ) : (
           <ThemeSections theme={theme} content={pageContent} data={pageProps} />
         )}
-      </div>
+      </Fragment>
     </Layout>
   )
 }
