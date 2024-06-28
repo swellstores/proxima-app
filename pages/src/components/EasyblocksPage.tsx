@@ -294,6 +294,25 @@ function getPageBlockProcessingInstructions(Blocks: any) {
   let blockIndex = 0;
   return [
     {
+      // Disable all external anchor links, and add editor property to internal links
+      shouldProcessNode: function (node: any) {
+        return node.name === 'a';
+      },
+      processNode: function (node: any, children: any, index: any) {
+        let reg_ex = new RegExp('^(http|https)://', 'i');
+        if (reg_ex.test(node.attribs.href)) {
+          node.attribs.style = 'pointer-events: none; cursor: default;';
+        } else {
+          if (node.attribs.href) {
+            node.attribs.href += node.attribs.href?.includes('?')
+              ? '&_editor'
+              : '?_editor';
+          }
+        }
+        return processNodeDefinitions.processDefaultNode(node, children, index);
+      },
+    },
+    {
       shouldProcessNode: function (node: any) {
         return node.attribs?.class === 'swell-block';
       },
@@ -366,6 +385,17 @@ export default function EasyblocksPage(props: any) {
     );
 
     setEasyblocksConfig(easyblocksConfig);
+
+    window.parent.postMessage(
+      {
+        type: '@easyblocks-editor/canvas-page-route',
+        payload: {
+          pageId,
+          pageRoute: window.location.pathname,
+        },
+      },
+      '*',
+    );
   }, []);
 
   if (!easyblocksConfig) {

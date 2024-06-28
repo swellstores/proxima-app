@@ -7,13 +7,30 @@ interface Props {
   data: SwellData;
 }
 
-const { theme, content, data } = Astro.props;
+type AllowedTags =
+  | 'article'
+  | 'aside'
+  | 'div'
+  | 'footer'
+  | 'header'
+  | 'section';
 
-const sections = await theme.renderPageSections(content, data);
+interface Section {
+  section: {
+    type?: string;
+  };
+  output: string;
+  tag: AllowedTags;
+}
+
+const { theme, content, data } = Astro.props;
+const sections = (await theme.renderPageSections(content, data)) as Section[];
 ---
 
 {
-  sections.map(({ section, output, tag: Tag /* FIXME */ }: any) => (
-    <div data-swell-section={section?.type || 'unknown'} set:html={output} />
-  ))
+  sections.map(({ section, output, tag: Tag }: Section) => {
+    const { type = 'unknown' } = section;
+    const TagComponent = Tag as keyof JSX.IntrinsicElements;
+    return <TagComponent data-swell-section={type} set:html={output} />;
+  })
 }
