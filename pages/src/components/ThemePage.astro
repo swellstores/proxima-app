@@ -102,7 +102,7 @@ try {
             ...props,
             ...pageData,
           },
-          pageData?.theme_template,
+          pageData?.theme_template
         ),
   ]);
 
@@ -113,7 +113,6 @@ try {
   if (required) {
     const isFound = await get(pageData, required);
     if (!isFound) {
-      console.log('NOT FOUND1');
       throw new PageNotFound();
     }
   }
@@ -121,7 +120,6 @@ try {
   try {
     if (err instanceof PageNotFound) {
       try {
-        console.log('NOT FOUND2');
         pageTitle = err.message;
         pageContent = await theme.renderPageTemplate('404');
       } catch (renderErr: any) {
