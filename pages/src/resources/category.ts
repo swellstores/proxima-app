@@ -1,22 +1,10 @@
 import {
   Swell,
+  StorefrontResource,
   SwellStorefrontRecord,
   SwellStorefrontCollection,
 } from '@swell/storefrontjs';
-import { getFilteredProducts } from './filterable-products';
-import { Category } from 'swell-js';
-
-export default function getCategoryResource(
-  swell: Swell,
-  slug: string,
-  query: SwellData = {},
-) {
-  return new CategoryResource(
-    swell,
-    slug,
-    query,
-  ) as any as SwellStorefrontRecord & Category;
-}
+import { getFilteredProducts } from './product';
 
 export class CategoryResource extends SwellStorefrontRecord {
   constructor(swell: Swell, slug: string, query: SwellData = {}) {
@@ -44,8 +32,6 @@ export class CategoryResource extends SwellStorefrontRecord {
           : {},
       );
 
-      console.log('found category', category.id);
-
       return {
         ...(category.id
           ? category._result
@@ -53,6 +39,27 @@ export class CategoryResource extends SwellStorefrontRecord {
             { name: 'Products', id: 'all', slug: 'all' }),
         ...filteredProps,
       };
+    });
+  }
+}
+
+export class CategoriesResource extends StorefrontResource {
+  constructor(swell: Swell, query: SwellData = {}) {
+    super(async () => {
+      const categories = new SwellStorefrontCollection(swell, 'categories', {
+        limit: 100,
+        top_id: null,
+        ...query,
+      });
+
+      const results = await categories.results;
+      for (const category of results) {
+        category.products = new SwellStorefrontCollection(swell, 'products', {
+          category: category.id,
+        });
+      }
+
+      return categories._result;
     });
   }
 }

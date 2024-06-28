@@ -1,6 +1,6 @@
 ---
 import { Swell } from '@swell/storefrontjs';
-import OrderResource from '@/resources/order';
+import { AccountOrderResource } from '@/resources/account';
 import ThemePage from '@/components/ThemePage.astro';
 
 const { id } = Astro.params;
@@ -12,6 +12,6 @@ const { id } = Astro.params;
   titleKey="pages.account_order.title"
   descriptionKey="pages.account_order.description"
   getData={(swell: Swell) => ({
-    order: OrderResource(swell, id as string),
+    order: new AccountOrderResource(swell, id as string),
   })}
 />

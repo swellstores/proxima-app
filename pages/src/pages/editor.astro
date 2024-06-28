@@ -1,13 +1,10 @@
 ---
-import { initSwell } from '@/swell';
+import { initSwell, initTheme } from '@/swell';
 import {
-  SwellTheme,
   removeCircularReferences,
   resolveAsyncResources,
 } from '@swell/storefrontjs';
 import EasyblocksEditor from '@/components/EasyblocksEditor.jsx';
-import storefrontConfig from '../../storefront.json';
-import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
 
 // Editor requires rootTemplate param
 if (!Astro.url.searchParams.get('rootTemplate')) {
@@ -15,10 +12,7 @@ if (!Astro.url.searchParams.get('rootTemplate')) {
 }
 
 const swell = initSwell(Astro);
-const theme = new SwellTheme(swell, {
-  storefrontConfig,
-  shopifyCompatibilityClass: StorefrontShopifyCompatibility,
-});
+const theme = initTheme(swell);
 
 const { pageId = 'index', pageRoute = '/' } = swell.queryParams;
 

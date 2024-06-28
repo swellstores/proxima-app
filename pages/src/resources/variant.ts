@@ -1,19 +1,4 @@
 import { Swell, SwellStorefrontRecord } from '@swell/storefrontjs';
-import { Variant } from 'swell-js';
-
-export default function getVariantResource(
-  swell: Swell,
-  product: SwellStorefrontRecord,
-  id: string,
-  query: SwellData = {},
-) {
-  return new VariantResource(
-    swell,
-    product,
-    id,
-    query,
-  ) as any as SwellStorefrontRecord & Variant;
-}
 
 export class VariantResource extends SwellStorefrontRecord {
   public product: SwellStorefrontRecord;

@@ -1,5 +1,8 @@
-import { Swell } from '@swell/storefrontjs';
+import { Swell, SwellTheme } from '@swell/storefrontjs';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
+import resources from './resources';
+import storefrontConfig from '../storefront.json';
+import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 
 // IMPORTANT NOTE:
 // Astro does not support setting multiple cookies in the same response
@@ -67,4 +70,12 @@ export function deleteCookie(
     ...options,
   };
   return Astro.cookies.delete(name, cookieOptions);
+}
+
+export function initTheme(swell: Swell) {
+  return new SwellTheme(swell, {
+    resources,
+    storefrontConfig,
+    shopifyCompatibilityClass: StorefrontShopifyCompatibility,
+  });
 }

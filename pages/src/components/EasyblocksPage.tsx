@@ -22,8 +22,8 @@ import {
   getThemeSettingsFromProps,
   getSectionSettingsFromProps,
 } from '@swell/storefrontjs';
-import storefrontConfig from '../../storefront.json';
-import StorefrontShopifyCompatibility from '../resources/shopify-compatibility';
+import { initTheme } from '@/swell';
+import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 
 // TODO: fix all the types
 
@@ -315,10 +315,8 @@ function getPageBlockProcessingInstructions(Blocks: any) {
 export function getEasyblocksComponents(swell: Swell, props: any) {
   const { themeGlobals } = props;
 
-  const theme = new SwellTheme(swell, {
-    storefrontConfig,
-    shopifyCompatibilityClass: StorefrontShopifyCompatibility,
-  });
+  const theme = initTheme(swell);
+
   theme.setGlobals(themeGlobals);
 
   if (themeGlobals?.shopify_compatibility) {

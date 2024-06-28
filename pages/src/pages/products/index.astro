@@ -1,6 +1,6 @@
 ---
 import { Swell } from '@swell/storefrontjs';
-import CategoryResource from '@/resources/category';
+import { CategoryResource } from '@/resources/category';
 import ThemePage from '../../components/ThemePage.astro';
 ---
 
@@ -9,6 +9,6 @@ import ThemePage from '../../components/ThemePage.astro';
   title="{{ category.meta_title | default: category.name }}"
   description="{{ category.meta_description | default: category.description }}"
   getData={(swell: Swell) => ({
-    category: CategoryResource(swell, 'all'),
+    category: new CategoryResource(swell, 'all'),
   })}
 />

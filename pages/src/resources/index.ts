@@ -1,23 +1,49 @@
-import { AccountResource } from './account';
+import {
+  AccountResource,
+  AccountAddressesResource,
+  AccountOrderResource,
+  AccountOrdersResource,
+  AccountSubscriptionResource,
+  AccountSubscriptionsResource,
+} from './account';
+import { BlogResource, BlogCategoryResource } from './blog';
 import { CartResource } from './cart';
-import { CategoryResource } from './category';
-import { CategoryListResource } from './category-list';
-import { OrderResource } from './order';
-import { PredictiveSearchResource } from './predictive-search';
+import { CategoryResource, CategoriesResource } from './category';
+import { PageResource } from './page';
 import { ProductResource } from './product';
-import { SearchResource } from './search';
-import { SubscriptionResource } from './subscription';
+import { SearchResource, PredictiveSearchResource } from './search';
 import { VariantResource } from './variant';
 
 export {
   AccountResource,
+  AccountAddressesResource,
+  AccountOrderResource,
+  AccountOrdersResource,
+  AccountSubscriptionResource,
+  AccountSubscriptionsResource,
+  BlogResource,
+  BlogCategoryResource,
   CartResource,
   CategoryResource,
-  CategoryListResource,
-  OrderResource,
+  CategoriesResource,
+  PageResource,
   PredictiveSearchResource,
   ProductResource,
   SearchResource,
-  SubscriptionResource,
   VariantResource,
+};
+
+export default {
+  singletons: {
+    account: AccountResource,
+    cart: CartResource,
+  },
+  records: {
+    'content/blogs': BlogResource,
+    'content/blogs-categories': BlogCategoryResource,
+    categories: CategoryResource,
+    pages: PageResource,
+    products: ProductResource,
+    search: SearchResource,
+  },
 };

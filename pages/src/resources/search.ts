@@ -1,5 +1,9 @@
-import { Swell, StorefrontResource } from '@swell/storefrontjs';
-import { getFilteredProducts } from './filterable-products';
+import {
+  Swell,
+  StorefrontResource,
+  SwellStorefrontCollection,
+} from '@swell/storefrontjs';
+import { getFilteredProducts } from './product';
 
 export class SearchResource extends StorefrontResource {
   constructor(swell: Swell, query: string | null) {
@@ -15,6 +19,29 @@ export class SearchResource extends StorefrontResource {
         query,
         performed,
         ...filteredProps,
+      };
+    });
+  }
+}
+
+export class PredictiveSearchResource extends StorefrontResource {
+  constructor(swell: Swell, query: string | null) {
+    super(async () => {
+      const performed = isSearchPerformed(query);
+
+      let products;
+      if (performed) {
+        products = new SwellStorefrontCollection(swell, 'products', {
+          search: query,
+          limit: 10,
+        });
+        await products.results;
+      }
+
+      return {
+        query,
+        performed,
+        products,
       };
     });
   }

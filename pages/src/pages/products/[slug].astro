@@ -1,6 +1,6 @@
 ---
 import { Swell } from '@swell/storefrontjs';
-import ProductResource from '@/resources/product';
+import { ProductResource } from '@/resources/product';
 import ThemePage from '@/components/ThemePage.astro';
 
 const { slug } = Astro.params;
@@ -12,6 +12,6 @@ const { slug } = Astro.params;
   title="{{ product.meta_title | default: product.name }}"
   description="{{ product.meta_description | default: product.description }}"
   getData={(swell: Swell) => ({
-    product: ProductResource(swell, slug as string),
+    product: new ProductResource(swell, slug as string),
   })}
 />

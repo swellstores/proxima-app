@@ -41,7 +41,7 @@ function getEditorThemeGlobals(globals: SwellData) {
     configs,
   } = globals;
 
-  const { editor, language, theme, presets } = configs;
+  const { editor, translations, theme, presets } = configs;
 
   return {
     settings,
@@ -52,7 +52,7 @@ function getEditorThemeGlobals(globals: SwellData) {
     shopify_compatibility,
     configs: {
       editor,
-      language,
+      translations,
       theme,
       presets,
     },

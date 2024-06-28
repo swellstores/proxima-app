@@ -1,9 +1,4 @@
 import { Swell, SwellStorefrontSingleton } from '@swell/storefrontjs';
-import { Cart } from 'swell-js';
-
-export default function getCartResource(swell: Swell) {
-  return new CartResource(swell) as any as SwellStorefrontSingleton & Cart;
-}
 
 export class CartResource extends SwellStorefrontSingleton {
   constructor(swell: Swell) {

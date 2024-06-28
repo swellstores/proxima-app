@@ -1,12 +1,12 @@
 ---
 import { Swell } from '@swell/storefrontjs';
-import CategoryListResource from '@/resources/category-list';
+import { CategoriesResource } from '@/resources/category';
 import ThemePage from '@/components/ThemePage.astro';
 ---
 
 <ThemePage
   id="categories/index"
   getData={(swell: Swell) => ({
-    categories: CategoryListResource(swell),
+    categories: new CategoriesResource(swell),
   })}
 />

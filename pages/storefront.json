@@ -138,7 +138,7 @@
       "collection": "subscriptions"
     },
     {
-      "id": "cart/index",
+      "id": "cart",
       "label": "Cart",
       "url": "/cart",
       "group": "checkout",

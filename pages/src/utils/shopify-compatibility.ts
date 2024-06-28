@@ -19,15 +19,15 @@ import {
 
 import {
   AccountResource,
+  AccountOrderResource,
   CartResource,
   CategoryResource,
-  OrderResource,
+  PageResource,
   PredictiveSearchResource,
   ProductResource,
   SearchResource,
-  SubscriptionResource,
   VariantResource,
-} from './';
+} from '../resources';
 
 import storefrontConfig from '../../storefront.json';
 
@@ -119,9 +119,9 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         page: 'collection',
         resources: [
           {
-            object: ShopifyCollection,
             from: 'category',
             to: 'collection',
+            object: ShopifyCollection,
           },
         ],
       },
@@ -129,9 +129,9 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         page: 'list-collections',
         resources: [
           {
-            object: ShopifyCollections,
             from: 'categories',
             to: 'collections',
+            object: ShopifyCollections,
           },
         ],
       },
@@ -139,9 +139,9 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         page: 'article',
         resources: [
           {
-            object: ShopifyArticle,
             from: 'blog',
             to: 'article',
+            object: ShopifyArticle,
           },
         ],
       },
@@ -149,9 +149,9 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         page: 'blog',
         resources: [
           {
-            object: ShopifyBlog,
             from: 'category',
             to: 'blog',
+            object: ShopifyBlog,
           },
         ],
       },
@@ -165,6 +165,10 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         object: ShopifyCustomer,
       },
       {
+        from: AccountOrderResource,
+        object: ShopifyOrder,
+      },
+      {
         from: CartResource,
         object: ShopifyCart,
       },
@@ -173,12 +177,12 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         object: ShopifyCollection,
       },
       {
-        from: OrderResource,
-        object: ShopifyOrder,
-      },
-      {
         from: PredictiveSearchResource,
         object: ShopifyPredictiveSearch,
+      },
+      {
+        from: PageResource,
+        object: ShopifyPage,
       },
       {
         from: ProductResource,

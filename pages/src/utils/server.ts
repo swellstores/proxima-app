@@ -1,13 +1,17 @@
 import { APIContext, MiddlewareHandler } from 'astro';
 import {
+  Swell,
   SwellTheme,
   StorefrontResource,
-  // removeCircularReferences,
   dehydrateSwellRefsInStorefrontResources,
 } from '@swell/storefrontjs';
-import { initSwell, getCookie, setCookie, deleteCookie } from '@/swell';
-import storefrontConfig from '../../storefront.json';
-import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
+import {
+  initSwell,
+  initTheme,
+  getCookie,
+  setCookie,
+  deleteCookie,
+} from '@/swell';
 import qs from 'qs';
 
 // TODO: replace this with handleMiddlewareRequest
@@ -23,15 +27,14 @@ export function handleServerRequest(
     contextHandler?: (context: any) => any,
   ) => {
     const swell = context.locals.swell || initSwell(context);
+    context.locals.swell = swell;
 
-    const theme =
-      context.locals.theme ||
-      new SwellTheme(swell, {
-        storefrontConfig,
-        shopifyCompatibilityClass: StorefrontShopifyCompatibility,
-      });
+    const theme = context.locals.theme || initTheme(swell);
+    context.locals.theme = theme;
 
-    await theme.initGlobals(pageId);
+    if (pageId) {
+      await theme.initGlobals(pageId);
+    }
 
     let params = await getFormParams(context.request, context.url.searchParams);
 
@@ -175,12 +178,7 @@ export function handleMiddlewareRequest(
     const swell = context.locals.swell || initSwell(context);
     context.locals.swell = swell;
 
-    const theme =
-      context.locals.theme ||
-      new SwellTheme(swell, {
-        storefrontConfig,
-        shopifyCompatibilityClass: StorefrontShopifyCompatibility,
-      });
+    const theme = context.locals.theme || initTheme(swell);
     context.locals.theme = theme;
 
     if (pageId) {

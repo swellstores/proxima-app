@@ -1,5 +1,5 @@
 import { handleMiddlewareRequest } from '@/utils/server';
-import StorefrontShopifyCompatibility from '@/resources/shopify-compatibility';
+import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 import storefrontConfig from '../../storefront.json';
 
 export const shopifyRouteCompatibility = handleMiddlewareRequest(

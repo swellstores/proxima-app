@@ -1,8 +1,9 @@
 ---
-import { Swell, SwellStorefrontRecord } from '@swell/storefrontjs';
+import { Swell } from '@swell/storefrontjs';
+import { BlogResource } from '@/resources/blog';
 import ThemePage from '../../../components/ThemePage.astro';
 
-const { category: categorySlug, slug } = Astro.params;
+const { category, slug } = Astro.params;
 ---
 
 <ThemePage
@@ -10,20 +11,7 @@ const { category: categorySlug, slug } = Astro.params;
   required="blog.id"
   title="{{ blog.meta_title | default: blog.title }}"
   description="{{ blog.meta_description | default: blog.description }}"
-  getData={async (swell: Swell) => {
-    const blog = new SwellStorefrontRecord(swell, `content/blogs`, slug);
-
-    const category = new SwellStorefrontRecord(
-      swell,
-      `content/blog-categories`,
-      categorySlug
-    );
-
-    blog.category = category;
-
-    return {
-      category,
-      blog,
-    };
-  }}
+  getData={(swell: Swell) => ({
+    blog: new BlogResource(swell, slug as string, category as string),
+  })}
 />
