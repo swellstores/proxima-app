@@ -1,0 +1,31 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
+main {
+  padding: 60px 30px;
+}
+
+header {
+  padding: 0 15px;
+  border-bottom: 1px solid #eee;
+}
+
+header nav ul {
+  list-style: none;
+  padding: 15px 0;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+}
+
+li a {
+  display: block;
+  padding: 15px;
+}
+
+footer {
+  padding: 30px;
+  border-top: 1px solid #eee;
+}

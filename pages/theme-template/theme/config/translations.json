@@ -1,0 +1,22 @@
+{
+  "pages": {
+    "home": {
+      "title": "Home",
+      "description": "Welcome to our store",
+      "$locale": {
+        "fr": {
+          "title": "Accueil",
+          "description": "Bienvenue sur notre magasin"
+        },
+        "es": {
+          "title": "Inicio",
+          "description": "Bienvenido a nuestra tienda"
+        },
+        "de": {
+          "title": "Zuhause",
+          "description": "Willkommen in unserem Laden"
+        }
+      }
+    }
+  }
+}
