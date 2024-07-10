@@ -1,14 +1,5 @@
 ---
 import ThemePage from '../../components/ThemePage.astro';
-import { POST as submitCheckout } from './checkout';
-
-if (Astro.request.method === 'POST') {
-  return submitCheckout(Astro);
-}
 ---
 
-<ThemePage
-  id="cart"
-  titleKey="pages.cart.title"
-  descriptionKey="pages.cart.description"
-/>
+<ThemePage id="cart" />

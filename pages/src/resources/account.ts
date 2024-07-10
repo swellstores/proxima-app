@@ -25,10 +25,16 @@ export class AccountResource extends SwellStorefrontSingleton {
 }
 
 export class AccountAddressesResource extends SwellStorefrontCollection {
-  constructor(swell: Swell) {
-    super(swell, 'accounts:addresses', {}, () => {
-      return swell.storefront.account.listAddresses(super._query);
-    });
+  constructor(swell: Swell, query: SwellData = {}) {
+    const { page, limit } = swell.queryParams;
+    super(
+      swell,
+      'accounts:addresses',
+      { page, limit, ...(query || undefined) },
+      function (this: SwellStorefrontCollection) {
+        return swell.storefront.account.listAddresses(this._query);
+      },
+    );
   }
 }
 
@@ -42,24 +48,42 @@ export class AccountOrderResource extends SwellStorefrontRecord {
 
 export class AccountOrdersResource extends SwellStorefrontCollection {
   constructor(swell: Swell, query: SwellData = {}) {
-    super(swell, 'accounts:orders', query, () => {
-      return swell.storefront.account.listOrders(super._query);
-    });
+    const { page, limit } = swell.queryParams;
+    super(
+      swell,
+      'accounts:orders',
+      { page, limit, ...(query || undefined) },
+      function (this: SwellStorefrontCollection) {
+        return swell.storefront.account.listOrders(this._query);
+      },
+    );
   }
 }
 
 export class AccountSubscriptionResource extends SwellStorefrontRecord {
   constructor(swell: Swell, subscriptionId: string, query: SwellData = {}) {
-    super(swell, 'accounts:subscriptions', subscriptionId, query, () => {
-      return swell.storefront.subscriptions.get(subscriptionId, super._query);
-    });
+    super(
+      swell,
+      'accounts:subscriptions',
+      subscriptionId,
+      query,
+      function (this: SwellStorefrontRecord) {
+        return swell.storefront.subscriptions.get(subscriptionId, this._query);
+      },
+    );
   }
 }
 
 export class AccountSubscriptionsResource extends SwellStorefrontCollection {
   constructor(swell: Swell, query: SwellData = {}) {
-    super(swell, 'accounts:subscriptions', query, () => {
-      return swell.storefront.subscriptions.list(super._query);
-    });
+    const { page, limit } = swell.queryParams;
+    super(
+      swell,
+      'accounts:subscriptions',
+      { page, limit, ...(query || undefined) },
+      function (this: SwellStorefrontCollection) {
+        return swell.storefront.subscriptions.list(this._query);
+      },
+    );
   }
 }

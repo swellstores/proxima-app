@@ -12,11 +12,18 @@ import {
   setCookie,
   deleteCookie,
 } from '@/swell';
+import micromatch from 'micromatch';
+import { match } from 'path-to-regexp';
 import qs from 'qs';
 
-// TODO: replace this with handleMiddlewareRequest
+export type SwellServerContext = APIContext & {
+  params: SwellData;
+  swell: Swell;
+  theme: SwellTheme;
+  context: APIContext;
+};
+
 export function handleServerRequest(
-  pageId: string,
   handler: (context: any) => string | object,
 ): (
   context: APIContext,
@@ -26,196 +33,64 @@ export function handleServerRequest(
     context: APIContext,
     contextHandler?: (context: any) => any,
   ) => {
-    const swell = context.locals.swell || initSwell(context);
-    context.locals.swell = swell;
-
-    const theme = context.locals.theme || initTheme(swell);
-    context.locals.theme = theme;
-
-    if (pageId) {
-      await theme.initGlobals(pageId);
-    }
-
-    let params = await getFormParams(context.request, context.url.searchParams);
+    const serverContext = await initServerContext(context);
 
     try {
-      let response: any;
+      const result = await handler(serverContext);
 
-      if (theme.shopifyCompatibility) {
-        const compatParams =
-          await theme.shopifyCompatibility.getAdaptedFormServerParams(
-            pageId,
-            params.form_type,
-            {
-              ...context,
-              params,
-              swell,
-              theme,
-            },
-          );
-        if (compatParams !== undefined) {
-          params = compatParams;
-        }
-      }
-
-      const result = await handler({
-        ...context,
-        params,
-        swell,
-        theme,
-        context,
-        redirect: context.redirect,
-      });
-
-      if (contextHandler) {
-        contextHandler({
-          ...context,
-          params,
-          swell,
-          theme,
-        });
-      }
-
-      if (result instanceof Response || result === undefined) {
+      if (result === undefined) {
         return result;
       }
 
-      if (theme.shopifyCompatibility) {
-        theme.setCompatibilityData(result);
+      if (result instanceof Response) {
+        ensureSwellSessionCookieSet(context, result);
+        return result;
       }
 
-      response = await resolveAsyncResources(result);
-
-      dehydrateSwellRefsInStorefrontResources(response);
-
-      if (theme.shopifyCompatibility) {
-        const compatResponse =
-          await theme.shopifyCompatibility.getAdaptedFormServerResponse(
-            pageId,
-            params.form_type,
-            {
-              ...context,
-              response,
-              params,
-              swell,
-              theme,
-            },
-          );
-        if (compatResponse !== undefined) {
-          response = compatResponse;
-        }
+      if (contextHandler) {
+        contextHandler(serverContext);
       }
 
-      if (typeof response === 'string') {
-        response = {
-          response,
-        };
-      } else if (!response) {
-        response = {};
-      }
-
-      if (params.sections) {
-        const sectionsRendered = await theme.renderAllSections(params.sections);
-        if (sectionsRendered) {
-          response.sections = sectionsRendered;
-        }
-      } else {
-        const sectionId = context.url.searchParams.get('section_id');
-        if (sectionId) {
-          const sectionRendered = await theme.renderSection(
-            sectionId,
-            response,
-          );
-          return new Response(
-            wrapSectionContent(theme, sectionId, sectionRendered),
-          );
-        }
-      }
-
-      return jsonResponse(response);
+      return sendServerResponse(result, serverContext);
     } catch (err: any) {
-      if (!err.code) {
-        console.error(err);
-      }
-      return jsonResponse(
-        {
-          message: 'Something went wrong',
-          description: err.code ? err.message : 'Internal server error',
-          errors: err.code && {
-            [err.code]: err.message,
-          },
-          status: err.status || 500,
-        },
-        {
-          status: err.status || 500,
-        },
-      );
+      return sendServerError(err);
     }
   };
 }
 
-export type MiddlewareAPIContext = APIContext & {
-  params: SwellData;
-  swell: Swell;
-  theme?: SwellTheme;
-  context?: APIContext;
-};
-
 export function handleMiddlewareRequest(
   method: string,
-  urlMatch: string | Function,
-  handler: (context: MiddlewareAPIContext) => any,
-  pageId?: string,
+  urlParam: string | string[] | Function,
+  handler: (context: SwellServerContext) => any,
 ): MiddlewareHandler {
+  const matchHandler = getMiddlewareMatcher(urlParam);
+
   return async (context, next) => {
     if (method !== context.request.method) {
       return next();
     }
-    if (!matchMiddlewareUrlPath(urlMatch, context)) {
+
+    const matchParam = matchHandler(context);
+    if (!matchParam) {
       return next();
     }
 
-    const swell = context.locals.swell || initSwell(context);
-    context.locals.swell = swell;
+    const serverContext = await initServerContext(context);
 
-    const theme = context.locals.theme || initTheme(swell);
-    context.locals.theme = theme;
-
-    if (pageId) {
-      await theme.initGlobals(pageId);
+    if (typeof matchParam === 'object') {
+      serverContext.params = {
+        ...serverContext.params,
+        ...matchParam,
+      };
     }
 
-    let params = await getFormParams(context.request, context.url.searchParams);
+    const { theme } = serverContext;
 
     try {
-      let response: any;
-
-      if (theme.shopifyCompatibility) {
-        const compatParams =
-          await theme.shopifyCompatibility.getAdaptedFormServerParams(
-            pageId,
-            params.form_type,
-            {
-              ...context,
-              params,
-              swell,
-              theme,
-            },
-          );
-        if (compatParams !== undefined) {
-          params = compatParams;
-        }
-      }
-
-      const result = await handler({
-        ...context,
-        params,
-        swell,
-        theme,
-        context,
-      });
+      const result = await handler(serverContext);
 
       if (result instanceof Response) {
+        ensureSwellSessionCookieSet(context, result);
         await preserveThemeRequestData(context, theme);
         return result;
       }
@@ -224,101 +99,187 @@ export function handleMiddlewareRequest(
         return next();
       }
 
-      if (theme.shopifyCompatibility) {
-        theme.setCompatibilityData(result);
-      }
-
-      response = await resolveAsyncResources(result);
-
-      dehydrateSwellRefsInStorefrontResources(response);
-
-      if (theme.shopifyCompatibility) {
-        const compatResponse =
-          await theme.shopifyCompatibility.getAdaptedFormServerResponse(
-            pageId,
-            params.form_type,
-            {
-              ...context,
-              response,
-              params,
-              swell,
-              theme,
-            },
-          );
-        if (compatResponse !== undefined) {
-          response = compatResponse;
-        }
-      }
-
-      if (typeof response === 'string') {
-        response = {
-          response,
-        };
-      } else if (!response) {
-        response = {};
-      }
-
-      if (theme) {
-        if (params.sections) {
-          const sectionsRendered = await theme.renderAllSections(
-            params.sections,
-          );
-          if (sectionsRendered) {
-            response.sections = sectionsRendered;
-          }
-        } else {
-          const sectionId = context.url.searchParams.get('section_id');
-          if (sectionId) {
-            const sectionRendered = await theme.renderSection(
-              sectionId,
-              response,
-            );
-            return new Response(
-              wrapSectionContent(theme, sectionId, sectionRendered),
-            );
-          }
-        }
-      }
-
-      return jsonResponse(response);
+      return sendServerResponse(result, serverContext);
     } catch (err: any) {
-      if (!err.code) {
-        console.error(err);
-      }
-      return jsonResponse(
-        {
-          message: 'Something went wrong',
-          description: err.code ? err.message : 'Internal server error',
-          errors: err.code && {
-            [err.code]: err.message,
-          },
-          status: err.status || 500,
-        },
-        {
-          status: err.status || 500,
-        },
-      );
+      return sendServerError(err);
     }
   };
 }
 
-function matchMiddlewareUrlPath(
-  urlMatch: string | Function,
-  context: APIContext,
-) {
-  const { url } = context;
+function ensureSwellSessionCookieSet(context: APIContext, response: Response) {
+  // IMPORTANT NOTE:
+  // Astro does not support setting multiple cookies in the same response
+  // Until a fix is made, we ensure the swell session cookie always takes precedence
+  const setCookies = Array.from(context.cookies.headers());
+  const swellSessionCookie = setCookies.find((cookie) =>
+    cookie.startsWith('swell-session='),
+  );
+  if (swellSessionCookie) {
+    response.headers.set('Set-Cookie', swellSessionCookie);
+  }
+}
 
-  if (typeof urlMatch === 'string') {
-    if (url.pathname === urlMatch) {
-      return true;
+export async function initServerContext(
+  context: APIContext,
+): Promise<SwellServerContext> {
+  const swell = context.locals.swell || initSwell(context);
+  context.locals.swell = swell;
+
+  const theme = context.locals.theme || initTheme(swell);
+  context.locals.theme = theme;
+
+  const params = await getFormParams(context.request, context.url.searchParams);
+
+  return {
+    ...context,
+    params,
+    swell,
+    theme,
+    context,
+  };
+}
+
+export async function sendServerResponse(
+  result: any,
+  context: SwellServerContext,
+): Promise<Response> {
+  const { theme, params } = context;
+
+  let response: any;
+
+  if (theme.shopifyCompatibility) {
+    theme.setCompatibilityData(result);
+  }
+
+  response = await resolveAsyncResources(result);
+
+  dehydrateSwellRefsInStorefrontResources(response);
+
+  if (typeof response === 'string') {
+    response = {
+      response,
+    };
+  } else if (!response) {
+    response = {};
+  }
+
+  if (params.sections) {
+    const sectionsRendered = await theme.renderAllSections(params.sections);
+    if (sectionsRendered) {
+      response.sections = sectionsRendered;
     }
-  } else if (typeof urlMatch === 'function') {
-    if (urlMatch(url.pathname)) {
-      return true;
+  } else {
+    const sectionId = context.url.searchParams.get('section_id');
+    if (sectionId) {
+      const sectionRendered = await theme.renderSection(sectionId, response);
+      return new Response(
+        wrapSectionContent(theme, sectionId, sectionRendered),
+      );
     }
   }
 
-  return false;
+  return jsonResponse(response);
+}
+
+export function sendServerError(err: any) {
+  if (!err.code) {
+    console.error(err);
+  }
+  return jsonResponse(
+    {
+      message: 'Something went wrong',
+      description: err.code ? err.message : 'Internal server error',
+      errors: err.code && {
+        [err.code]: err.message,
+      },
+      status: err.status || 500,
+    },
+    {
+      status: err.status || 500,
+    },
+  );
+}
+
+export async function getShopifyCompatibleServerParams(
+  formType: string,
+  context: SwellServerContext,
+) {
+  const { theme, params } = context;
+
+  let result = params;
+
+  if (theme.shopifyCompatibility) {
+    const compatParams =
+      await theme.shopifyCompatibility.getAdaptedFormServerParams(
+        formType,
+        context,
+      );
+    if (compatParams !== undefined) {
+      result = compatParams;
+    }
+  }
+
+  return result;
+}
+
+export async function getShopifyCompatibleServerResponse(
+  formType: string,
+  context: SwellServerContext,
+  response: any,
+) {
+  const { theme } = context;
+
+  let result = response;
+
+  if (theme.shopifyCompatibility) {
+    const compatResponse =
+      await theme.shopifyCompatibility.getAdaptedFormServerResponse(formType, {
+        ...context,
+        response,
+      });
+    if (compatResponse !== undefined) {
+      result = compatResponse;
+    }
+  }
+
+  return result;
+}
+
+function getMiddlewareMatcher(urlParam: string | string[] | Function) {
+  if (typeof urlParam === 'function') {
+    return (context: APIContext) => {
+      return urlParam(context.url.pathname);
+    };
+  }
+
+  const urlParamArr = urlParam instanceof Array ? urlParam : [urlParam];
+
+  try {
+    const urlMatchers = urlParamArr.map((urlMatch) =>
+      // Use micromatch for negation support
+      urlMatch.includes('!')
+        ? (url: string) => micromatch.isMatch(url, urlMatch)
+        : match(urlMatch),
+    );
+
+    return (context: APIContext) => {
+      for (let i = 0; i < urlMatchers.length; i++) {
+        const check = urlMatchers[i](context.url.pathname) as any;
+        if (check) {
+          if (check.params) {
+            return check.params;
+          }
+          return true;
+        }
+      }
+      return false;
+    };
+  } catch (err: any) {
+    console.log(
+      `Middleware URL match parameter invalid - ${JSON.stringify(urlParam)} - ${err.toString()}`,
+    );
+    return () => false;
+  }
 }
 
 export async function getFormParams(

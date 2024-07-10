@@ -8,8 +8,6 @@ const query = Astro.url.searchParams.get('q');
 
 <ThemePage
   id="search"
-  titleKey="pages.search.title"
-  descriptionKey="pages.search.description"
   getData={(swell: Swell) => ({
     search: new SearchResource(swell, query),
   })}

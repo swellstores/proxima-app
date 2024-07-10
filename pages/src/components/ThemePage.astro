@@ -23,11 +23,7 @@ const sectionIds = sections
 export interface Props {
   id: string;
   title?: string | ((data: SwellData | undefined) => string);
-  titleKey?: string;
-  titlePath?: string;
-  description?: string;
-  descriptionKey?: string;
-  descriptionPath?: string;
+  description?: string | ((data: SwellData | undefined) => string);
   required?: string;
   requiredPath?: string;
   content?: string;
@@ -38,19 +34,8 @@ export interface Props {
   getData?: (swell: Swell, theme: SwellTheme) => Promise<SwellData> | SwellData;
 }
 
-const {
-  id,
-  title,
-  titleKey,
-  titlePath,
-  description,
-  descriptionKey,
-  descriptionPath,
-  required,
-  content,
-  props,
-  getData,
-} = Astro.props;
+const { id, title, description, required, content, props, getData } =
+  Astro.props;
 
 const swell = Astro.locals.swell || initSwell(Astro);
 
@@ -76,21 +61,17 @@ try {
   theme.setCompatibilityData(pageData);
 
   [pageTitle, pageDescription, pageContent] = await Promise.all([
-    titleKey
-      ? await theme.lang(titleKey)
-      : typeof title === 'string'
-        ? await theme.renderTemplateString(title, pageData)
-        : typeof title === 'function'
-          ? await title(pageData)
-          : await get(pageData, titlePath as string),
+    typeof title === 'string'
+      ? await theme.renderTemplateString(title, pageData)
+      : typeof title === 'function'
+        ? await title(pageData)
+        : '',
 
-    descriptionKey
-      ? await theme.lang(descriptionKey)
-      : typeof description === 'string'
-        ? await theme.renderTemplateString(description, pageData)
-        : typeof description === 'function'
-          ? await description(pageData)
-          : await get(pageData, descriptionPath),
+    typeof description === 'string'
+      ? await theme.renderTemplateString(description, pageData)
+      : typeof description === 'function'
+        ? await description(pageData)
+        : '',
 
     content ?? sectionIds
       ? theme.renderAllSections(sectionIds, {
@@ -106,8 +87,16 @@ try {
         ),
   ]);
 
-  if (!pageContent && typeof pageContent !== 'string') {
+  // TODO: replace with json schema validation
+  if (typeof pageContent !== 'string' && !pageContent) {
     throw new PageError('Invalid page content');
+  }
+
+  if (!pageTitle && pageContent?.page?.title) {
+    pageTitle = pageContent.page.title;
+  }
+  if (!pageDescription && pageContent?.page?.description) {
+    pageDescription = pageContent.page.description;
   }
 
   if (required) {

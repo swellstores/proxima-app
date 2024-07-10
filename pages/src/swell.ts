@@ -1,22 +1,20 @@
 import { Swell, SwellTheme } from '@swell/storefrontjs';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
-import resources from './resources';
-import storefrontConfig from '../storefront.json';
+import forms from '@/forms';
+import resources from '@/resources';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
-
-// IMPORTANT NOTE:
-// Astro does not support setting multiple cookies in the same response
-// There be a workaround to set cookies manually on the response object (todo)
+import storefrontConfig from '../storefront.json';
 
 export function initSwell(
-  Astro: AstroGlobal | APIContext,
+  context: AstroGlobal | APIContext,
   options?: { [key: string]: any },
 ) {
   return new Swell({
-    url: Astro.url,
-    serverHeaders: Astro.request.headers,
+    url: context.url,
+    serverHeaders: context.request.headers,
     getCookie: (name: string) => {
-      return getCookie(Astro, name);
+      //getCookie(context, 'test-astro');
+      return getCookie(context, name);
     },
     setCookie: (
       name: string,
@@ -24,8 +22,9 @@ export function initSwell(
       options?: AstroCookieSetOptions,
       swell?: Swell,
     ) => {
-      if (!(Astro as any).response && !swell?.sentResponse) {
-        return setCookie(Astro, name, value, options);
+      if (canUpdateCookies(context, swell)) {
+        //setCookie(context, 'test-astro', `${Date.now()}`, options);
+        return setCookie(context, name, value, options);
       }
     },
     deleteCookie: (
@@ -33,20 +32,27 @@ export function initSwell(
       options?: AstroCookieSetOptions,
       swell?: Swell,
     ) => {
-      if (!(Astro as any).response && !swell?.sentResponse) {
-        return deleteCookie(Astro, name, options);
+      if (canUpdateCookies(context, swell)) {
+        return deleteCookie(context, name, options);
       }
     },
     ...options,
   });
 }
 
-export function getCookie(Astro: AstroGlobal | APIContext, name: string) {
-  return Astro.cookies.get(name)?.value;
+export function canUpdateCookies(
+  context: AstroGlobal | APIContext,
+  swell: Swell,
+) {
+  return !(context as any).response && !swell?.sentResponse;
+}
+
+export function getCookie(context: AstroGlobal | APIContext, name: string) {
+  return context.cookies.get(name)?.value;
 }
 
 export function setCookie(
-  Astro: AstroGlobal | APIContext,
+  context: AstroGlobal | APIContext,
   name: string,
   value: string,
   options?: AstroCookieSetOptions,
@@ -56,11 +62,11 @@ export function setCookie(
     samesite: 'lax',
     ...options,
   };
-  return Astro.cookies.set(name, value, cookieOptions);
+  context.cookies.set(name, value, cookieOptions);
 }
 
 export function deleteCookie(
-  Astro: AstroGlobal | APIContext,
+  context: AstroGlobal | APIContext,
   name: string,
   options?: AstroCookieSetOptions,
 ) {
@@ -69,11 +75,12 @@ export function deleteCookie(
     samesite: 'lax',
     ...options,
   };
-  return Astro.cookies.delete(name, cookieOptions);
+  context.cookies.delete(name, cookieOptions);
 }
 
 export function initTheme(swell: Swell) {
   return new SwellTheme(swell, {
+    forms,
     resources,
     storefrontConfig,
     shopifyCompatibilityClass: StorefrontShopifyCompatibility,

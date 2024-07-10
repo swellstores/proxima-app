@@ -8,7 +8,6 @@ export const postLogin = handleMiddlewareRequest(
 
     // TODO
   },
-  'products/product',
 );
 
 /*

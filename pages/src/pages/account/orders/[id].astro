@@ -9,8 +9,6 @@ const { id } = Astro.params;
 <ThemePage
   id="account/order"
   required="order.id"
-  titleKey="pages.account_order.title"
-  descriptionKey="pages.account_order.description"
   getData={(swell: Swell) => ({
     order: new AccountOrderResource(swell, id as string),
   })}

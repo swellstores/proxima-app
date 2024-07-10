@@ -1,24 +1,13 @@
 import { sequence } from 'astro:middleware';
-import { shopifyRouteCompatibility } from './route';
-import {
-  postLogin,
-  postLogout,
-  postCreateAccount,
-  validateAccountResetKey,
-  postAccountReset,
-  ensureAccountLoggedIn,
-  postCreateOrUpdateAddress,
-} from './account';
-import { restoreThemeRequestData } from './form';
+import globalRoutes from './route';
+import { formRoutes, restoreThemeRequestData } from './form';
+import accountRoutes from './account';
+import cartRoutes from './cart';
 
 export const onRequest = sequence(
-  shopifyRouteCompatibility,
-  postLogin,
-  postLogout,
-  postCreateAccount,
-  validateAccountResetKey,
-  postAccountReset,
-  ensureAccountLoggedIn,
-  postCreateOrUpdateAddress,
+  ...globalRoutes,
+  ...accountRoutes,
+  ...cartRoutes,
+  ...formRoutes,
   restoreThemeRequestData,
 );

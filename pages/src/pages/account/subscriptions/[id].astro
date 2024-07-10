@@ -9,8 +9,6 @@ const { id } = Astro.params;
 <ThemePage
   id="account/subscription"
   required="subscription.id"
-  titleKey="pages.account_subscription.title"
-  descriptionKey="pages.account_subscription.description"
   getData={(swell: Swell) => ({
     subscription: new AccountSubscriptionResource(swell, id as string),
   })}

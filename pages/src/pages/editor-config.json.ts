@@ -4,7 +4,6 @@ import { handleServerRequest } from '@/utils/server';
 const defaultPageId = 'index';
 
 export const GET = handleServerRequest(
-  defaultPageId,
   async ({ swell, theme, params }: any) => {
     const pageTemplate = (await theme.renderPageTemplate(
       params.pageId || defaultPageId,

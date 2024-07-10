@@ -93,23 +93,23 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
     return {
       account_addresses_url: this.getPageRouteUrl('account/addresses'),
       account_login_url: this.getPageRouteUrl('account/login'),
-      account_logout_url: this.getPageRouteUrl('account/logout'),
       account_recover_url: this.getPageRouteUrl('account/recover'),
       account_register_url: this.getPageRouteUrl('account/signup'),
       account_url: this.getPageRouteUrl('account/index'),
       all_products_collection_url: this.getPageRouteUrl('products/index'),
-      cart_add_url: this.getPageRouteUrl('cart/add'),
-      cart_change_url: this.getPageRouteUrl('cart/change'),
-      cart_url: this.getPageRouteUrl('cart/index'),
+      cart_url: this.getPageRouteUrl('cart'),
       collections_url: this.getPageRouteUrl('categories/index'),
-      predictive_search_url: this.getPageRouteUrl('search/suggest'),
-      product_recommendations_url: this.getPageRouteUrl('products/index'),
       root_url: this.getPageRouteUrl('index'),
       search_url: this.getPageRouteUrl('search'),
 
-      // TODO: implement support for these
-      // cart_clear_url: this.getPageRouteUrl('cart/clear'),
-      // cart_update_url: this.getPageRouteUrl('cart/update'),
+      // Middleware or server routes
+      account_logout_url: '/account/logout',
+      cart_add_url: '/cart/add',
+      cart_change_url: '/cart/update',
+      cart_clear_url: '/cart/clear',
+      cart_update_url: '/cart/update', // Same as cart_change_url with different params
+      predictive_search_url: '/search/suggest',
+      product_recommendations_url: null, // N/A
     };
   }
 
@@ -206,8 +206,8 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
   getFormResourceMap() {
     return [
       {
-        pageId: 'cart/add',
-        formType: 'product',
+        type: 'cart_add',
+        shopifyType: 'product',
         clientHtml: () => {
           return `
             <input type="hidden" name="product_id" value="{{ product.id }}" />
@@ -221,7 +221,6 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           const variant_id = id && id !== product_id ? id : undefined;
 
           return {
-            ...params,
             prevItems,
             variant_id,
           };
@@ -230,22 +229,31 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           const { prevItems } = params;
 
           if (cart) {
-            // Return last added/updated item
-            const item = findUpdatedCartItem(prevItems, cart.items);
+            // Return last added/updated item where quantity changed
+            const cartItems = await cart.items;
+
+            const item = (cartItems || []).find((newItem: any) => {
+              const prevItem = (prevItems || []).find(
+                (item: any) => item.id === newItem.id,
+              );
+              return !prevItem || prevItem.quantity !== newItem.quantity;
+            });
+
             return item;
           }
         },
       },
       {
-        pageId: 'cart/change',
+        type: 'cart_update',
+        shopifyType: null, // No Shopify equivalent, manually executed by the cart_update handler
         serverParams: async ({ params, theme }: any) => {
           const { line, quantity } = params;
 
           // Convert line number to item_id
           const prevCartItems = await theme.globals.cart?.items;
           const prevItem = prevCartItems?.[line - 1];
+
           return {
-            ...params,
             prevItem,
             item_id: prevItem?.id,
             quantity: Number(quantity),
@@ -258,6 +266,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             const updatedCartItem = cart.items?.find(
               (item: any) => item.id === item_id,
             );
+
             // Indicate which item was updated or removed
             return {
               ...cart,
@@ -268,31 +277,68 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         },
       },
       {
-        formType: 'customer_login',
+        type: 'localization',
+        shopifyType: null, // Same form type as Shopify
         serverParams: ({ params }: any) => {
-          const { customer } = params;
+          const { country_code, locale_code } = params;
+
           return {
-            ...params,
-            email: customer?.email,
-            password: customer?.password,
+            currency: country_code,
+            locale: locale_code,
           };
         },
       },
       {
-        formType: 'create_customer',
+        type: 'account_login',
+        shopifyType: 'customer_login',
         serverParams: ({ params }: any) => {
           const { customer } = params;
 
           return {
-            first_name: customer?.first_name,
-            last_name: customer?.last_name,
-            email: customer?.email,
-            password: customer?.password,
+            account: {
+              email: customer?.email,
+              password: customer?.password,
+            },
           };
         },
       },
       {
-        formType: 'reset_customer_password',
+        type: 'account_create',
+        shopifyType: 'create_customer',
+        serverParams: ({ params }: any) => {
+          const { customer } = params;
+
+          return {
+            account: {
+              first_name: customer?.first_name,
+              last_name: customer?.last_name,
+              email: customer?.email,
+              password: customer?.password,
+            },
+          };
+        },
+      },
+      {
+        type: 'account_subscribe',
+        shopifyType: 'customer',
+        serverParams: ({ params }: any) => {
+          const { contact } = params;
+
+          return {
+            account: {
+              email: contact?.email,
+              email_optin: true,
+            },
+          };
+        },
+      },
+      {
+        type: 'account_password_recover',
+        shopifyType: 'recover_customer_password',
+      },
+      {
+        type: 'account_password_reset',
+        shopifyType: 'reset_customer_password',
         clientHtml: () => {
           return `
             <input type="hidden" name="password_reset_key" value="{{ password_reset_key }}" />
@@ -302,14 +348,14 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           const { customer } = params;
 
           return {
-            ...params,
             password: customer?.password,
             password_confirmation: customer?.password_confirmation,
           };
         },
       },
       {
-        formType: 'customer_address',
+        type: 'account_address',
+        shopifyType: 'customer_address',
         clientHtml: (_scope: any, arg: any) => {
           if (arg?.id) {
             return `
@@ -323,27 +369,21 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           const hasName = address?.first_name || address?.last_name;
 
           return {
-            ...params,
-            first_name: address?.first_name || (!hasName ? 'test' : ''),
-            last_name: address?.last_name || (!hasName ? 'test' : ''),
-            company: address?.company,
-            address1: address?.address1,
-            address2: address?.address2,
-            city: address?.city,
-            country: address?.country,
-            state: address?.province,
-            zip: address?.zip,
-            phone: address?.phone,
+            address: {
+              first_name: address?.first_name || (!hasName ? 'test' : ''),
+              last_name: address?.last_name || (!hasName ? 'test' : ''),
+              company: address?.company,
+              address1: address?.address1,
+              address2: address?.address2,
+              city: address?.city,
+              country: address?.country,
+              state: address?.province,
+              zip: address?.zip,
+              phone: address?.phone,
+            },
           };
         },
       },
     ];
   }
-}
-
-function findUpdatedCartItem(prevItems: any[], newItems: any[]) {
-  return (newItems || []).find((newItem) => {
-    const prevItem = (prevItems || []).find((item) => item.id === newItem.id);
-    return !prevItem || prevItem.quantity !== newItem.quantity;
-  });
 }

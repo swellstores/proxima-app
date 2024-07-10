@@ -18,16 +18,11 @@
     {
       "id": "products/product",
       "label": "Product",
-      "url": "/products/{slug}",
+      "url": "/products/:slug",
       "group": "store",
       "icon": "tag",
       "templates": true,
       "collection": "products"
-    },
-    {
-      "id": "variants/variant",
-      "url": "/variants/{slug}",
-      "ajax": true
     },
     {
       "id": "categories/index",
@@ -39,7 +34,7 @@
     {
       "id": "categories/category",
       "label": "Category",
-      "url": "/categories/{slug}",
+      "url": "/categories/:slug",
       "group": "store",
       "icon": "tags",
       "templates": true,
@@ -48,7 +43,7 @@
     {
       "id": "pages/page",
       "label": "Page",
-      "url": "/pages/{slug}",
+      "url": "/pages/:slug",
       "group": "store",
       "icon": "page",
       "templates": true,
@@ -57,7 +52,7 @@
     {
       "id": "blogs/blog",
       "label": "Blog post",
-      "url": "/blogs/{category}/{slug}",
+      "url": "/blogs/:category/:slug",
       "group": "store",
       "icon": "rss",
       "templates": true,
@@ -66,7 +61,7 @@
     {
       "id": "blogs/category",
       "label": "Blog category",
-      "url": "/blogs/{slug}",
+      "url": "/blogs/:slug",
       "group": "store",
       "icon": "rss",
       "templates": true,
@@ -95,11 +90,6 @@
       "icon": "user"
     },
     {
-      "id": "account/logout",
-      "url": "/account/logout",
-      "ajax": true
-    },
-    {
       "id": "account/signup",
       "label": "Customer signup",
       "url": "/account/signup",
@@ -124,7 +114,7 @@
     {
       "id": "account/order",
       "label": "Customer order",
-      "url": "/account/orders/{id}",
+      "url": "/account/orders/:id",
       "group": "customer",
       "icon": "shopping-cart",
       "collection": "orders"
@@ -132,7 +122,7 @@
     {
       "id": "account/subscription",
       "label": "Customer subscription",
-      "url": "/account/subscriptions/{id}",
+      "url": "/account/subscriptions/:id",
       "group": "customer",
       "icon": "shopping-cart",
       "collection": "subscriptions"
@@ -146,26 +136,6 @@
       "collection": "carts"
     },
     {
-      "id": "cart/add",
-      "url": "/cart/add",
-      "ajax": true
-    },
-    {
-      "id": "cart/change",
-      "url": "/cart/change",
-      "ajax": true
-    },
-    {
-      "id": "cart/clear",
-      "url": "/cart/clear",
-      "ajax": true
-    },
-    {
-      "id": "cart/update",
-      "url": "/cart/update",
-      "ajax": true
-    },
-    {
       "id": "checkout",
       "label": "Checkout",
       "url": "/checkout",
@@ -175,7 +145,7 @@
     },
     {
       "id": "404",
-      "label": "404",
+      "label": "404 Page Not Found",
       "url": "/404",
       "group": "other",
       "icon": "page"
@@ -183,7 +153,7 @@
     {
       "id": "gift-card",
       "label": "Gift card",
-      "url": "/gift-card/{code}",
+      "url": "/gift-card/:code",
       "group": "other",
       "icon": "gift",
       "collection": "giftcards"
@@ -194,74 +164,6 @@
       "url": "/search",
       "group": "other",
       "icon": "search"
-    },
-    {
-      "id": "search/suggest",
-      "url": "/search/suggest",
-      "ajax": true
-    }
-  ],
-  "forms": [
-    {
-      "id": "activate_customer_password",
-      "url": "/account/activate",
-      "return_url": "/account"
-    },
-    {
-      "id": "cart",
-      "url": "/cart/checkout"
-    },
-    {
-      "id": "contact",
-      "url": "/contact#contact_form"
-    },
-    {
-      "id": "create_customer",
-      "url": "/account"
-    },
-    {
-      "id": "currency",
-      "url": "/cart/update",
-      "return_url": "/cart"
-    },
-    {
-      "id": "customer",
-      "url": "/contact#contact_form",
-      "return_url": "/contact"
-    },
-    {
-      "id": "customer_address",
-      "url": "/account/addresses"
-    },
-    {
-      "id": "customer_login",
-      "url": "/account/login",
-      "return_url": "/account"
-    },
-    {
-      "id": "guest_login",
-      "url": "/account/login",
-      "return_url": "/account"
-    },
-    {
-      "id": "localization",
-      "url": "/localization"
-    },
-    {
-      "id": "product",
-      "url": "/cart/add"
-    },
-    {
-      "id": "reset_customer_password",
-      "url": "/account/recover"
-    },
-    {
-      "id": "recover_customer_password",
-      "url": "/account/recover"
-    },
-    {
-      "id": "storefront_password",
-      "url": "/password"
     }
   ]
 }
