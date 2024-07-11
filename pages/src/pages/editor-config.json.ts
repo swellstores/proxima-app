@@ -1,4 +1,4 @@
-import { resolveAsyncResources } from '@swell/storefrontjs';
+import { SwellTheme, resolveAsyncResources } from '@swell/storefrontjs';
 import { handleServerRequest } from '@/utils/server';
 
 const defaultPageId = 'index';
@@ -23,36 +23,28 @@ export const GET = handleServerRequest(
       allSections,
       pageSections,
       layoutSectionGroups,
-      globals: getEditorThemeGlobals(theme.globals),
+      globals: getEditorThemeGlobals(theme),
       swellClientProps: getSwellClientProps(swellClientProps),
     };
   },
 );
 
-function getEditorThemeGlobals(globals: SwellData) {
-  const {
-    settings,
-    menus,
-    page,
-    localeCode,
-    storefrontConfig,
-    shopify_compatibility,
-    configs,
-  } = globals;
+function getEditorThemeGlobals(theme: SwellTheme) {
+  const { settings, menus, page, shopify_compatibility, configs } =
+    theme.globals || {};
 
-  const { editor, translations, theme, presets } = configs;
+  const { editor, translations, theme: themeJson, presets } = configs;
 
   return {
     settings,
     menus,
     page,
-    localeCode,
-    storefrontConfig,
+    storefrontConfig: theme.props, // TODO: rename this for editor
     shopify_compatibility,
     configs: {
       editor,
       translations,
-      theme,
+      theme: themeJson,
       presets,
     },
   };

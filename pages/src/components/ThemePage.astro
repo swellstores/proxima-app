@@ -131,7 +131,7 @@ try {
 
 const pageProps = { ...props, ...pageData };
 const layoutProps = {
-  page_title: pageTitle || pageData?.title || theme.globals?.store?.name,
+  page_title: pageTitle || pageData?.title || theme.globals.store?.name,
   page_description: pageDescription || pageData?.description,
   content_for_header: theme.getContentForHeader(),
   props,

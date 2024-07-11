@@ -3,7 +3,7 @@ import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
 import forms from '@/forms';
 import resources from '@/resources';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
-import storefrontConfig from '../storefront.json';
+import swellConfig from '../../swell.json';
 
 export function initSwell(
   context: AstroGlobal | APIContext,
@@ -11,6 +11,7 @@ export function initSwell(
 ) {
   return new Swell({
     url: context.url,
+    config: swellConfig,
     serverHeaders: context.request.headers,
     getCookie: (name: string) => {
       //getCookie(context, 'test-astro');
@@ -82,7 +83,6 @@ export function initTheme(swell: Swell) {
   return new SwellTheme(swell, {
     forms,
     resources,
-    storefrontConfig,
     shopifyCompatibilityClass: StorefrontShopifyCompatibility,
   });
 }

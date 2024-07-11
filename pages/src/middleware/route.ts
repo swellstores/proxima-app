@@ -1,5 +1,4 @@
-import { handleMiddlewareRequest } from '@/utils/server';
-import storefrontConfig from '../../storefront.json';
+import { handleMiddlewareRequest, SwellServerContext } from '@/utils/server';
 import { pathToRegexp } from 'path-to-regexp';
 
 export const getThemePage = handleMiddlewareRequest(
@@ -14,11 +13,11 @@ export const postThemePage = handleMiddlewareRequest(
   initThemePageHandler,
 );
 
-async function initThemePageHandler(context: any) {
+async function initThemePageHandler(context: SwellServerContext) {
   const { theme, redirect, url } = context;
 
-  if (storefrontConfig.pages instanceof Array) {
-    const page = storefrontConfig.pages.find((page) => {
+  if (theme.props.pages instanceof Array) {
+    const page = theme.props.pages.find((page: any) => {
       const regexp = pathToRegexp(page.url);
       return Boolean(regexp.exec(url.pathname));
     });

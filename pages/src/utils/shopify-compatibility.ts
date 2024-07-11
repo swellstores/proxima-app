@@ -1,5 +1,5 @@
 import {
-  Swell,
+  SwellTheme,
   ShopifyCompatibility,
   ShopifyArticle,
   ShopifyBlog,
@@ -29,11 +29,9 @@ import {
   VariantResource,
 } from '../resources';
 
-import storefrontConfig from '../../storefront.json';
-
 export default class StorefrontShopifyCompatibility extends ShopifyCompatibility {
-  constructor(swell: Swell) {
-    super(swell);
+  constructor(theme: SwellTheme) {
+    super(theme);
   }
 
   getPageType(pageId: string) {
@@ -85,7 +83,9 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
 
   getPageRouteUrl(pageId: string) {
     return (
-      storefrontConfig.pages?.find((page) => page.id === pageId)?.url || ''
+      (this as ShopifyCompatibility).theme.props.pages?.find(
+        (page: any) => page.id === pageId,
+      )?.url || ''
     );
   }
 
