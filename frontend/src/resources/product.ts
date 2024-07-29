@@ -2,7 +2,7 @@ import {
   Swell,
   SwellStorefrontRecord,
   SwellStorefrontCollection,
-} from '@swell/storefrontjs';
+} from '@swell/storefront-sdk';
 
 export class ProductResource extends SwellStorefrontRecord {
   constructor(swell: Swell, slug: string, query: SwellData = {}) {
@@ -21,7 +21,10 @@ export const SORT_OPTIONS = [
   { value: `name_desc`, name: 'Product name, Z-A', query: 'name desc' },
 ];
 
-export async function getFilteredProducts(swell: Swell, productQuery?: SwellData) {
+export async function getFilteredProducts(
+  swell: Swell,
+  productQuery?: SwellData,
+) {
   const { page, limit } = swell.queryParams;
   const resource = new SwellStorefrontCollection(
     swell,

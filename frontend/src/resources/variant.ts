@@ -1,4 +1,4 @@
-import { Swell, SwellStorefrontRecord } from '@swell/storefrontjs';
+import { Swell, SwellStorefrontRecord } from '@swell/storefront-sdk';
 
 export class VariantResource extends SwellStorefrontRecord {
   public product: SwellStorefrontRecord;

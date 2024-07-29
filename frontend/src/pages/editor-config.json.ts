@@ -1,10 +1,14 @@
-import { SwellTheme, resolveAsyncResources } from '@swell/storefrontjs';
+import { SwellTheme, resolveAsyncResources } from '@swell/storefront-sdk';
 import { handleServerRequest } from '@/utils/server';
 
 const defaultPageId = 'index';
 
 export const GET = handleServerRequest(
   async ({ swell, theme, params }: any) => {
+    if (!theme.pageId) {
+      await theme.initGlobals(params.pageId || defaultPageId);
+    }
+
     const pageTemplate = (await theme.renderPageTemplate(
       params.pageId || defaultPageId,
     )) as unknown;

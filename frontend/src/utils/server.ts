@@ -4,7 +4,7 @@ import {
   SwellTheme,
   StorefrontResource,
   dehydrateSwellRefsInStorefrontResources,
-} from '@swell/storefrontjs';
+} from '@swell/storefront-sdk';
 import {
   initSwell,
   initTheme,
