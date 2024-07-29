@@ -5,172 +5,166 @@
   "version": "0.1.0",
   "description": "Official storefront app for Swell",
   "properties": {
-    "type": "theme",
-    "shopify_compatibility": true,
-    "pages": [
-      {
-        "id": "index",
-        "label": "Home",
-        "url": "/",
-        "icon": "home"
+    "theme": {
+      "required": true,
+      "default": "surge",
+      "compatibility": {
+        "version": ">=0.1.0",
+        "conflicts": {
+          "exclude_files": ["theme/config/**", "theme/templates/**"]
+        },
+        "shopify": true
       },
-      {
-        "id": "products/index",
-        "label": "Product list",
-        "url": "/products",
-        "group": "store",
-        "icon": "tag"
-      },
-      {
-        "id": "products/product",
-        "label": "Product",
-        "url": "/products/:slug",
-        "group": "store",
-        "icon": "tag",
-        "templates": true,
-        "collection": "products"
-      },
-      {
-        "id": "categories/index",
-        "label": "Category list",
-        "url": "/categories",
-        "group": "store",
-        "icon": "tags"
-      },
-      {
-        "id": "categories/category",
-        "label": "Category",
-        "url": "/categories/:slug",
-        "group": "store",
-        "icon": "tags",
-        "templates": true,
-        "collection": "categories"
-      },
-      {
-        "id": "pages/page",
-        "label": "Page",
-        "url": "/pages/:slug",
-        "group": "store",
-        "icon": "page",
-        "templates": true,
-        "collection": "content/pages"
-      },
-      {
-        "id": "blogs/blog",
-        "label": "Blog post",
-        "url": "/blogs/:category/:slug",
-        "group": "store",
-        "icon": "rss",
-        "templates": true,
-        "collection": "content/blogs"
-      },
-      {
-        "id": "blogs/category",
-        "label": "Blog category",
-        "url": "/blogs/:slug",
-        "group": "store",
-        "icon": "rss",
-        "templates": true,
-        "collection": "content/blog-categories"
-      },
-      {
-        "id": "account/index",
-        "label": "Customer account",
-        "url": "/account",
-        "group": "customer",
-        "icon": "user",
-        "collection": "accounts"
-      },
-      {
-        "id": "account/activate",
-        "label": "Customer account activation",
-        "url": "/account/activate",
-        "group": "customer",
-        "icon": "user"
-      },
-      {
-        "id": "account/login",
-        "label": "Customer login",
-        "url": "/account/login",
-        "group": "customer",
-        "icon": "user"
-      },
-      {
-        "id": "account/signup",
-        "label": "Customer signup",
-        "url": "/account/signup",
-        "group": "customer",
-        "icon": "user"
-      },
-      {
-        "id": "account/recover",
-        "label": "Customer password recovery",
-        "url": "/account/recover",
-        "group": "customer",
-        "icon": "user"
-      },
-      {
-        "id": "account/addresses",
-        "label": "Customer addresses",
-        "url": "/account/addresses",
-        "group": "customer",
-        "icon": "map-marker",
-        "collection": "accounts"
-      },
-      {
-        "id": "account/order",
-        "label": "Customer order",
-        "url": "/account/orders/:id",
-        "group": "customer",
-        "icon": "shopping-cart",
-        "collection": "orders"
-      },
-      {
-        "id": "account/subscription",
-        "label": "Customer subscription",
-        "url": "/account/subscriptions/:id",
-        "group": "customer",
-        "icon": "shopping-cart",
-        "collection": "subscriptions"
-      },
-      {
-        "id": "cart",
-        "label": "Cart",
-        "url": "/cart",
-        "group": "checkout",
-        "icon": "shopping-cart",
-        "collection": "carts"
-      },
-      {
-        "id": "checkout",
-        "label": "Checkout",
-        "url": "/checkout",
-        "group": "checkout",
-        "icon": "shopping-cart",
-        "collection": "carts"
-      },
-      {
-        "id": "404",
-        "label": "404 Page Not Found",
-        "url": "/404",
-        "group": "other",
-        "icon": "page"
-      },
-      {
-        "id": "gift-card",
-        "label": "Gift card",
-        "url": "/gift-card/:code",
-        "group": "other",
-        "icon": "gift",
-        "collection": "giftcards"
-      },
-      {
-        "id": "search",
-        "label": "Search",
-        "url": "/search",
-        "group": "other",
-        "icon": "search"
-      }
-    ]
+      "pages": [
+        {
+          "id": "index",
+          "label": "Home",
+          "url": "/",
+          "icon": "home"
+        },
+        {
+          "id": "products/index",
+          "label": "Product list",
+          "url": "/products",
+          "icon": "tag"
+        },
+        {
+          "id": "products/product",
+          "label": "Product",
+          "url": "/products/:slug",
+          "icon": "tag",
+          "templates": true,
+          "collection": "products"
+        },
+        {
+          "id": "categories/index",
+          "label": "Category list",
+          "url": "/categories",
+          "icon": "tags"
+        },
+        {
+          "id": "categories/category",
+          "label": "Category",
+          "url": "/categories/:slug",
+          "icon": "tags",
+          "templates": true,
+          "collection": "categories"
+        },
+        {
+          "id": "pages/page",
+          "label": "Page",
+          "url": "/pages/:slug",
+          "icon": "page",
+          "templates": true,
+          "collection": "content/pages"
+        },
+        {
+          "id": "blogs/blog",
+          "label": "Blog post",
+          "url": "/blogs/:category/:slug",
+          "icon": "rss",
+          "templates": true,
+          "collection": "content/blogs"
+        },
+        {
+          "id": "blogs/category",
+          "label": "Blog category",
+          "url": "/blogs/:slug",
+          "icon": "rss",
+          "templates": true,
+          "collection": "content/blog-categories"
+        },
+        {
+          "id": "account/index",
+          "label": "Customer account",
+          "url": "/account",
+          "group": "customer",
+          "icon": "user",
+          "collection": "accounts"
+        },
+        {
+          "id": "account/activate",
+          "label": "Customer account activation",
+          "url": "/account/activate",
+          "group": "customer",
+          "icon": "user"
+        },
+        {
+          "id": "account/login",
+          "label": "Customer login",
+          "url": "/account/login",
+          "group": "customer",
+          "icon": "user"
+        },
+        {
+          "id": "account/signup",
+          "label": "Customer signup",
+          "url": "/account/signup",
+          "group": "customer",
+          "icon": "user"
+        },
+        {
+          "id": "account/recover",
+          "label": "Customer password recovery",
+          "url": "/account/recover",
+          "group": "customer",
+          "icon": "user"
+        },
+        {
+          "id": "account/addresses",
+          "label": "Customer addresses",
+          "url": "/account/addresses",
+          "group": "customer",
+          "icon": "map-marker",
+          "collection": "accounts"
+        },
+        {
+          "id": "account/order",
+          "label": "Customer order",
+          "url": "/account/orders/:id",
+          "group": "customer",
+          "icon": "shopping-cart",
+          "collection": "orders"
+        },
+        {
+          "id": "account/subscription",
+          "label": "Customer subscription",
+          "url": "/account/subscriptions/:id",
+          "group": "customer",
+          "icon": "shopping-cart",
+          "collection": "subscriptions"
+        },
+        {
+          "id": "cart",
+          "label": "Cart",
+          "url": "/cart",
+          "group": "checkout",
+          "icon": "shopping-cart",
+          "collection": "carts"
+        },
+        {
+          "id": "404",
+          "label": "404 Page Not Found",
+          "url": "/404",
+          "group": "other",
+          "icon": "page"
+        },
+        {
+          "id": "gift-card",
+          "label": "Gift card",
+          "url": "/gift-card/:code",
+          "group": "other",
+          "icon": "gift",
+          "collection": "giftcards"
+        },
+        {
+          "id": "search",
+          "label": "Search",
+          "url": "/search",
+          "group": "other",
+          "icon": "search"
+        }
+      ]
+    }
   }
 }
