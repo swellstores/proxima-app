@@ -1,4 +1,4 @@
-import { SwellTheme, resolveAsyncResources } from '@swell/storefrontjs';
+import { SwellTheme, resolveAsyncResources } from '@swell/storefront-sdk';
 import { handleServerRequest } from '@/utils/server';
 
 const defaultPageId = 'index';

@@ -6,7 +6,7 @@ import React, {
   Fragment,
 } from 'react';
 import ReactDOMServer from 'react-dom/server';
-import { EasyblocksEditor } from '@easyblocks/editor';
+import { EasyblocksEditor } from '@swell/easyblocks-editor';
 import {
   Parser as HtmlToReactParser,
   ProcessNodeDefinitions,
@@ -21,7 +21,7 @@ import {
   getEasyblocksComponentDefinitions,
   getThemeSettingsFromProps,
   getSectionSettingsFromProps,
-} from '@swell/storefrontjs';
+} from '@swell/storefront-sdk';
 import { initTheme } from '@/swell';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 

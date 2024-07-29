@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { EasyblocksEditor } from "@easyblocks/editor";
+import React, { useState, useEffect } from 'react';
+import { EasyblocksEditor } from '@swell/easyblocks-editor';
 import {
   getEasyblocksPagePropsWithConfigs,
   getEasyblocksComponentDefinitions,
-} from '@swell/storefrontjs';
+} from '@swell/storefront-sdk';
 
 import { TestMenuWidget } from './TestMenuWidget';
 

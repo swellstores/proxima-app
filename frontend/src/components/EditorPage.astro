@@ -4,7 +4,7 @@ import {
   SwellTheme,
   resolveAsyncResources,
   removeCircularReferences,
-} from '@swell/storefrontjs';
+} from '@swell/storefront-sdk';
 import EasyblocksPage from './EasyblocksPage.jsx';
 
 export interface Props {
@@ -42,5 +42,5 @@ swellClientProps = removeCircularReferences(swellClientProps);
   layoutProps={layoutProps}
   themeGlobals={themeGlobals}
   swellClientProps={swellClientProps}
-  client:load
+  client:only="react"
 />
