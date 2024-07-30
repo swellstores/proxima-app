@@ -6,12 +6,12 @@ import react from '@astrojs/react';
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
-  adapter: cloudflare({
-    runtime: {
-      mode: 'local',
-      type: 'pages',
-    },
-  }),
+  // adapter: cloudflare({
+  //   runtime: {
+  //     mode: 'local',
+  //     type: 'pages',
+  //   },
+  // }),
   integrations: [react()],
   devToolbar: {
     enabled: false,

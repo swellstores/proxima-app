@@ -17,7 +17,7 @@
     "@astrojs/check": "^0.5.1",
     "@astrojs/cloudflare": "^9.0.0",
     "@astrojs/react": "^3.0.10",
-    "@swell/easyblocks-editor": "^1.0.10",
+    "@swell/easyblocks-editor": "^1.0.12",
     "@swell/storefront-sdk": "^1.0.6",
     "astro": "^4.9.2",
     "color": "^4.2.3",

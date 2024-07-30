@@ -67,10 +67,11 @@ export async function getProductFiltersByQuery(
   swell: Swell,
   query: SwellData = {},
 ) {
-  const filters = await swell.get('/products/:filters', {
-    ...query,
-    sort: undefined,
-  });
+  const filters =
+    (await swell.get('/products/:filters', {
+      ...query,
+      sort: undefined,
+    })) || [];
 
   for (const filter of filters) {
     filter.param_name = `filter_${filter.id}`;
