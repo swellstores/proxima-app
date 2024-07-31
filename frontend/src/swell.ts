@@ -13,8 +13,8 @@ export function initSwell(
     url: context.url,
     config: swellConfig,
     serverHeaders: context.request.headers,
+    workerEnv: (context.locals as any).runtime?.env,
     getCookie: (name: string) => {
-      //getCookie(context, 'test-astro');
       return getCookie(context, name);
     },
     setCookie: (
@@ -24,7 +24,6 @@ export function initSwell(
       swell?: Swell,
     ) => {
       if (canUpdateCookies(context, swell)) {
-        //setCookie(context, 'test-astro', `${Date.now()}`, options);
         return setCookie(context, name, value, options);
       }
     },

@@ -12,7 +12,7 @@ import {
   setCookie,
   deleteCookie,
 } from '@/swell';
-import micromatch from 'micromatch';
+import { minimatch } from 'minimatch';
 import { match } from 'path-to-regexp';
 import qs from 'qs';
 
@@ -256,9 +256,9 @@ function getMiddlewareMatcher(urlParam: string | string[] | Function) {
 
   try {
     const urlMatchers = urlParamArr.map((urlMatch) =>
-      // Use micromatch for negation support
+      // Use minimatch for negation support
       urlMatch.includes('!')
-        ? (url: string) => micromatch.isMatch(url, urlMatch)
+        ? (url: string) => minimatch(url, urlMatch)
         : match(urlMatch),
     );
 

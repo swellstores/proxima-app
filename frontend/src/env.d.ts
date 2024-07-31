@@ -1,7 +1,15 @@
 /// <reference types="astro/client" />
 
+type KVNamespace = import('@cloudflare/workers-types').KVNamespace;
+
+type ENV = {
+  THEME: KVNamespace;
+};
+
+type Runtime = import('@astrojs/cloudflare').Runtime<ENV>;
+
 declare namespace App {
-  interface Locals {
+  interface Locals extends Runtime {
     swell?: Swell;
     theme?: SwellTheme;
   }

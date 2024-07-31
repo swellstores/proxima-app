@@ -9,29 +9,32 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro check && astro build",
+    "build:watch": "nodemon -e astro,ts,tsx,json --watch ./src --exec astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "pages:deploy": "npx wrangler pages deploy dist/"
+    "frontend:preview": "npx wrangler pages dev dist/",
+    "frontend:preview:build": "astro build && npx wrangler pages dev dist/",
+    "frontend:deploy": "npx wrangler pages deploy dist/"
   },
   "dependencies": {
-    "@astrojs/check": "^0.5.1",
-    "@astrojs/cloudflare": "^9.0.0",
-    "@astrojs/react": "^3.0.10",
-    "@swell/easyblocks-editor": "^1.0.10",
-    "@swell/storefront-sdk": "^1.0.6",
-    "astro": "^4.9.2",
+    "@astrojs/check": "^0.9.0",
+    "@astrojs/cloudflare": "^11.0.1",
+    "@astrojs/react": "^3.6.1",
+    "@swell/easyblocks-editor": "^1.0.12",
+    "@swell/storefront-sdk": "^1.0.12",
+    "astro": "^4.12.3",
     "color": "^4.2.3",
     "flatted": "^3.3.1",
     "html-to-react": "^1.7.0",
     "liquidjs": "^10.10.1",
     "lodash": "^4.17.21",
     "micromatch": "^4.0.7",
+    "minimatch": "^10.0.1",
     "path-to-regexp": "^7.0.0",
     "qs": "^6.12.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "strftime": "^0.10.2",
-    "swell-js": "^4.0.3",
     "textdiff-patch": "^1.1.8",
     "typescript": "^5.3.3"
   },
@@ -40,6 +43,7 @@
     "@types/micromatch": "^4.0.9",
     "@types/qs": "^6.9.15",
     "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21"
+    "@types/react-dom": "^18.2.21",
+    "nodemon": "^3.1.4"
   }
 }
