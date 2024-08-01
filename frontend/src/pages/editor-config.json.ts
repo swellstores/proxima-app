@@ -3,35 +3,31 @@ import { handleServerRequest } from '@/utils/server';
 
 const defaultPageId = 'index';
 
-export const GET = handleServerRequest(
-  async ({ swell, theme, params }: any) => {
-    if (!theme.pageId) {
-      await theme.initGlobals(params.pageId || defaultPageId);
-    }
+export const GET = handleServerRequest(async ({ swell, theme, params }: any) => {
+  await theme.initGlobals(params.pageId || defaultPageId);
 
-    const pageTemplate = (await theme.renderPageTemplate(
-      params.pageId || defaultPageId,
-    )) as unknown;
+  const pageTemplate = (await theme.renderPageTemplate(
+    params.pageId || defaultPageId,
+  )) as unknown;
 
-    let allSections = await theme.getAllSections();
-    let pageSections = await theme.getPageSections(pageTemplate, false);
-    let layoutSectionGroups = await theme.getLayoutSectionGroups(false);
+  let allSections = await theme.getAllSections();
+  let pageSections = await theme.getPageSections(pageTemplate, false);
+  let layoutSectionGroups = await theme.getLayoutSectionGroups(false);
 
-    pageSections = await resolveAsyncResources(pageSections);
-    layoutSectionGroups = await resolveAsyncResources(layoutSectionGroups);
+  pageSections = await resolveAsyncResources(pageSections);
+  layoutSectionGroups = await resolveAsyncResources(layoutSectionGroups);
 
-    const swellClientProps = swell.getClientProps();
+  const swellClientProps = swell.getClientProps();
 
-    return {
-      pageTemplate,
-      allSections,
-      pageSections,
-      layoutSectionGroups,
-      globals: getEditorThemeGlobals(theme),
-      swellClientProps: getSwellClientProps(swellClientProps),
-    };
-  },
-);
+  return {
+    pageTemplate,
+    allSections,
+    pageSections,
+    layoutSectionGroups,
+    globals: getEditorThemeGlobals(theme),
+    swellClientProps: getSwellClientProps(swellClientProps),
+  };
+});
 
 function getEditorThemeGlobals(theme: SwellTheme) {
   const { settings, menus, page, shopify_compatibility, configs } =

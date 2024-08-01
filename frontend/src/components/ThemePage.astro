@@ -122,9 +122,7 @@ try {
     pageError = {
       title: err.title,
       status: err.status,
-      description: swell.isDevelopment
-        ? err.description || err.message
-        : undefined,
+      description: swell.isPreview ? err.description || err.message : undefined,
     };
   }
 }
