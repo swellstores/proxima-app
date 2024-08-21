@@ -385,17 +385,6 @@ export default function EasyblocksPage(props: any) {
     );
 
     setEasyblocksConfig(easyblocksConfig);
-
-    window.parent.postMessage(
-      {
-        type: '@easyblocks-editor/canvas-page-route',
-        payload: {
-          pageId,
-          pageRoute: window.location.pathname,
-        },
-      },
-      '*',
-    );
   }, []);
 
   if (!easyblocksConfig) {
