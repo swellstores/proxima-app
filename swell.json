@@ -4,14 +4,13 @@
   "type": "storefront",
   "version": "0.1.0",
   "description": "Official storefront app for Swell",
-  "properties": {
+  "storefront": {
     "theme": {
-      "required": true,
-      "default": "surge",
+      "provider": "app",
       "compatibility": {
-        "version": ">=0.1.0",
+        "version": "*",
         "conflicts": {
-          "exclude_files": ["theme/config/**", "theme/templates/**"]
+          "exclude_files": ["theme/config/**", "theme/templates/**", "theme/sections/**"]
         },
         "shopify": true
       },
