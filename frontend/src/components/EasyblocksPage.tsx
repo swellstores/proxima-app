@@ -82,14 +82,20 @@ function getRootComponent(props: any, theme: SwellTheme) {
         })
         .then((output: any) => {
           const RootContext = createContext(null);
+
           const RootElements = htmlToReactParser.parseWithInstructions(
             output,
             isValidNode,
             getLayoutProcessingInstructions(RootContext, stringOutput),
           );
+
           const Content = RootElements.find(
             (element: any) => element.type === ContentWrapper,
-          ) || <div />;
+          ) || (
+            // TODO: nicer UI for rendering this error
+            <div>Theme layout is missing a valid &lt;html&gt; tag</div>
+          );
+
           setContent(Content);
           setRootContext(RootContext);
         });
