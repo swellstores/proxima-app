@@ -1,4 +1,4 @@
-import { SwellTheme } from '@swell/storefront-sdk';
+import { SwellTheme } from '@swell/apps-sdk';
 import { SwellServerContext } from '@/utils/server';
 
 export async function accountLogin(context: SwellServerContext) {

@@ -3,7 +3,7 @@ import {
   StorefrontResource,
   SwellStorefrontRecord,
   SwellStorefrontCollection,
-} from '@swell/storefront-sdk';
+} from '@swell/apps-sdk';
 import { getFilteredProducts } from './product';
 
 export class CategoryResource extends SwellStorefrontRecord {

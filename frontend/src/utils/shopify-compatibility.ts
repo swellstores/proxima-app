@@ -15,7 +15,7 @@ import {
   ShopifyPage,
   ShopifySearch,
   ShopifyVariant,
-} from '@swell/storefront-sdk';
+} from '@swell/apps-sdk';
 
 import {
   AccountResource,

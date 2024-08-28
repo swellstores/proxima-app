@@ -2,7 +2,7 @@ import {
   Swell,
   SwellStorefrontRecord,
   SwellStorefrontCollection,
-} from '@swell/storefront-sdk';
+} from '@swell/apps-sdk';
 
 export class BlogResource extends SwellStorefrontRecord {
   constructor(

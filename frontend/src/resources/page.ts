@@ -1,4 +1,4 @@
-import { Swell, SwellStorefrontRecord } from '@swell/storefront-sdk';
+import { Swell, SwellStorefrontRecord } from '@swell/apps-sdk';
 
 export class PageResource extends SwellStorefrontRecord {
   constructor(swell: Swell, slug: string, query: SwellData = {}) {

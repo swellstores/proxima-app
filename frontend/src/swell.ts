@@ -1,4 +1,4 @@
-import { Swell, SwellTheme } from '@swell/storefront-sdk';
+import { Swell, SwellTheme } from '@swell/apps-sdk';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
 import forms from '@/forms';
 import resources from '@/resources';

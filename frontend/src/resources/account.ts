@@ -3,7 +3,7 @@ import {
   SwellStorefrontRecord,
   SwellStorefrontCollection,
   SwellStorefrontSingleton,
-} from '@swell/storefront-sdk';
+} from '@swell/apps-sdk';
 
 export class AccountResource extends SwellStorefrontSingleton {
   constructor(swell: Swell) {

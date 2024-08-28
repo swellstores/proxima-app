@@ -3,7 +3,7 @@ import { EasyblocksEditor } from '@swell/easyblocks-editor';
 import {
   getEasyblocksPagePropsWithConfigs,
   getEasyblocksComponentDefinitions,
-} from '@swell/storefront-sdk';
+} from '@swell/apps-sdk';
 
 import { TestMenuWidget } from './TestMenuWidget';
 

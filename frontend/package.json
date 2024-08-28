@@ -21,7 +21,7 @@
     "@astrojs/cloudflare": "^11.0.1",
     "@astrojs/react": "^3.6.1",
     "@swell/easyblocks-editor": "^1.0.12",
-    "@swell/storefront-sdk": "^1.0.13",
+    "@swell/apps-sdk": "^1.0.13",
     "astro": "^4.12.3",
     "color": "^4.2.3",
     "flatted": "^3.3.1",
@@ -35,7 +35,6 @@
     "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@rollup/rollup-darwin-arm64": "^4.20.0",
     "@types/color": "^3.0.6",
     "@types/micromatch": "^4.0.9",
     "@types/qs": "^6.9.15",

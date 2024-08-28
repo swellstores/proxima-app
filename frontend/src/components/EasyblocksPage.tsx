@@ -21,7 +21,7 @@ import {
   getEasyblocksComponentDefinitions,
   getThemeSettingsFromProps,
   getSectionSettingsFromProps,
-} from '@swell/storefront-sdk';
+} from '@swell/apps-sdk';
 import { initTheme } from '@/swell';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 

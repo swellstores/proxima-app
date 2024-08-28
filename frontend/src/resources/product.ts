@@ -2,7 +2,7 @@ import {
   Swell,
   SwellStorefrontRecord,
   SwellStorefrontCollection,
-} from '@swell/storefront-sdk';
+} from '@swell/apps-sdk';
 
 export class ProductResource extends SwellStorefrontRecord {
   constructor(swell: Swell, slug: string, query: SwellData = {}) {
