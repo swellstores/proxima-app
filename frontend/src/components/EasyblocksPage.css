@@ -12,3 +12,94 @@ div[data-swell-inline-editable] {
 div[data-active='true'] div[data-swell-inline-editable] {
   text-decoration-color: rgba(230, 216, 251);
 }
+
+body .fr-placeholder {
+  padding-top: 20px !important;
+}
+
+.fr-element h1 {
+  font-size: 32px !important;
+}
+
+.fr-element h2 {
+  font-size: 24px !important;
+}
+
+.fr-element h3 {
+  font-size: 18.72px !important;
+}
+
+.fr-element h4 {
+  font-size: 16px !important;
+}
+
+.fr-element h1,
+.fr-element h2,
+.fr-element h3,
+.fr-element h4 {
+  font-weight: 700 !important;
+}
+
+.fr-toolbar .fr-btn-grp {
+  margin: 0 10px !important;
+}
+
+.fr-toolbar .fr-newline {
+  margin: 0 !important;
+}
+
+div.SettingsMenu-field {
+  span.form-editor,
+  span.form-field-input,
+  div.fr-basic,
+  div.fr-popup.fr-desktop.fr-active {
+    left: 0 !important;
+  }
+}
+
+/* Froala */
+.fr-btn-grp {
+  margin: 4px;
+}
+.fr-toolbar .fr-command.fr-btn,
+.fr-popup .fr-command.fr-btn,
+.fr-modal .fr-command.fr-btn {
+  height: 32px;
+  svg {
+    height: 20px;
+    margin: 4px;
+  }
+}
+.fr-newline {
+  margin: 0px;
+}
+.fr-box.fr-basic .fr-element {
+  font-size: 14px !important;
+  padding: 10px;
+}
+.fr-placeholder {
+  padding-top: 10px !important;
+  font-size: 14px !important;
+}
+
+.fr-toolbar.fr-inline {
+  background-color: #ffffff;
+  border: 1px solid #d4d4d4;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #262626;
+  box-shadow: none;
+}
+
+.fr-view {
+  box-shadow: none !important;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  text-underline-position: under;
+  transition: 0.3s text-decoration ease-out;
+}
+div[data-active='true'] .fr-view {
+  text-decoration-color: rgba(230, 216, 251);
+}

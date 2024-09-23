@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import FroalaEditor from 'react-froala-wysiwyg';
+
+import 'froala-editor/css/froala_style.min.css';
+import 'froala-editor/css/froala_editor.pkgd.min.css';
+import 'froala-editor/js/plugins/link.min.js';
+import 'froala-editor/js/plugins/paragraph_format.min.js';
+import 'froala-editor/js/plugins/lists.min.js';
 
 type InlineEditableProps = {
   fieldID: string;
@@ -12,10 +19,21 @@ export function InlineEditable(props: InlineEditableProps) {
   const { fieldID, children, path, type } = props;
 
   const elementRef = useRef(null);
+  const spanRef = useRef(null);
   const [code, setCode] = useState(renderToStaticMarkup(children));
 
-  const changeHandler = (e: any) => {
-    postChange(e.target.innerHTML);
+  const changeHandler = (text: string) => {
+    const textWithoutOuterDiv = text
+      .replace(/^<div>/, '')
+      .replace(/<\/div>$/, '');
+    setCode(text);
+    postChange(textWithoutOuterDiv);
+  };
+
+  const setRole = () => {
+    if (elementRef.current) {
+      elementRef.current.editor.el.setAttribute('role', 'textbox');
+    }
   };
 
   const postChange = (text: any) => {
@@ -26,7 +44,7 @@ export function InlineEditable(props: InlineEditableProps) {
           key: path + '.' + fieldID,
           value: {
             type: 'text',
-            value: text || ' ',
+            value: text,
           },
         },
       },
@@ -35,17 +53,43 @@ export function InlineEditable(props: InlineEditableProps) {
   };
 
   useEffect(() => {
-    setCode(renderToStaticMarkup(children));
+    // Still have to optimize the logic so it doesnt loose track of cursor position
+    if (
+      renderToStaticMarkup(children) !==
+      code.replace(/^<div>/, '').replace(/<\/div>$/, '')
+    ) {
+      setCode(renderToStaticMarkup(children));
+    }
   }, [children]);
 
   return (
-    <div
-      data-swell-inline-editable={fieldID}
-      role="textbox"
-      ref={elementRef}
-      contentEditable={type === 'rich_text' ? true : 'plaintext-only'}
-      onBlur={changeHandler}
-      dangerouslySetInnerHTML={{ __html: code }}
-    ></div>
+    <>
+      {/* <span ref={spanRef}>{code}</span> */}
+      <FroalaEditor
+        tag="div"
+        ref={elementRef}
+        config={{
+          toolbarInline: true,
+          toolbarVisibleWithoutSelection: true,
+          fontFamilyDefaultSelection: '',
+          fontSizeDefaultSelection: '',
+          multiline: type === 'rich_text',
+          toolbarButtons: [
+            'bold',
+            'italic',
+            'paragraphFormat',
+            'formatUL',
+            'formatOL',
+            'insertLink',
+          ],
+          htmlUntouched: true,
+          events: {
+            initialized: setRole,
+          },
+        }}
+        model={code}
+        onModelChange={changeHandler}
+      />
+    </>
   );
 }
