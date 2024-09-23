@@ -24,6 +24,13 @@ import {
 } from '@swell/apps-sdk';
 import { initTheme } from '@/swell';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
+import { getEditableBlockComponent } from './EditableContentBlock';
+import { InlineEditable } from './InlineEditable';
+
+import './EasyblocksPage.css';
+
+// Which types can be inline editable
+const INLINE_EDITABLE_TYPES = ['text', 'rich_text'];
 
 // TODO: fix all the types
 
@@ -37,7 +44,10 @@ const ContentWrapper = React.memo(function ContentWrapper({ children }: any) {
   return <Fragment>{children}</Fragment>;
 });
 
-const LayoutSectionGroup = React.memo(function LayoutSectionGroup({ Root, Sections }: any) {
+const LayoutSectionGroup = React.memo(function LayoutSectionGroup({
+  Root,
+  Sections,
+}: any) {
   return (
     <Root.type {...Root.props}>
       {Sections.map((Section: any, index: number) => (
@@ -63,14 +73,11 @@ function getRootComponent(props: any, theme: SwellTheme) {
 
     const editorSchema = pageProps.configs?.editor?.settings;
 
-    const settings = useMemo(
-      () => {
-        const settingProps = getThemeSettingsFromProps(props, editorSchema);
+    const settings = useMemo(() => {
+      const settingProps = getThemeSettingsFromProps(props, editorSchema);
 
-        return resolveThemeSettings(theme, settingProps, editorSchema);
-      },
-      [props, editorSchema],
-    );
+      return resolveThemeSettings(theme, settingProps, editorSchema);
+    }, [props, editorSchema]);
 
     useEffect(() => {
       console.log('render layout', { settings });
@@ -120,17 +127,14 @@ function getRootComponent(props: any, theme: SwellTheme) {
   });
 }
 
-function getPageSectionComponent(
-  theme: SwellTheme,
-  sectionSchema: any,
-) {
+function getPageSectionComponent(theme: SwellTheme, sectionSchema: any) {
   return React.memo(function Section(props: any) {
     const { Root, Blocks } = props;
     const [SectionElements, setOutput] = useState(null);
 
     const sectionData = useMemo(() => {
       const settingProps = getSectionSettingsFromProps(props, sectionSchema);
-  
+
       return resolveSectionSettings(theme, {
         settings: { section: settingProps },
         schema: sectionSchema,
@@ -139,6 +143,7 @@ function getPageSectionComponent(
 
     useEffect(() => {
       console.log('render section', sectionSchema.id, sectionData);
+      const path = props.__easyblocks?.path;
 
       theme
         .renderThemeTemplate(
@@ -149,7 +154,7 @@ function getPageSectionComponent(
           const SectionElements = htmlToReactParser.parseWithInstructions(
             output,
             isValidNode,
-            getPageBlockProcessingInstructions(Blocks),
+            getPageBlockProcessingInstructions(Blocks, sectionSchema, path),
           );
 
           setOutput(SectionElements);
@@ -165,8 +170,7 @@ const SectionGroup = React.memo(function SectionGroup(props: any) {
 
   const sectionGroupId = props.id?.split('__').pop();
 
-  const SectionGroupSections =
-    rootProps[`SectionGroup_${sectionGroupId}`];
+  const SectionGroupSections = rootProps[`SectionGroup_${sectionGroupId}`];
 
   return (
     <div className={props.class} id={props.id}>
@@ -178,7 +182,9 @@ const SectionGroup = React.memo(function SectionGroup(props: any) {
   );
 });
 
-const ContentForLayout = React.memo(function ContentForLayout({ children }: any) {
+const ContentForLayout = React.memo(function ContentForLayout({
+  children,
+}: any) {
   const rootProps: any = useContext(RootContext);
   const { ContentSections } = rootProps;
 
@@ -197,7 +203,10 @@ function getLayoutProcessingInstructions(stringOutput?: string) {
         return node.attribs?.class?.startsWith?.('swell-section-group');
       },
       processNode: function (node: any, _children: any, index: number) {
-        return React.createElement(SectionGroup, { ...node.attribs, key: index });
+        return React.createElement(SectionGroup, {
+          ...node.attribs,
+          key: index,
+        });
       },
     },
     {
@@ -269,7 +278,12 @@ function getLayoutProcessingInstructions(stringOutput?: string) {
       },
       processNode: function (_node: any, _children: any, index: number) {
         if (stringOutput) {
-          return <div key={index} dangerouslySetInnerHTML={{ __html: stringOutput }} />;
+          return (
+            <div
+              key={index}
+              dangerouslySetInnerHTML={{ __html: stringOutput }}
+            />
+          );
         }
 
         return React.createElement(ContentForLayout, { key: index });
@@ -309,7 +323,11 @@ const REPLACE_PROPS = Object.freeze([
   ['onload', 'onLoad'],
 ]);
 
-function getPageBlockProcessingInstructions(Blocks: any) {
+function getPageBlockProcessingInstructions(
+  Blocks: any,
+  sectionSchema: any,
+  path: string,
+) {
   let blockIndex = 0;
 
   return [
@@ -332,6 +350,40 @@ function getPageBlockProcessingInstructions(Blocks: any) {
         return processNodeDefinitions.processDefaultNode(node, children, index);
       },
     },
+    {
+      shouldProcessNode: function (node: any) {
+        const isEditable = node.attribs?.['data-swell-inline-editable'];
+        if (isEditable) {
+          if (
+            sectionSchema.fields.find(
+              (field: any) =>
+                field.id === isEditable &&
+                INLINE_EDITABLE_TYPES.includes(field.type),
+            )
+          ) {
+            return true;
+          }
+        } else {
+          return false;
+        }
+      },
+      processNode: function (node: any, children: any) {
+        const isEditable = node.attribs?.['data-swell-inline-editable'];
+        const fieldType = sectionSchema.fields.find(
+          (field: any) => field.id === isEditable,
+        ).type;
+        return (
+          <InlineEditable
+            type={fieldType}
+            path={path}
+            fieldID={node.attribs?.['data-swell-inline-editable']}
+          >
+            {children}
+          </InlineEditable>
+        );
+      },
+    },
+
     {
       shouldProcessNode: function (node: any) {
         return node.attribs?.class === 'swell-block';
@@ -374,20 +426,33 @@ export function getEasyblocksComponents(swell: Swell, props: any) {
     theme.shopifyCompatibility = new StorefrontShopifyCompatibility(theme);
   }
 
-  return getEasyblocksComponentDefinitions(allSections, layoutSectionGroups, (type: string, data: any) => {
-    switch (type) {
-      case 'pageSection':
-        return getPageSectionComponent(theme, data);
-      case 'layoutSectionGroup':
-        return LayoutSectionGroup;
-      case 'block':
-        return Block;
-      case 'root':
-        return getRootComponent(props, theme);
-      default:
-        throw new Error(`Invalid component definition type: ${type}`);
-    }
-  });
+  return getEasyblocksComponentDefinitions(
+    allSections,
+    layoutSectionGroups,
+    (type: string, data: any) => {
+      switch (type) {
+        case 'pageSection':
+          return getPageSectionComponent(theme, data);
+        case 'layoutSectionGroup':
+          return LayoutSectionGroup;
+        case 'block':
+          if (
+            data.block.fields.find((field: any) =>
+              INLINE_EDITABLE_TYPES.includes(field.type),
+            )
+          ) {
+            return getEditableBlockComponent(theme, data);
+          } else {
+            return Block;
+          }
+
+        case 'root':
+          return getRootComponent(props, theme);
+        default:
+          throw new Error(`Invalid component definition type: ${type}`);
+      }
+    },
+  );
 }
 
 function EasyblocksPage(props: any) {
