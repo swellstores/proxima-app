@@ -1,5 +1,6 @@
-import { SwellTheme } from '@swell/apps-sdk';
-import { SwellServerContext } from '@/utils/server';
+import { SwellTheme, SwellData } from '@swell/apps-sdk';
+
+import type { SwellServerContext } from '@/utils/server';
 
 export async function accountLogin(context: SwellServerContext) {
   const {
@@ -30,7 +31,7 @@ export async function accountCreate({
 
   try {
     const result = await swell.storefront.account.create(account);
-    if (result?.errors) {
+    if (result && 'errors' in result) {
       await setCreateAccountErrors(theme, result.errors);
       return redirect('/account/signup', 303);
     }
@@ -59,7 +60,7 @@ export async function accountSubscribe({
       });
     } else {
       const result = await swell.storefront.account.create(account);
-      if (result?.errors) {
+      if (result && 'errors' in result) {
         await setSubscribeAccountErrors(theme, result.errors);
       }
     }
@@ -90,7 +91,7 @@ export async function accountPasswordRecover({
     console.log(err);
   }
 
-  return redirect(`/account/login`, 303);
+  return redirect('/account/login', 303);
 }
 
 export async function accountPasswordReset({
@@ -102,7 +103,7 @@ export async function accountPasswordReset({
   const { password_reset_key, password, password_confirmation } = params;
 
   if (!password_reset_key) {
-    return redirect(`/account/login`, 303);
+    return redirect('/account/login', 303);
   }
 
   // Submit new password
@@ -119,8 +120,8 @@ export async function accountPasswordReset({
         password,
       });
 
-      if (result?.email) {
-        await swell.storefront.account.login(result.email, password);
+      if (result && !('errors' in result)) {
+        await swell.storefront.account.login(result.email as string, password);
         return redirect('/account', 303);
       }
     }
@@ -137,7 +138,7 @@ export async function accountPasswordReset({
     );
   }
 
-  return redirect(`/account/login`, 303);
+  return redirect('/account/login', 303);
 }
 
 export async function accountAddressCreateUpdate({
@@ -161,7 +162,7 @@ export async function accountAddressCreateUpdate({
       } else {
         result = await swell.storefront.account.createAddress(address);
       }
-      if (result?.errors) {
+      if (result && 'errors' in result) {
         console.log(result.errors);
       }
     }
