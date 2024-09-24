@@ -246,6 +246,17 @@ function getLayoutProcessingInstructions(stringOutput?: string) {
             ${selectable} > div:first-child {
               display: block !important;
             }
+
+            ::-webkit-scrollbar-thumb {
+              background-color: #8a8a8a;
+              border: 2px solid transparent;
+              border-radius: 8px;
+              background-clip: padding-box;
+            }
+
+            ::-webkit-scrollbar {
+              width: 12px;
+            }
           </style>
         `,
         );
