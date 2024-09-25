@@ -1,5 +1,6 @@
 import {
   Swell,
+  SwellData,
   SwellStorefrontRecord,
   SwellStorefrontCollection,
 } from '@swell/apps-sdk';
@@ -15,18 +16,18 @@ export class BlogResource extends SwellStorefrontRecord {
       const category = categorySlug
         ? new SwellStorefrontRecord(
             swell,
-            `content/blog-categories`,
+            'content/blog-categories',
             categorySlug,
           )
         : null;
 
-      if (categorySlug) {
+      if (category) {
         await category.id;
       }
 
       const blog =
-        categorySlug && category.id
-          ? new SwellStorefrontRecord(swell, `content/blogs`, blogSlug, query)
+        category && category.id
+          ? new SwellStorefrontRecord(swell, 'content/blogs', blogSlug, query)
           : null;
 
       if (blog) {
@@ -54,7 +55,7 @@ export class BlogCategoryResource extends SwellStorefrontRecord {
       const categoryId = await category.id;
 
       const blogs = categoryId
-        ? new SwellStorefrontCollection(swell, `content/blogs`, {
+        ? new SwellStorefrontCollection(swell, 'content/blogs', {
             category_id: categoryId,
           })
         : null;

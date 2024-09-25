@@ -83,7 +83,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
 
   getPageRouteUrl(pageId: string) {
     return (
-      (this as ShopifyCompatibility).theme.props.pages?.find(
+      this.theme.props.pages?.find(
         (page: any) => page.id === pageId,
       )?.url || ''
     );

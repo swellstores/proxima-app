@@ -13,7 +13,7 @@ export function initSwell(
     url: context.url,
     config: swellConfig,
     serverHeaders: context.request.headers,
-    workerEnv: (context.locals as any).runtime?.env,
+    workerEnv: context.locals.runtime?.env,
     getCookie: (name: string) => {
       return getCookie(context, name);
     },
@@ -42,7 +42,7 @@ export function initSwell(
 
 export function canUpdateCookies(
   context: AstroGlobal | APIContext,
-  swell: Swell,
+  swell?: Swell,
 ) {
   return !(context as any).response && !swell?.sentResponse;
 }

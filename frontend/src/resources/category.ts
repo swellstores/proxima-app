@@ -1,9 +1,11 @@
 import {
   Swell,
+  SwellData,
   StorefrontResource,
   SwellStorefrontRecord,
   SwellStorefrontCollection,
 } from '@swell/apps-sdk';
+
 import { getFilteredProducts } from './product';
 
 export class CategoryResource extends SwellStorefrontRecord {
@@ -23,12 +25,11 @@ export class CategoryResource extends SwellStorefrontRecord {
       }
 
       const categoryFilter = category.id || (slug === 'all' ? undefined : slug);
+
       const filteredProps = await getFilteredProducts(
         swell,
         categoryFilter
-          ? {
-              category: categoryFilter,
-            }
+          ? { category: categoryFilter }
           : {},
       );
 
@@ -52,7 +53,8 @@ export class CategoriesResource extends StorefrontResource {
         ...query,
       });
 
-      const results = await categories.results;
+      const results = (await categories.results) ?? [];
+
       for (const category of results) {
         category.products = new SwellStorefrontCollection(swell, 'products', {
           category: category.id,
