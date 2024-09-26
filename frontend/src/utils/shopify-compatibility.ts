@@ -35,57 +35,12 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
   }
 
   getPageType(pageId: string) {
-    switch (pageId) {
-      case 'index':
-        return 'index';
-      case 'products/product':
-        return 'product';
-      case 'products/index':
-        return 'collection';
-      case 'categories/category':
-        return 'collection';
-      case 'categories/index':
-        return 'list-collections';
-      case 'pages/page':
-        return 'page';
-      case 'content/entry':
-        return 'metaobject';
-      case 'blogs/blog':
-        return 'article';
-      case 'blogs/category':
-        return 'blog';
-      case 'account/index':
-        return 'customers/account';
-      case 'account/activate':
-        return 'customers/activate_account';
-      case 'account/addresses':
-        return 'customers/addresses';
-      case 'account/login':
-        return 'customers/login';
-      case 'account/order':
-        return 'customers/order';
-      case 'account/signup':
-        return 'customers/register';
-      case 'account/recover':
-        return 'customers/reset_password';
-      case 'cart/index':
-        return 'cart';
-      case '404':
-        return '404';
-      case 'gift-card':
-        return 'gift_card';
-      case 'search':
-        return 'search';
-      default:
-        return pageId;
-    }
+    return this.theme?.props?.compatibility?.page_types?.[pageId] || pageId;
   }
 
   getPageRouteUrl(pageId: string) {
     return (
-      this.theme.props.pages?.find(
-        (page: any) => page.id === pageId,
-      )?.url || ''
+      this.theme.props.pages?.find((page: any) => page.id === pageId)?.url || ''
     );
   }
 

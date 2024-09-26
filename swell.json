@@ -1,173 +1,196 @@
 {
-	"id": "proxima",
-	"name": "Proxima",
-	"type": "storefront",
-	"version": "1.0.8",
-	"description": "Official storefront app for Swell",
-	"storefront": {
-		"theme": {
-			"provider": "app",
-			"compatibility": {
-				"version": "*",
-				"conflicts": {
-					"exclude_files": [
-						"theme/config/**",
-						"theme/templates/**",
-						"theme/sections/**"
-					]
-				},
-				"shopify": true
-			},
-			"pages": [
-				{
-					"id": "index",
-					"label": "Home",
-					"url": "/",
-					"icon": "home"
-				},
-				{
-					"id": "products/index",
-					"label": "Product list",
-					"url": "/products",
-					"icon": "tag"
-				},
-				{
-					"id": "products/product",
-					"label": "Product",
-					"url": "/products/:slug",
-					"icon": "tag",
-					"templates": true,
-					"collection": "products"
-				},
-				{
-					"id": "categories/index",
-					"label": "Category list",
-					"url": "/categories",
-					"icon": "tags"
-				},
-				{
-					"id": "categories/category",
-					"label": "Category",
-					"url": "/categories/:slug",
-					"icon": "tags",
-					"templates": true,
-					"collection": "categories"
-				},
-				{
-					"id": "pages/page",
-					"label": "Page",
-					"url": "/pages/:slug",
-					"icon": "page",
-					"templates": true,
-					"collection": "content/pages"
-				},
-				{
-					"id": "blogs/blog",
-					"label": "Blog post",
-					"url": "/blogs/:category/:slug",
-					"icon": "rss",
-					"templates": true,
-					"collection": "content/blogs"
-				},
-				{
-					"id": "blogs/category",
-					"label": "Blog category",
-					"url": "/blogs/:slug",
-					"icon": "rss",
-					"templates": true,
-					"collection": "content/blog-categories"
-				},
-				{
-					"id": "account/index",
-					"label": "Customer account",
-					"url": "/account",
-					"group": "customer",
-					"icon": "user",
-					"collection": "accounts"
-				},
-				{
-					"id": "account/activate",
-					"label": "Customer account activation",
-					"url": "/account/activate",
-					"group": "customer",
-					"icon": "user"
-				},
-				{
-					"id": "account/login",
-					"label": "Customer login",
-					"url": "/account/login",
-					"group": "customer",
-					"icon": "user"
-				},
-				{
-					"id": "account/signup",
-					"label": "Customer signup",
-					"url": "/account/signup",
-					"group": "customer",
-					"icon": "user"
-				},
-				{
-					"id": "account/recover",
-					"label": "Customer password recovery",
-					"url": "/account/recover",
-					"group": "customer",
-					"icon": "user"
-				},
-				{
-					"id": "account/addresses",
-					"label": "Customer addresses",
-					"url": "/account/addresses",
-					"group": "customer",
-					"icon": "map-marker",
-					"collection": "accounts"
-				},
-				{
-					"id": "account/order",
-					"label": "Customer order",
-					"url": "/account/orders/:id",
-					"group": "customer",
-					"icon": "shopping-cart",
-					"collection": "orders"
-				},
-				{
-					"id": "account/subscription",
-					"label": "Customer subscription",
-					"url": "/account/subscriptions/:id",
-					"group": "customer",
-					"icon": "shopping-cart",
-					"collection": "subscriptions"
-				},
-				{
-					"id": "cart",
-					"label": "Cart",
-					"url": "/cart",
-					"group": "checkout",
-					"icon": "shopping-cart",
-					"collection": "carts"
-				},
-				{
-					"id": "404",
-					"label": "404 Page Not Found",
-					"url": "/404",
-					"group": "other",
-					"icon": "page"
-				},
-				{
-					"id": "gift-card",
-					"label": "Gift card",
-					"url": "/gift-card/:code",
-					"group": "other",
-					"icon": "gift",
-					"collection": "giftcards"
-				},
-				{
-					"id": "search",
-					"label": "Search",
-					"url": "/search",
-					"group": "other",
-					"icon": "search"
-				}
-			]
-		}
-	}
+  "id": "proxima",
+  "name": "Proxima",
+  "type": "storefront",
+  "version": "1.0.8",
+  "description": "Official storefront app for Swell",
+  "storefront": {
+    "theme": {
+      "provider": "app",
+      "compatibility": {
+        "version": "*",
+        "conflicts": {
+          "exclude_files": [
+            "theme/config/**",
+            "theme/templates/**",
+            "theme/sections/**"
+          ]
+        },
+        "shopify": true,
+        "page_types": {
+          "index": "index",
+          "products/product": "product",
+          "products/index": "collection",
+          "categories/category": "collection",
+          "categories/index": "list-collections",
+          "pages/page": "page",
+          "content/entry": "metaobject",
+          "blogs/blog": "article",
+          "blogs/category": "blog",
+          "account/index": "customers/account",
+          "account/activate": "customers/activate_account",
+          "account/addresses": "customers/addresses",
+          "account/login": "customers/login",
+          "account/order": "customers/order",
+          "account/signup": "customers/register",
+          "account/recover": "customers/reset_password",
+          "cart/index": "cart",
+          "404": "404",
+          "gift-card": "gift_card",
+          "search": "search"
+        }
+      },
+
+      "pages": [
+        {
+          "id": "index",
+          "label": "Home",
+          "url": "/",
+          "icon": "home"
+        },
+        {
+          "id": "products/index",
+          "label": "Product list",
+          "url": "/products",
+          "icon": "tag"
+        },
+        {
+          "id": "products/product",
+          "label": "Product",
+          "url": "/products/:slug",
+          "icon": "tag",
+          "templates": true,
+          "collection": "products"
+        },
+        {
+          "id": "categories/index",
+          "label": "Category list",
+          "url": "/categories",
+          "icon": "tags"
+        },
+        {
+          "id": "categories/category",
+          "label": "Category",
+          "url": "/categories/:slug",
+          "icon": "tags",
+          "templates": true,
+          "collection": "categories"
+        },
+        {
+          "id": "pages/page",
+          "label": "Page",
+          "url": "/pages/:slug",
+          "icon": "page",
+          "templates": true,
+          "collection": "content/pages"
+        },
+        {
+          "id": "blogs/blog",
+          "label": "Blog post",
+          "url": "/blogs/:category/:slug",
+          "icon": "rss",
+          "templates": true,
+          "collection": "content/blogs"
+        },
+        {
+          "id": "blogs/category",
+          "label": "Blog category",
+          "url": "/blogs/:slug",
+          "icon": "rss",
+          "templates": true,
+          "collection": "content/blog-categories"
+        },
+        {
+          "id": "account/index",
+          "label": "Customer account",
+          "url": "/account",
+          "group": "customer",
+          "icon": "user",
+          "collection": "accounts"
+        },
+        {
+          "id": "account/activate",
+          "label": "Customer account activation",
+          "url": "/account/activate",
+          "group": "customer",
+          "icon": "user"
+        },
+        {
+          "id": "account/login",
+          "label": "Customer login",
+          "url": "/account/login",
+          "group": "customer",
+          "icon": "user"
+        },
+        {
+          "id": "account/signup",
+          "label": "Customer signup",
+          "url": "/account/signup",
+          "group": "customer",
+          "icon": "user"
+        },
+        {
+          "id": "account/recover",
+          "label": "Customer password recovery",
+          "url": "/account/recover",
+          "group": "customer",
+          "icon": "user"
+        },
+        {
+          "id": "account/addresses",
+          "label": "Customer addresses",
+          "url": "/account/addresses",
+          "group": "customer",
+          "icon": "map-marker",
+          "collection": "accounts"
+        },
+        {
+          "id": "account/order",
+          "label": "Customer order",
+          "url": "/account/orders/:id",
+          "group": "customer",
+          "icon": "shopping-cart",
+          "collection": "orders"
+        },
+        {
+          "id": "account/subscription",
+          "label": "Customer subscription",
+          "url": "/account/subscriptions/:id",
+          "group": "customer",
+          "icon": "shopping-cart",
+          "collection": "subscriptions"
+        },
+        {
+          "id": "cart",
+          "label": "Cart",
+          "url": "/cart",
+          "group": "checkout",
+          "icon": "shopping-cart",
+          "collection": "carts"
+        },
+        {
+          "id": "404",
+          "label": "404 Page Not Found",
+          "url": "/404",
+          "group": "other",
+          "icon": "page"
+        },
+        {
+          "id": "gift-card",
+          "label": "Gift card",
+          "url": "/gift-card/:code",
+          "group": "other",
+          "icon": "gift",
+          "collection": "giftcards"
+        },
+        {
+          "id": "search",
+          "label": "Search",
+          "url": "/search",
+          "group": "other",
+          "icon": "search"
+        }
+      ]
+    }
+  }
 }
