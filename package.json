@@ -1,14 +1,46 @@
 {
-  "name": "swell-storefront",
-  "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
+  "name": "@swell/proxima",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "An official Swell storefront app.",
+  "author": "Swell",
+  "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "build:watch": "nodemon -e astro,ts,tsx,json --watch ./src --exec astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "frontend:preview": "npx wrangler pages dev dist/",
+    "frontend:preview:build": "astro build && npx wrangler pages dev dist/",
+    "frontend:deploy": "npx wrangler pages deploy dist/"
   },
-  "author": "",
-  "license": "ISC",
+  "dependencies": {
+    "@astrojs/check": "^0.9.0",
+    "@astrojs/cloudflare": "^11.0.1",
+    "@astrojs/react": "^3.6.1",
+    "@swell/easyblocks-editor": "^1.0.12",
+    "@swell/apps-sdk": "^1.0.16",
+    "astro": "^4.12.3",
+    "color": "^4.2.3",
+    "flatted": "^3.3.1",
+    "html-to-react": "^1.7.0",
+    "lodash": "^4.17.21",
+    "minimatch": "^10.0.1",
+    "path-to-regexp": "^7.0.0",
+    "qs": "^6.12.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3"
+  },
   "devDependencies": {
+    "@types/color": "^3.0.6",
+    "@types/micromatch": "^4.0.9",
+    "@types/qs": "^6.9.15",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "nodemon": "^3.1.4",
     "prettier": "^3.2.5",
     "prettier-plugin-astro": "^0.13.0"
   }
