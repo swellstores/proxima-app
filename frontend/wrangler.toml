@@ -1,8 +1,11 @@
+name = "swell-proxima-app"
+pages_build_output_dir = "./dist"
+
 kv_namespaces = [
     { binding = "THEME", id = "40921157860042bcb7f1c746ba5e9b64" }
 ]
 
-[env.dev]
+[env.preview]
 
 kv_namespaces = [
     { binding = "THEME", id = "a47205081eac414285418d8fe0851e47" }

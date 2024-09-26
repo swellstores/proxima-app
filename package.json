@@ -6,15 +6,15 @@
   "author": "Swell",
   "license": "MIT",
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro check && astro build",
-    "build:watch": "nodemon -e astro,ts,tsx,json --watch ./src --exec astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "frontend:preview": "npx wrangler pages dev dist/",
-    "frontend:preview:build": "astro build && npx wrangler pages dev dist/",
-    "frontend:deploy": "npx wrangler pages deploy dist/"
+    "dev": "astro dev --root frontend",
+    "start": "astro dev --root frontend",
+    "build": "astro check --root frontend && astro build --root frontend",
+    "build:watch": "nodemon -e astro,ts,tsx,json --watch ./frontend/src --exec astro build",
+    "preview": "astro preview --root frontend",
+    "astro": "astro --root frontend",
+    "frontend:preview": "npx wrangler pages dev frontend/dist/",
+    "frontend:preview:build": "astro build --root frontend && npx wrangler pages dev frontend/dist/",
+    "frontend:deploy": "npx wrangler pages deploy frontend/dist/"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.0",
