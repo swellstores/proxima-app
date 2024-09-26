@@ -1,5 +1,6 @@
 import {
   Swell,
+  SwellData,
   SwellStorefrontRecord,
   SwellStorefrontCollection,
 } from '@swell/apps-sdk';

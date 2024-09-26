@@ -1,18 +1,20 @@
-import { SwellTheme, resolveAsyncResources } from '@swell/apps-sdk';
+import { resolveAsyncResources } from '@swell/apps-sdk';
 import { handleServerRequest } from '@/utils/server';
+
+import type { SwellTheme, ThemeSectionGroup } from '@swell/apps-sdk';
 
 const defaultPageId = 'index';
 
 export const GET = handleServerRequest(
-  async ({ swell, theme, params }: any) => {
+  async ({ swell, theme, params }) => {
     await theme.initGlobals(params.pageId || defaultPageId);
 
-    const pageTemplate = (await theme.renderPageTemplate(
+    const pageTemplate = await theme.renderPageTemplate(
       params.pageId || defaultPageId,
-    )) as unknown;
+    );
 
     let allSections = await theme.getAllSections();
-    let pageSections = await theme.getPageSections(pageTemplate, false);
+    let pageSections = await theme.getPageSections(pageTemplate as ThemeSectionGroup, false);
     let layoutSectionGroups = await theme.getLayoutSectionGroups(false);
 
     pageSections = await resolveAsyncResources(pageSections);

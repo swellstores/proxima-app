@@ -4,6 +4,7 @@ import {
   SwellTheme,
   StorefrontResource,
   dehydrateSwellRefsInStorefrontResources,
+  SwellData,
 } from '@swell/apps-sdk';
 import {
   initSwell,
@@ -16,7 +17,7 @@ import { minimatch } from 'minimatch';
 import { match } from 'path-to-regexp';
 import qs from 'qs';
 
-export type SwellServerContext = APIContext & {
+export interface SwellServerContext extends APIContext {
   params: SwellData;
   swell: Swell;
   theme: SwellTheme;
@@ -24,7 +25,7 @@ export type SwellServerContext = APIContext & {
 };
 
 export function handleServerRequest(
-  handler: (context: any) => string | object,
+  handler: (context: SwellServerContext) => string | object,
 ): (
   context: APIContext,
   contextHandler?: (context: any) => any,
@@ -173,7 +174,7 @@ export async function sendServerResponse(
     if (sectionId) {
       const sectionRendered = await theme.renderSection(sectionId, response);
       return new Response(
-        wrapSectionContent(theme, sectionId, sectionRendered),
+        wrapSectionContent(theme, sectionId, sectionRendered as string),
       );
     }
   }
