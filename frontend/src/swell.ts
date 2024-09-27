@@ -1,19 +1,21 @@
-import { Swell, SwellTheme } from '@swell/apps-sdk';
+import { CFThemeEnv, Swell, SwellAppConfig, SwellTheme } from '@swell/apps-sdk';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
+
 import forms from '@/forms';
 import resources from '@/resources';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
+
 import swellConfig from '../../swell.json';
 
-export function initSwell(
+export async function initSwell(
   context: AstroGlobal | APIContext,
   options?: { [key: string]: any },
-) {
-  return new Swell({
+): Promise<Swell> {
+  const swell = new Swell({
     url: context.url,
-    config: swellConfig,
+    config: swellConfig as SwellAppConfig,
     serverHeaders: context.request.headers,
-    workerEnv: context.locals.runtime?.env,
+    workerEnv: context.locals.runtime?.env as CFThemeEnv,
     getCookie: (name: string) => {
       return getCookie(context, name);
     },
@@ -38,6 +40,12 @@ export function initSwell(
     },
     ...options,
   });
+
+  await swell.updateCacheModified(
+    context.request.headers.get('swell-cache-modified') ?? '',
+  );
+
+  return swell;
 }
 
 export function canUpdateCookies(

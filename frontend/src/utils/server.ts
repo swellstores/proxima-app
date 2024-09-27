@@ -123,7 +123,7 @@ function ensureSwellSessionCookieSet(context: APIContext, response: Response) {
 export async function initServerContext(
   context: APIContext,
 ): Promise<SwellServerContext> {
-  const swell = context.locals.swell || initSwell(context);
+  const swell = context.locals.swell || await initSwell(context);
   context.locals.swell = swell;
 
   const theme = context.locals.theme || initTheme(swell);
