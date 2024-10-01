@@ -11,7 +11,7 @@ if (!Astro.url.searchParams.get('rootTemplate')) {
   return Astro.redirect(`/editor?rootTemplate=swell_page`);
 }
 
-const swell = initSwell(Astro);
+const swell = await initSwell(Astro);
 const theme = initTheme(swell);
 
 const { pageId = 'index', pageRoute = '/' } = swell.queryParams;

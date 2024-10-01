@@ -32,7 +32,7 @@ export interface Props {
 const { id, title, description, required, content, props, getData } =
   Astro.props;
 
-const swell = Astro.locals.swell || initSwell(Astro);
+const swell = Astro.locals.swell || await initSwell(Astro);
 
 // Indicate response was sent to avoid mutating cookies
 if (Astro.locals.swell) {
