@@ -4,6 +4,7 @@ import forms from '@/forms';
 import resources from '@/resources';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 import swellConfig from '../../swell.json';
+import shopifyCompatibilityConfig from '../../shopify_compatibility.json';
 
 export function initSwell(
   context: AstroGlobal | APIContext,
@@ -12,6 +13,7 @@ export function initSwell(
   return new Swell({
     url: context.url,
     config: swellConfig,
+    shopifyCompatibilityConfig,
     serverHeaders: context.request.headers,
     workerEnv: context.locals.runtime?.env,
     getCookie: (name: string) => {
