@@ -51,7 +51,8 @@
           "id": "products/index",
           "label": "Product list",
           "url": "/products",
-          "icon": "tag"
+          "icon": "tag",
+          "json": true
         },
         {
           "id": "products/product",
@@ -59,13 +60,15 @@
           "url": "/products/:slug",
           "icon": "tag",
           "templates": true,
-          "collection": "products"
+          "collection": "products",
+          "json": true
         },
         {
           "id": "categories/index",
           "label": "Category list",
           "url": "/categories",
-          "icon": "tags"
+          "icon": "tags",
+          "json": true
         },
         {
           "id": "categories/category",
@@ -73,7 +76,8 @@
           "url": "/categories/:slug",
           "icon": "tags",
           "templates": true,
-          "collection": "categories"
+          "collection": "categories",
+          "json": true
         },
         {
           "id": "pages/page",
@@ -81,7 +85,8 @@
           "url": "/pages/:slug",
           "icon": "page",
           "templates": true,
-          "collection": "content/pages"
+          "collection": "content/pages",
+          "json": true
         },
         {
           "id": "blogs/blog",
@@ -89,7 +94,8 @@
           "url": "/blogs/:category/:slug",
           "icon": "rss",
           "templates": true,
-          "collection": "content/blogs"
+          "collection": "content/blogs",
+          "json": true
         },
         {
           "id": "blogs/category",
@@ -97,7 +103,8 @@
           "url": "/blogs/:slug",
           "icon": "rss",
           "templates": true,
-          "collection": "content/blog-categories"
+          "collection": "content/blog-categories",
+          "json": true
         },
         {
           "id": "account/index",
@@ -149,7 +156,8 @@
           "url": "/account/orders/:id",
           "group": "customer",
           "icon": "shopping-cart",
-          "collection": "orders"
+          "collection": "orders",
+          "json": true
         },
         {
           "id": "account/subscription",
@@ -157,7 +165,8 @@
           "url": "/account/subscriptions/:id",
           "group": "customer",
           "icon": "shopping-cart",
-          "collection": "subscriptions"
+          "collection": "subscriptions",
+          "json": true
         },
         {
           "id": "cart",
@@ -175,19 +184,12 @@
           "icon": "page"
         },
         {
-          "id": "gift-card",
-          "label": "Gift card",
-          "url": "/gift-card/:code",
-          "group": "other",
-          "icon": "gift",
-          "collection": "giftcards"
-        },
-        {
           "id": "search",
           "label": "Search",
           "url": "/search",
           "group": "other",
-          "icon": "search"
+          "icon": "search",
+          "json": true
         }
       ]
     }

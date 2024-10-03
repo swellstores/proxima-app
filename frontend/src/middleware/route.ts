@@ -26,6 +26,12 @@ async function initThemePageHandler(context: SwellServerContext) {
     });
 
     if (page) {
+      // If using .json extension, make sure page supports json or return 404
+      const ext = url.pathname.match(/\.[^\/]+$/)?.[0].replace('.', '');
+      if (ext && !page.json) {
+        return new Response(null, { status: 404 });
+      }
+
       await theme.initGlobals(page.id);
     }
   }
