@@ -1,14 +1,23 @@
 ---
 import { Swell } from '@swell/apps-sdk';
 import { CategoryResource } from '@/resources/category';
-import ThemePage from '../../components/ThemePage.astro';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
+
+export async function getData(swell: Swell) {
+  return {
+    category: new CategoryResource(swell, 'all'),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell }) => {
+  return getData(swell);
+});
 ---
 
 <ThemePage
   id="categories/category"
   title="{{ category.meta_title | default: category.name }}"
   description="{{ category.meta_description | default: category.description }}"
-  getData={(swell: Swell) => ({
-    category: new CategoryResource(swell, 'all'),
-  })}
+  getData={getData}
 />

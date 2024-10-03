@@ -1,4 +1,9 @@
-import { Swell, SwellTheme } from '@swell/apps-sdk';
+import {
+  Swell,
+  SwellTheme,
+  SwellAppConfig,
+  ShopifyCompatibility,
+} from '@swell/apps-sdk';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
 import forms from '@/forms';
 import resources from '@/resources';
@@ -11,7 +16,7 @@ export function initSwell(
 ) {
   return new Swell({
     url: context.url,
-    config: swellConfig,
+    config: swellConfig as unknown as SwellAppConfig,
     serverHeaders: context.request.headers,
     workerEnv: context.locals.runtime?.env,
     getCookie: (name: string) => {
@@ -82,6 +87,27 @@ export function initTheme(swell: Swell) {
   return new SwellTheme(swell, {
     forms,
     resources,
-    shopifyCompatibilityClass: StorefrontShopifyCompatibility,
+    shopifyCompatibilityClass:
+      StorefrontShopifyCompatibility as unknown as typeof ShopifyCompatibility,
   });
+}
+
+export async function initSwellTheme(
+  Astro: AstroGlobal | APIContext,
+  pageId?: string,
+) {
+  const swell = Astro.locals.swell || initSwell(Astro);
+
+  // Indicate response was sent to avoid mutating cookies
+  if (Astro.locals.swell) {
+    swell.sentResponse = true;
+  }
+
+  const theme = Astro.locals.theme || initTheme(swell);
+
+  if (!theme.pageId) {
+    await theme.initGlobals(pageId);
+  }
+
+  return { swell, theme };
 }

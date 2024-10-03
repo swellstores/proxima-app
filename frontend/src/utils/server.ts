@@ -1,4 +1,4 @@
-import { APIContext, MiddlewareHandler } from 'astro';
+import { APIContext, MiddlewareHandler, MiddlewareNext } from 'astro';
 import {
   Swell,
   SwellTheme,
@@ -22,7 +22,9 @@ export interface SwellServerContext extends APIContext {
   swell: Swell;
   theme: SwellTheme;
   context: APIContext;
-};
+}
+
+export interface SwellServerNext extends MiddlewareNext {}
 
 export function handleServerRequest(
   handler: (context: SwellServerContext) => string | object,
@@ -62,7 +64,7 @@ export function handleServerRequest(
 export function handleMiddlewareRequest(
   method: string,
   urlParam: string | string[] | Function,
-  handler: (context: SwellServerContext) => any,
+  handler: (context: SwellServerContext, next: SwellServerNext) => any,
 ): MiddlewareHandler {
   const matchHandler = getMiddlewareMatcher(urlParam);
 
@@ -88,7 +90,7 @@ export function handleMiddlewareRequest(
     const { theme } = serverContext;
 
     try {
-      const result = await handler(serverContext);
+      const result = await handler(serverContext, next);
 
       if (result instanceof Response) {
         ensureSwellSessionCookieSet(context, result);
@@ -320,7 +322,13 @@ export async function getFormParams(
 }
 
 export function jsonResponse(values: SwellData, options?: ResponseInit) {
-  return new Response(JSON.stringify(values), options);
+  return new Response(JSON.stringify(values), {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
 }
 
 export function restoreThemeRequestData(
@@ -332,7 +340,7 @@ export function restoreThemeRequestData(
     try {
       const formData = JSON.parse(serializedFormData);
       for (const [formId, data] of Object.entries(formData)) {
-        theme.setFormData(formId, data);
+        theme.setFormData(formId, data as unknown as SwellData);
       }
     } catch (err) {
       console.log(err);

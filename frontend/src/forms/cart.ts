@@ -45,7 +45,7 @@ export async function cartUpdate(context: SwellServerContext) {
       });
     }
 
-    const cart = theme.fetchCart();
+    const cart = await theme.fetchCart();
 
     // Make sure cart items are loaded
     await cart.items;

@@ -1,12 +1,18 @@
 ---
 import { Swell } from '@swell/apps-sdk';
 import { CategoriesResource } from '@/resources/category';
+import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
+
+export async function getData(swell: Swell) {
+  return {
+    categories: new CategoriesResource(swell),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell }) => {
+  return getData(swell);
+});
 ---
 
-<ThemePage
-  id="categories/index"
-  getData={(swell: Swell) => ({
-    categories: new CategoriesResource(swell),
-  })}
-/>
+<ThemePage id="categories/index" getData={getData} />

@@ -1,15 +1,22 @@
 ---
 import { Swell } from '@swell/apps-sdk';
 import { AccountSubscriptionResource } from '@/resources/account';
+import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 
-const { id } = Astro.params;
+export async function getData(swell: Swell, id?: string) {
+  return {
+    subscription: new AccountSubscriptionResource(swell, id as string),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  return getData(swell, context.params.id);
+});
 ---
 
 <ThemePage
   id="account/subscription"
   required="subscription.id"
-  getData={(swell: Swell) => ({
-    subscription: new AccountSubscriptionResource(swell, id as string),
-  })}
+  getData={(swell) => getData(swell, Astro.params.id)}
 />

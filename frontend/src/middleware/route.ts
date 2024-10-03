@@ -1,4 +1,5 @@
 import { handleMiddlewareRequest, SwellServerContext } from '@/utils/server';
+import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 import { pathToRegexp } from 'path-to-regexp';
 
 export const getThemePage = handleMiddlewareRequest(
@@ -17,9 +18,11 @@ async function initThemePageHandler(context: SwellServerContext) {
   const { theme, redirect, url } = context;
 
   if (theme.props.pages instanceof Array) {
+    const pagePath = url.pathname.replace(/\.[^\/]+$/, '');
+
     const page = theme.props.pages.find((page: any) => {
       const regexp = pathToRegexp(page.url);
-      return Boolean(regexp.exec(url.pathname));
+      return Boolean(regexp.exec(pagePath));
     });
 
     if (page) {
@@ -27,14 +30,19 @@ async function initThemePageHandler(context: SwellServerContext) {
     }
   }
 
+  // Use compatibility instance if page was identified, otherwise use default
+  const shopifyCompatibility = theme.props?.compatibility?.shopify
+    ? theme.shopifyCompatibility || new StorefrontShopifyCompatibility(theme)
+    : null;
+
   // Redirect shopify URLs to the adapted page
-  if (theme.shopifyCompatibility) {
-    const adaptedUrl = theme.shopifyCompatibility.getAdaptedPageUrl(
-      url.pathname,
+  if (shopifyCompatibility) {
+    const adaptedUrl = shopifyCompatibility.getAdaptedPageUrl(
+      url.pathname + url.search,
     );
 
     if (adaptedUrl && adaptedUrl !== url.pathname) {
-      return redirect(adaptedUrl, 301);
+      return redirect(adaptedUrl, 307);
     }
   }
 }

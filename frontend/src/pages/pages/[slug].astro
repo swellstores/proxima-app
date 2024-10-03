@@ -1,9 +1,18 @@
 ---
 import { Swell } from '@swell/apps-sdk';
 import { PageResource } from '@/resources/page';
+import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 
-const { slug } = Astro.params;
+export async function getData(swell: Swell, slug?: string) {
+  return {
+    page: new PageResource(swell, slug as string),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  return getData(swell, context.params.slug);
+});
 ---
 
 <ThemePage
@@ -11,7 +20,5 @@ const { slug } = Astro.params;
   required="page.id"
   title="{{ page.meta_title | default: page.name }}"
   description="{{ page.meta_description | default: page.description }}"
-  getData={(swell: Swell) => ({
-    page: new PageResource(swell, slug as string),
-  })}
+  getData={(swell) => getData(swell, Astro.params.slug)}
 />

@@ -1,7 +1,13 @@
 ---
 import get from 'lodash/get';
-import { initSwell, initTheme } from '@/swell';
-import { Swell, PageError, PageNotFound, SwellTheme, SwellData } from '@swell/apps-sdk';
+import { initSwellTheme } from '@/swell';
+import {
+  Swell,
+  PageError,
+  PageNotFound,
+  SwellTheme,
+  SwellData,
+} from '@swell/apps-sdk';
 import Layout from '@/layouts/Layout.astro';
 import ThemeSections from './ThemeSections.astro';
 import EditorPage from './EditorPage.astro';
@@ -32,18 +38,7 @@ export interface Props {
 const { id, title, description, required, content, props, getData } =
   Astro.props;
 
-const swell = Astro.locals.swell || initSwell(Astro);
-
-// Indicate response was sent to avoid mutating cookies
-if (Astro.locals.swell) {
-  swell.sentResponse = true;
-}
-
-const theme = Astro.locals.theme || initTheme(swell);
-
-if (!theme.pageId) {
-  await theme.initGlobals(id);
-}
+const { swell, theme } = await initSwellTheme(Astro, id);
 
 const isEditor = typeof Astro.url.searchParams.get('_editor') === 'string';
 
@@ -68,7 +63,7 @@ try {
         ? await description(pageData)
         : '',
 
-    content ?? sectionIds
+    (content ?? sectionIds)
       ? theme.renderAllSections(sectionIds, {
           ...props,
           ...pageData,
