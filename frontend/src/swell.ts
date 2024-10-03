@@ -12,6 +12,7 @@ import resources from '@/resources';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 
 import swellConfig from '../../swell.json';
+import shopifyCompatibilityConfig from '../../shopify_compatibility.json';
 
 export async function initSwell(
   context: AstroGlobal | APIContext,
@@ -19,6 +20,7 @@ export async function initSwell(
 ): Promise<Swell> {
   const swell = new Swell({
     url: context.url,
+    shopifyCompatibilityConfig,
     config: swellConfig as SwellAppConfig,
     serverHeaders: context.request.headers,
     workerEnv: context.locals.runtime?.env as CFThemeEnv,

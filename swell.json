@@ -15,29 +15,6 @@
             "theme/templates/**",
             "theme/sections/**"
           ]
-        },
-        "shopify": true,
-        "page_types": {
-          "index": "index",
-          "products/product": "product",
-          "products/index": "collection",
-          "categories/category": "collection",
-          "categories/index": "list-collections",
-          "pages/page": "page",
-          "content/entry": "metaobject",
-          "blogs/blog": "article",
-          "blogs/category": "blog",
-          "account/index": "customers/account",
-          "account/activate": "customers/activate_account",
-          "account/addresses": "customers/addresses",
-          "account/login": "customers/login",
-          "account/order": "customers/order",
-          "account/signup": "customers/register",
-          "account/recover": "customers/reset_password",
-          "cart/index": "cart",
-          "404": "404",
-          "gift-card": "gift_card",
-          "search": "search"
         }
       },
       "pages": [
