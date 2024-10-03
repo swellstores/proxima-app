@@ -1,21 +1,29 @@
-import { Swell, SwellTheme } from '@swell/apps-sdk';
+import {
+  Swell,
+  SwellTheme,
+  SwellAppConfig,
+  ShopifyCompatibility,
+  CFThemeEnv,
+} from '@swell/apps-sdk';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
+
 import forms from '@/forms';
 import resources from '@/resources';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
+
 import swellConfig from '../../swell.json';
 import shopifyCompatibilityConfig from '../../shopify_compatibility.json';
 
-export function initSwell(
+export async function initSwell(
   context: AstroGlobal | APIContext,
   options?: { [key: string]: any },
-) {
-  return new Swell({
+): Promise<Swell> {
+  const swell = new Swell({
     url: context.url,
-    config: swellConfig,
     shopifyCompatibilityConfig,
+    config: swellConfig as SwellAppConfig,
     serverHeaders: context.request.headers,
-    workerEnv: context.locals.runtime?.env,
+    workerEnv: context.locals.runtime?.env as CFThemeEnv,
     getCookie: (name: string) => {
       return getCookie(context, name);
     },
@@ -40,6 +48,12 @@ export function initSwell(
     },
     ...options,
   });
+
+  await swell.updateCacheModified(
+    context.request.headers.get('swell-cache-modified') ?? '',
+  );
+
+  return swell;
 }
 
 export function canUpdateCookies(
@@ -84,6 +98,27 @@ export function initTheme(swell: Swell) {
   return new SwellTheme(swell, {
     forms,
     resources,
-    shopifyCompatibilityClass: StorefrontShopifyCompatibility,
+    shopifyCompatibilityClass:
+      StorefrontShopifyCompatibility as unknown as typeof ShopifyCompatibility,
   });
+}
+
+export async function initSwellTheme(
+  Astro: AstroGlobal | APIContext,
+  pageId?: string,
+) {
+  const swell = Astro.locals.swell || await initSwell(Astro);
+
+  // Indicate response was sent to avoid mutating cookies
+  if (Astro.locals.swell) {
+    swell.sentResponse = true;
+  }
+
+  const theme = Astro.locals.theme || initTheme(swell);
+
+  if (!theme.pageId) {
+    await theme.initGlobals(pageId);
+  }
+
+  return { swell, theme };
 }

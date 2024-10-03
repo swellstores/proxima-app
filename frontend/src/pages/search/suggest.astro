@@ -1,14 +1,21 @@
 ---
 import { Swell } from '@swell/apps-sdk';
 import { PredictiveSearchResource } from '@/resources/search';
-import ThemePage from '../../components/ThemePage.astro';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
 
-const query = Astro.url.searchParams.get('q');
+export async function getData(swell: Swell, query: string | null) {
+  return {
+    predictive_search: new PredictiveSearchResource(swell, query),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  return getData(swell, context.url.searchParams.get('q'));
+});
 ---
 
 <ThemePage
   id="search"
-  getData={(swell: Swell) => ({
-    predictive_search: new PredictiveSearchResource(swell, query),
-  })}
+  getData={(swell) => getData(swell, Astro.url.searchParams.get('q'))}
 />

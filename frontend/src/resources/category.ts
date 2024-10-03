@@ -10,7 +10,7 @@ import { getFilteredProducts } from './product';
 
 export class CategoryResource extends SwellStorefrontRecord {
   constructor(swell: Swell, slug: string, query: SwellData = {}) {
-    super(swell, 'categories', slug, query, async () => {
+    super(swell, 'categories', slug, query, async (): Promise<any> => {
       const category = new SwellStorefrontRecord(
         swell,
         'categories',
@@ -28,9 +28,7 @@ export class CategoryResource extends SwellStorefrontRecord {
 
       const filteredProps = await getFilteredProducts(
         swell,
-        categoryFilter
-          ? { category: categoryFilter }
-          : {},
+        categoryFilter ? { category: categoryFilter } : {},
       );
 
       return {

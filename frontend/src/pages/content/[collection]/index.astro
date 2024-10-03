@@ -4,9 +4,22 @@ import {
   SwellStorefrontCollection,
   getContentModel,
 } from '@swell/apps-sdk';
-import ThemePage from '../../../components/ThemePage.astro';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
 
-const { collection } = Astro.params;
+export async function getData(swell: Swell, collection?: string) {
+  const model = await getContentModel(swell, collection as string);
+  const entries = new SwellStorefrontCollection(swell, `content/${collection}`);
+
+  return {
+    model,
+    entries,
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  return getData(swell, context.params.collection);
+});
 ---
 
 <ThemePage
@@ -14,16 +27,5 @@ const { collection } = Astro.params;
   required="model.id"
   title="{{ model.name }}"
   description="{{ model.description }}"
-  getData={async (swell: Swell) => {
-    const model = await getContentModel(swell, collection);
-    const entries = new SwellStorefrontCollection(
-      swell,
-      `content/${collection}`
-    );
-
-    return {
-      model,
-      entries,
-    };
-  }}
+  getData={(swell) => getData(swell, Astro.params.collection)}
 />
