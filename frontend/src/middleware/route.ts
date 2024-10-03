@@ -37,19 +37,16 @@ async function initThemePageHandler(context: SwellServerContext) {
   }
 
   // Use compatibility instance if page was identified, otherwise use default
-  const shopifyCompatibility = theme.props?.compatibility?.shopify
-    ? theme.shopifyCompatibility || new StorefrontShopifyCompatibility(theme)
-    : null;
+  const shopifyCompatibility =
+    theme.shopifyCompatibility || new StorefrontShopifyCompatibility(theme);
 
   // Redirect shopify URLs to the adapted page
-  if (shopifyCompatibility) {
-    const adaptedUrl = shopifyCompatibility.getAdaptedPageUrl(
-      url.pathname + url.search,
-    );
+  const adaptedUrl = shopifyCompatibility.getAdaptedPageUrl(
+    url.pathname + url.search,
+  );
 
-    if (adaptedUrl && adaptedUrl !== url.pathname) {
-      return redirect(adaptedUrl, 307);
-    }
+  if (adaptedUrl && adaptedUrl !== url.pathname) {
+    return redirect(adaptedUrl, 307);
   }
 }
 
