@@ -2,6 +2,7 @@ import {
   Swell,
   SwellTheme,
   SwellAppConfig,
+  SwellAppShopifyCompatibilityConfig,
   ShopifyCompatibility,
   CFThemeEnv,
 } from '@swell/apps-sdk';
@@ -20,7 +21,8 @@ export async function initSwell(
 ): Promise<Swell> {
   const swell = new Swell({
     url: context.url,
-    shopifyCompatibilityConfig,
+    shopifyCompatibilityConfig:
+      shopifyCompatibilityConfig as unknown as SwellAppShopifyCompatibilityConfig,
     config: swellConfig as SwellAppConfig,
     serverHeaders: context.request.headers,
     workerEnv: context.locals.runtime?.env as CFThemeEnv,
@@ -107,7 +109,7 @@ export async function initSwellTheme(
   Astro: AstroGlobal | APIContext,
   pageId?: string,
 ) {
-  const swell = Astro.locals.swell || await initSwell(Astro);
+  const swell = Astro.locals.swell || (await initSwell(Astro));
 
   // Indicate response was sent to avoid mutating cookies
   if (Astro.locals.swell) {
