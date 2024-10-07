@@ -47,6 +47,8 @@ let pageData, pageTitle, pageDescription, pageContent, pageError;
 try {
   // Rendering page content
   pageData = getData && (await getData(swell, theme));
+
+  console.log(pageData)
   
   theme.setCompatibilityData(pageData);
 

@@ -4,15 +4,17 @@ import {
   SwellAppConfig,
   ShopifyCompatibility,
   CFThemeEnv,
+  ThemeResources,
+  SwellAppStorefrontThemeResources,
 } from '@swell/apps-sdk';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
 
 import forms from '@/forms';
-import resources from '@/resources';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 
 import swellConfig from '../../swell.json';
 import shopifyCompatibilityConfig from '../../shopify_compatibility.json';
+import * as resources from '@/resources';
 
 export async function initSwell(
   context: AstroGlobal | APIContext,
@@ -94,10 +96,29 @@ export function deleteCookie(
   context.cookies.delete(name, cookieOptions);
 }
 
+function getResources(
+  resourcesConfig: SwellAppStorefrontThemeResources,
+): ThemeResources {
+  const { singletons, records } = resourcesConfig;
+
+  const loadResources = (resourceList: Record<string, string>) =>
+    Object.fromEntries(
+      Object.entries(resourceList).map(([key, resource]) => [
+        key,
+        resources[resource],
+      ]),
+    );
+
+  return {
+    singletons: loadResources(singletons),
+    records: loadResources(records),
+  };
+}
+
 export function initTheme(swell: Swell) {
   return new SwellTheme(swell, {
     forms,
-    resources,
+    resources: getResources(swellConfig.storefront.theme.resources),
     shopifyCompatibilityClass:
       StorefrontShopifyCompatibility as unknown as typeof ShopifyCompatibility,
   });
@@ -107,7 +128,7 @@ export async function initSwellTheme(
   Astro: AstroGlobal | APIContext,
   pageId?: string,
 ) {
-  const swell = Astro.locals.swell || await initSwell(Astro);
+  const swell = Astro.locals.swell || (await initSwell(Astro));
 
   // Indicate response was sent to avoid mutating cookies
   if (Astro.locals.swell) {
