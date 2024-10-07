@@ -24,6 +24,7 @@ import {
 } from '@swell/apps-sdk';
 import { initTheme } from '@/swell';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
+import shopifyCompatibilityConfig from '../../../shopify_compatibility.json';
 
 // TODO: fix all the types
 
@@ -444,7 +445,11 @@ function EasyblocksPage(props: any) {
   }, [pageId, themeGlobals, allSections, pageSections, layoutSectionGroups]);
 
   const swell = useMemo(() => {
-    return new Swell({ ...swellClientProps, isEditor: true });
+    return new Swell({
+      ...swellClientProps,
+      isEditor: true,
+      shopifyCompatibilityConfig,
+    });
   }, [swellClientProps]);
 
   const components = useMemo(() => {
