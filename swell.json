@@ -1,174 +1,174 @@
 {
-  "id": "proxima",
-  "name": "Proxima",
-  "type": "storefront",
-  "version": "1.0.22",
-  "description": "Official storefront app for Swell",
-  "storefront": {
-    "theme": {
-      "provider": "app",
-      "compatibility": {
-        "version": "*",
-        "conflicts": {
-          "exclude_files": [
-            "theme/config/**",
-            "theme/templates/**",
-            "theme/sections/**"
-          ]
-        }
-      },
-      "pages": [
-        {
-          "id": "index",
-          "label": "Home",
-          "url": "/",
-          "icon": "home"
-        },
-        {
-          "id": "products/index",
-          "label": "Product list",
-          "url": "/products",
-          "icon": "tag",
-          "json": true
-        },
-        {
-          "id": "products/product",
-          "label": "Product",
-          "url": "/products/:slug",
-          "icon": "tag",
-          "templates": true,
-          "collection": "products",
-          "json": true
-        },
-        {
-          "id": "categories/index",
-          "label": "Category list",
-          "url": "/categories",
-          "icon": "tags",
-          "json": true
-        },
-        {
-          "id": "categories/category",
-          "label": "Category",
-          "url": "/categories/:slug",
-          "icon": "tags",
-          "templates": true,
-          "collection": "categories",
-          "json": true
-        },
-        {
-          "id": "pages/page",
-          "label": "Page",
-          "url": "/pages/:slug",
-          "icon": "page",
-          "templates": true,
-          "collection": "content/pages",
-          "json": true
-        },
-        {
-          "id": "blogs/blog",
-          "label": "Blog post",
-          "url": "/blogs/:category/:slug",
-          "icon": "rss",
-          "templates": true,
-          "collection": "content/blogs",
-          "json": true
-        },
-        {
-          "id": "blogs/category",
-          "label": "Blog category",
-          "url": "/blogs/:slug",
-          "icon": "rss",
-          "templates": true,
-          "collection": "content/blog-categories",
-          "json": true
-        },
-        {
-          "id": "account/index",
-          "label": "Customer account",
-          "url": "/account",
-          "group": "customer",
-          "icon": "user",
-          "collection": "accounts"
-        },
-        {
-          "id": "account/activate",
-          "label": "Customer account activation",
-          "url": "/account/activate",
-          "group": "customer",
-          "icon": "user"
-        },
-        {
-          "id": "account/login",
-          "label": "Customer login",
-          "url": "/account/login",
-          "group": "customer",
-          "icon": "user"
-        },
-        {
-          "id": "account/signup",
-          "label": "Customer signup",
-          "url": "/account/signup",
-          "group": "customer",
-          "icon": "user"
-        },
-        {
-          "id": "account/recover",
-          "label": "Customer password recovery",
-          "url": "/account/recover",
-          "group": "customer",
-          "icon": "user"
-        },
-        {
-          "id": "account/addresses",
-          "label": "Customer addresses",
-          "url": "/account/addresses",
-          "group": "customer",
-          "icon": "map-marker",
-          "collection": "accounts"
-        },
-        {
-          "id": "account/order",
-          "label": "Customer order",
-          "url": "/account/orders/:id",
-          "group": "customer",
-          "icon": "shopping-cart",
-          "collection": "orders",
-          "json": true
-        },
-        {
-          "id": "account/subscription",
-          "label": "Customer subscription",
-          "url": "/account/subscriptions/:id",
-          "group": "customer",
-          "icon": "shopping-cart",
-          "collection": "subscriptions",
-          "json": true
-        },
-        {
-          "id": "cart",
-          "label": "Cart",
-          "url": "/cart",
-          "group": "checkout",
-          "icon": "shopping-cart",
-          "collection": "carts"
-        },
-        {
-          "id": "404",
-          "label": "404 Page Not Found",
-          "url": "/404",
-          "group": "other",
-          "icon": "page"
-        },
-        {
-          "id": "search",
-          "label": "Search",
-          "url": "/search",
-          "group": "other",
-          "icon": "search",
-          "json": true
-        }
-      ]
-    }
-  }
+	"id": "proxima",
+	"name": "Proxima",
+	"type": "storefront",
+	"version": "1.0.22",
+	"description": "Official storefront app for Swell",
+	"storefront": {
+		"theme": {
+			"provider": "app",
+			"compatibility": {
+				"version": "*",
+				"conflicts": {
+					"exclude_files": [
+						"theme/config/**",
+						"theme/templates/**",
+						"theme/sections/**"
+					]
+				}
+			},
+			"pages": [
+				{
+					"id": "index",
+					"label": "Home",
+					"url": "/",
+					"icon": "home"
+				},
+				{
+					"id": "products/index",
+					"label": "Product list",
+					"url": "/products",
+					"icon": "tag",
+					"json": true
+				},
+				{
+					"id": "products/product",
+					"label": "Product",
+					"url": "/products/:slug",
+					"icon": "tag",
+					"templates": true,
+					"collection": "products",
+					"json": true
+				},
+				{
+					"id": "categories/index",
+					"label": "Category list",
+					"url": "/categories",
+					"icon": "tags",
+					"json": true
+				},
+				{
+					"id": "categories/category",
+					"label": "Category",
+					"url": "/categories/:slug",
+					"icon": "tags",
+					"templates": true,
+					"collection": "categories",
+					"json": true
+				},
+				{
+					"id": "pages/page",
+					"label": "Page",
+					"url": "/pages/:slug",
+					"icon": "page",
+					"templates": true,
+					"collection": "content/pages",
+					"json": true
+				},
+				{
+					"id": "blogs/blog",
+					"label": "Blog post",
+					"url": "/blogs/:category/:slug",
+					"icon": "rss",
+					"templates": true,
+					"collection": "content/blogs",
+					"json": true
+				},
+				{
+					"id": "blogs/category",
+					"label": "Blog category",
+					"url": "/blogs/:slug",
+					"icon": "rss",
+					"templates": true,
+					"collection": "content/blog-categories",
+					"json": true
+				},
+				{
+					"id": "account/index",
+					"label": "Customer account",
+					"url": "/account",
+					"group": "customer",
+					"icon": "user",
+					"collection": "accounts"
+				},
+				{
+					"id": "account/activate",
+					"label": "Customer account activation",
+					"url": "/account/activate",
+					"group": "customer",
+					"icon": "user"
+				},
+				{
+					"id": "account/login",
+					"label": "Customer login",
+					"url": "/account/login",
+					"group": "customer",
+					"icon": "user"
+				},
+				{
+					"id": "account/signup",
+					"label": "Customer signup",
+					"url": "/account/signup",
+					"group": "customer",
+					"icon": "user"
+				},
+				{
+					"id": "account/recover",
+					"label": "Customer password recovery",
+					"url": "/account/recover",
+					"group": "customer",
+					"icon": "user"
+				},
+				{
+					"id": "account/addresses",
+					"label": "Customer addresses",
+					"url": "/account/addresses",
+					"group": "customer",
+					"icon": "map-marker",
+					"collection": "accounts"
+				},
+				{
+					"id": "account/order",
+					"label": "Customer order",
+					"url": "/account/orders/:id",
+					"group": "customer",
+					"icon": "shopping-cart",
+					"collection": "orders",
+					"json": true
+				},
+				{
+					"id": "account/subscription",
+					"label": "Customer subscription",
+					"url": "/account/subscriptions/:id",
+					"group": "customer",
+					"icon": "shopping-cart",
+					"collection": "subscriptions",
+					"json": true
+				},
+				{
+					"id": "cart",
+					"label": "Cart",
+					"url": "/cart",
+					"group": "checkout",
+					"icon": "shopping-cart",
+					"collection": "carts"
+				},
+				{
+					"id": "404",
+					"label": "404 Page Not Found",
+					"url": "/404",
+					"group": "other",
+					"icon": "page"
+				},
+				{
+					"id": "search",
+					"label": "Search",
+					"url": "/search",
+					"group": "other",
+					"icon": "search",
+					"json": true
+				}
+			]
+		}
+	}
 }
