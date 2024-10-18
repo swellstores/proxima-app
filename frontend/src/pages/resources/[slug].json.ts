@@ -8,7 +8,8 @@ export const GET = handleServerRequest(
       slug: keyof typeof resources;
     };
 
-    const { path, slug = '', query = {} } = params;
+    let { path, slug = '', query = {} } = params;
+    query = JSON.parse(query);
 
     const Resource = resources[resource_slug];
 
@@ -18,12 +19,7 @@ export const GET = handleServerRequest(
       resource = await new Resource(swell, slug, query)[path.replace('/', '.')];
       resource = await resource.resolveWithMetadata();
     } else {
-      resource = await new Resource(
-        swell,
-
-        slug,
-        query,
-      ).resolveWithMetadata();
+      resource = await new Resource(swell, slug, query).resolveWithMetadata();
     }
 
     return resource;

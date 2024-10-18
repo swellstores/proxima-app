@@ -6,6 +6,7 @@ import {
 } from '@swell/apps-sdk';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
 
 export async function getData(swell: Swell, collection?: string) {
   const model = await getContentModel(swell, collection as string);
@@ -18,7 +19,8 @@ export async function getData(swell: Swell, collection?: string) {
 }
 
 export const getJSON = handleServerRequest(async ({ swell, context }) => {
-  return getData(swell, context.params.collection);
+  const data = await getData(swell, context.params.collection);
+  return parseResources(data);
 });
 ---
 

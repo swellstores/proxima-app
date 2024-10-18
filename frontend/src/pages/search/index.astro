@@ -3,6 +3,7 @@ import { Swell } from '@swell/apps-sdk';
 import { SearchResource } from '@/resources/search';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
 
 export async function getData(swell: Swell, query: string | null) {
   return {
@@ -11,7 +12,8 @@ export async function getData(swell: Swell, query: string | null) {
 }
 
 export const getJSON = handleServerRequest(async ({ swell, context }) => {
-  return getData(swell, context.url.searchParams.get('q'));
+  const data = await getData(swell, context.url.searchParams.get('q'));
+  return parseResources(data);
 });
 ---
 

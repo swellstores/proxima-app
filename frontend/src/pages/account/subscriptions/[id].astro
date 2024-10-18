@@ -3,6 +3,7 @@ import { Swell } from '@swell/apps-sdk';
 import { AccountSubscriptionResource } from '@/resources/account';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
 
 export async function getData(swell: Swell, id?: string) {
   return {
@@ -11,7 +12,8 @@ export async function getData(swell: Swell, id?: string) {
 }
 
 export const getJSON = handleServerRequest(async ({ swell, context }) => {
-  return getData(swell, context.params.id);
+  const data = await getData(swell, context.params.id);
+  return parseResources(data);
 });
 ---
 

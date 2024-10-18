@@ -47,8 +47,6 @@ let pageData, pageTitle, pageDescription, pageContent, pageError;
 try {
   // Rendering page content
   pageData = getData && (await getData(swell, theme));
-
-  console.log(pageData)
   
   theme.setCompatibilityData(pageData);
 
@@ -120,12 +118,14 @@ try {
 }
 
 const pageProps = { ...props, ...pageData };
+
 const layoutProps = {
   page_title: pageTitle || pageData?.title || theme.globals.store?.name,
   page_description: pageDescription || pageData?.description,
   content_for_header: theme.getContentForHeader(),
   props,
 };
+
 ---
 
 {
