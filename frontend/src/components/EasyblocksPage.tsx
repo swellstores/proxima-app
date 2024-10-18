@@ -12,6 +12,7 @@ import {
   Parser as HtmlToReactParser,
   ProcessNodeDefinitions,
 } from 'html-to-react';
+import styleToObject from 'style-to-object';
 import {
   Swell,
   SwellTheme,
@@ -357,6 +358,15 @@ function getPageBlockProcessingInstructions(Blocks: any) {
       processNode: function (_node: any, children: any) {
         const Root = Blocks[blockIndex++];
         return React.createElement(Block, { Root }, children);
+      },
+    },
+    {
+      // Parse CSS inline style to JavaScript object
+      shouldProcessNode: (node: any) => node.attribs?.style,
+      processNode: (node: any, children: any) => {
+        node.attribs.style = styleToObject(node.attribs.style);
+
+        return React.createElement(node.name, node.attribs, children);
       },
     },
     {
