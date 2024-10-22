@@ -1,208 +1,208 @@
 {
-  "id": "proxima",
-  "name": "Proxima",
-  "type": "storefront",
-  "version": "1.0.22",
-  "description": "Official storefront app for Swell",
-  "use_cases": [
-    "direct_to_consumer",
-    "wholesale"
-  ],
-  "purchase_options": [
-    "standard",
-    "susbcription"
-  ],
-  "features": [
-    "multi_currency",
-    "multi_language",
-    "bulk_pricing",
-    "account_pricing"
-  ],
-  "highlights": [
-    {
-      "id": "adapt-brand",
-      "title": "Adaptable to your brand",
-      "description": "Bring your brand to life with individual custom color sections, adaptable elements, elegant animations, and many more powerful settings.",
-      "image_src": "assets/feature-adapt-brand.png"
-    },
-    {
-      "id": "tell-your-story",
-      "title": "Tell your story",
-      "description": "With more than 20 built-in sections, create unique and creative landing pages to engage your customers and promote your brand identity.",
-      "image_src": "assets/feature-tell-your-story.png"
-    },
-    {
-      "id": "cross-selling",
-      "title": "Cross-selling capabilities",
-      "description": "Designed to help you increase sales through powerful features like product recommendations on product and cart pages and sticky Add to cart.",
-      "image_src": "assets/feature-cross-selling.png"
-    }
-  ],
-  "storefront": {
-    "theme": {
-      "provider": "app",
-      "compatibility": {
-        "version": "*",
-        "conflicts": {
-          "exclude_files": [
-            "theme/config/**",
-            "theme/templates/**",
-            "theme/sections/**"
-          ]
-        }
-      },
-      "pages": [
-        {
-          "id": "index",
-          "label": "Home",
-          "url": "/",
-          "icon": "home"
-        },
-        {
-          "id": "products/index",
-          "label": "Product list",
-          "url": "/products",
-          "icon": "tag",
-          "json": true
-        },
-        {
-          "id": "products/product",
-          "label": "Product",
-          "url": "/products/:slug",
-          "icon": "tag",
-          "templates": true,
-          "collection": "products",
-          "json": true
-        },
-        {
-          "id": "categories/index",
-          "label": "Category list",
-          "url": "/categories",
-          "icon": "tags",
-          "json": true
-        },
-        {
-          "id": "categories/category",
-          "label": "Category",
-          "url": "/categories/:slug",
-          "icon": "tags",
-          "templates": true,
-          "collection": "categories",
-          "json": true
-        },
-        {
-          "id": "pages/page",
-          "label": "Page",
-          "url": "/pages/:slug",
-          "icon": "page",
-          "templates": true,
-          "collection": "content/pages",
-          "json": true
-        },
-        {
-          "id": "blogs/blog",
-          "label": "Blog post",
-          "url": "/blogs/:category/:slug",
-          "icon": "rss",
-          "templates": true,
-          "collection": "content/blogs",
-          "json": true
-        },
-        {
-          "id": "blogs/category",
-          "label": "Blog category",
-          "url": "/blogs/:slug",
-          "icon": "rss",
-          "templates": true,
-          "collection": "content/blog-categories",
-          "json": true
-        },
-        {
-          "id": "account/index",
-          "label": "Customer account",
-          "url": "/account",
-          "group": "customer",
-          "icon": "user",
-          "collection": "accounts"
-        },
-        {
-          "id": "account/activate",
-          "label": "Customer account activation",
-          "url": "/account/activate",
-          "group": "customer",
-          "icon": "user"
-        },
-        {
-          "id": "account/login",
-          "label": "Customer login",
-          "url": "/account/login",
-          "group": "customer",
-          "icon": "user"
-        },
-        {
-          "id": "account/signup",
-          "label": "Customer signup",
-          "url": "/account/signup",
-          "group": "customer",
-          "icon": "user"
-        },
-        {
-          "id": "account/recover",
-          "label": "Customer password recovery",
-          "url": "/account/recover",
-          "group": "customer",
-          "icon": "user"
-        },
-        {
-          "id": "account/addresses",
-          "label": "Customer addresses",
-          "url": "/account/addresses",
-          "group": "customer",
-          "icon": "map-marker",
-          "collection": "accounts"
-        },
-        {
-          "id": "account/order",
-          "label": "Customer order",
-          "url": "/account/orders/:id",
-          "group": "customer",
-          "icon": "shopping-cart",
-          "collection": "orders",
-          "json": true
-        },
-        {
-          "id": "account/subscription",
-          "label": "Customer subscription",
-          "url": "/account/subscriptions/:id",
-          "group": "customer",
-          "icon": "shopping-cart",
-          "collection": "subscriptions",
-          "json": true
-        },
-        {
-          "id": "cart",
-          "label": "Cart",
-          "url": "/cart",
-          "group": "checkout",
-          "icon": "shopping-cart",
-          "collection": "carts"
-        },
-        {
-          "id": "404",
-          "label": "404 Page Not Found",
-          "url": "/404",
-          "group": "other",
-          "icon": "page"
-        },
-        {
-          "id": "search",
-          "label": "Search",
-          "url": "/search",
-          "group": "other",
-          "icon": "search",
-          "json": true
-        }
-      ]
-    }
-  }
+	"id": "proxima",
+	"name": "Proxima",
+	"type": "storefront",
+	"version": "1.0.23",
+	"description": "Official storefront app for Swell",
+	"use_cases": [
+		"direct_to_consumer",
+		"wholesale"
+	],
+	"purchase_options": [
+		"standard",
+		"susbcription"
+	],
+	"features": [
+		"multi_currency",
+		"multi_language",
+		"bulk_pricing",
+		"account_pricing"
+	],
+	"highlights": [
+		{
+			"id": "adapt-brand",
+			"title": "Adaptable to your brand",
+			"description": "Bring your brand to life with individual custom color sections, adaptable elements, elegant animations, and many more powerful settings.",
+			"image_src": "assets/feature-adapt-brand.png"
+		},
+		{
+			"id": "tell-your-story",
+			"title": "Tell your story",
+			"description": "With more than 20 built-in sections, create unique and creative landing pages to engage your customers and promote your brand identity.",
+			"image_src": "assets/feature-tell-your-story.png"
+		},
+		{
+			"id": "cross-selling",
+			"title": "Cross-selling capabilities",
+			"description": "Designed to help you increase sales through powerful features like product recommendations on product and cart pages and sticky Add to cart.",
+			"image_src": "assets/feature-cross-selling.png"
+		}
+	],
+	"storefront": {
+		"theme": {
+			"provider": "app",
+			"compatibility": {
+				"version": "*",
+				"conflicts": {
+					"exclude_files": [
+						"theme/config/**",
+						"theme/templates/**",
+						"theme/sections/**"
+					]
+				}
+			},
+			"pages": [
+				{
+					"id": "index",
+					"label": "Home",
+					"url": "/",
+					"icon": "home"
+				},
+				{
+					"id": "products/index",
+					"label": "Product list",
+					"url": "/products",
+					"icon": "tag",
+					"json": true
+				},
+				{
+					"id": "products/product",
+					"label": "Product",
+					"url": "/products/:slug",
+					"icon": "tag",
+					"templates": true,
+					"collection": "products",
+					"json": true
+				},
+				{
+					"id": "categories/index",
+					"label": "Category list",
+					"url": "/categories",
+					"icon": "tags",
+					"json": true
+				},
+				{
+					"id": "categories/category",
+					"label": "Category",
+					"url": "/categories/:slug",
+					"icon": "tags",
+					"templates": true,
+					"collection": "categories",
+					"json": true
+				},
+				{
+					"id": "pages/page",
+					"label": "Page",
+					"url": "/pages/:slug",
+					"icon": "page",
+					"templates": true,
+					"collection": "content/pages",
+					"json": true
+				},
+				{
+					"id": "blogs/blog",
+					"label": "Blog post",
+					"url": "/blogs/:category/:slug",
+					"icon": "rss",
+					"templates": true,
+					"collection": "content/blogs",
+					"json": true
+				},
+				{
+					"id": "blogs/category",
+					"label": "Blog category",
+					"url": "/blogs/:slug",
+					"icon": "rss",
+					"templates": true,
+					"collection": "content/blog-categories",
+					"json": true
+				},
+				{
+					"id": "account/index",
+					"label": "Customer account",
+					"url": "/account",
+					"group": "customer",
+					"icon": "user",
+					"collection": "accounts"
+				},
+				{
+					"id": "account/activate",
+					"label": "Customer account activation",
+					"url": "/account/activate",
+					"group": "customer",
+					"icon": "user"
+				},
+				{
+					"id": "account/login",
+					"label": "Customer login",
+					"url": "/account/login",
+					"group": "customer",
+					"icon": "user"
+				},
+				{
+					"id": "account/signup",
+					"label": "Customer signup",
+					"url": "/account/signup",
+					"group": "customer",
+					"icon": "user"
+				},
+				{
+					"id": "account/recover",
+					"label": "Customer password recovery",
+					"url": "/account/recover",
+					"group": "customer",
+					"icon": "user"
+				},
+				{
+					"id": "account/addresses",
+					"label": "Customer addresses",
+					"url": "/account/addresses",
+					"group": "customer",
+					"icon": "map-marker",
+					"collection": "accounts"
+				},
+				{
+					"id": "account/order",
+					"label": "Customer order",
+					"url": "/account/orders/:id",
+					"group": "customer",
+					"icon": "shopping-cart",
+					"collection": "orders",
+					"json": true
+				},
+				{
+					"id": "account/subscription",
+					"label": "Customer subscription",
+					"url": "/account/subscriptions/:id",
+					"group": "customer",
+					"icon": "shopping-cart",
+					"collection": "subscriptions",
+					"json": true
+				},
+				{
+					"id": "cart",
+					"label": "Cart",
+					"url": "/cart",
+					"group": "checkout",
+					"icon": "shopping-cart",
+					"collection": "carts"
+				},
+				{
+					"id": "404",
+					"label": "404 Page Not Found",
+					"url": "/404",
+					"group": "other",
+					"icon": "page"
+				},
+				{
+					"id": "search",
+					"label": "Search",
+					"url": "/search",
+					"group": "other",
+					"icon": "search",
+					"json": true
+				}
+			]
+		}
+	}
 }
