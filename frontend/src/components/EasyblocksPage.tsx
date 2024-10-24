@@ -183,7 +183,9 @@ const ContentForLayout = React.memo(function ContentForLayout({
   const { ContentSections } = rootProps;
 
   return ContentSections.map((Section: any, index: number) => (
-    <Section.type {...Section.props} key={index} />
+    <section className="section" key={index}>
+      <Section.type {...Section.props} />
+    </section>
   ));
 });
 
