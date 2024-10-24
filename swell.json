@@ -31,6 +31,48 @@
           "search": "SearchResource"
         }
       },
+      "forms": [
+        {
+          "id": "account_login",
+          "url": "/account/login"
+        },
+        {
+          "id": "account_create",
+          "url": "/account"
+        },
+        {
+          "id": "account_subscribe",
+          "url": "/account/subscribe"
+        },
+        {
+          "id": "account_password_recover",
+          "url": "/account/recover"
+        },
+        {
+          "id": "account_password_reset",
+          "url": "/account/recover"
+        },
+        {
+          "id": "account_address",
+          "url": "/account/addresses"
+        },
+        {
+          "id": "cart_add",
+          "url": "/cart/add"
+        },
+        {
+          "id": "cart_update",
+          "url": "/cart/update"
+        },
+        {
+          "id": "cart_checkout",
+          "url": "/cart/checkout"
+        },
+        {
+          "id": "localization",
+          "url": "/localization"
+        }
+      ],
       "pages": [
         {
           "id": "index",
