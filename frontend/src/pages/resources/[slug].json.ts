@@ -17,9 +17,9 @@ export const GET = handleServerRequest(
 
     if (path) {
       resource = await new Resource(swell, slug, query)[path.replace('/', '.')];
-      resource = await resource.resolveWithMetadata();
+      resource = await resource.resolve(false);
     } else {
-      resource = await new Resource(swell, slug, query).resolveWithMetadata();
+      resource = await new Resource(swell, slug, query).resolve(false);
     }
 
     return resource;

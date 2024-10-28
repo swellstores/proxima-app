@@ -4,14 +4,10 @@ export async function parseResources(
   const result: Record<string, any> = {};
 
   for (const [key, value] of Object.entries(data)) {
-    if (
-      value &&
-      typeof value === 'object' &&
-      'resolveWithResourceMetadata' in value
-    ) {
+    if (value && typeof value === 'object' && 'resolve' in value) {
       result[key] = {
         _resource: value.constructor.name,
-        value: await value.resolveWithResourceMetadata(),
+        value: await value.resolve(false, true),
       };
     } else {
       result[key] = value;
