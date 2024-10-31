@@ -148,6 +148,7 @@
   "forms": [
     {
       "id": "cart_add",
+      "shopify_type": "product",
       "client_params": [
         {
           "name": "product_id",
@@ -172,6 +173,26 @@
           "value": "{{ address.id }}"
         }
       ]
+    },
+    {
+      "id": "account_login",
+      "shopify_type": "customer_login"
+    },
+    {
+      "id": "account_create",
+      "shopify_type": "create_customer"
+    },
+    {
+      "id": "account_subscribe",
+      "shopify_type": "customer"
+    },
+    {
+      "id": "account_password_recover",
+      "shopify_type": "recover_customer_password"
+    },
+    {
+      "id": "account_password_reset",
+      "shopify_type": "reset_customer_password"
     }
   ]
 }

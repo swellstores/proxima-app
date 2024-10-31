@@ -32,18 +32,3 @@ export {
   SearchResource,
   VariantResource,
 };
-
-export default {
-  singletons: {
-    account: AccountResource,
-    cart: CartResource,
-  },
-  records: {
-    'content/blogs': BlogResource,
-    'content/blogs-categories': BlogCategoryResource,
-    categories: CategoryResource,
-    pages: PageResource,
-    products: ProductResource,
-    search: SearchResource,
-  },
-};
