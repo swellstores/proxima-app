@@ -226,5 +226,33 @@
         }
       ]
     }
-  }
+  },
+  "use_cases": ["direct_to_consumer", "wholesale"],
+  "purchase_options": ["standard", "susbcription"],
+  "features": [
+    "multi_currency",
+    "multi_language",
+    "bulk_pricing",
+    "account_pricing"
+  ],
+  "highlights": [
+    {
+      "id": "adapt-brand",
+      "title": "Adaptable to your brand",
+      "description": "Bring your brand to life with individual custom color sections, adaptable elements, elegant animations, and many more powerful settings.",
+      "image_src": "assets/feature-adapt-brand.png"
+    },
+    {
+      "id": "tell-your-story",
+      "title": "Tell your story",
+      "description": "With more than 20 built-in sections, create unique and creative landing pages to engage your customers and promote your brand identity.",
+      "image_src": "assets/feature-tell-your-story.png"
+    },
+    {
+      "id": "cross-selling",
+      "title": "Cross-selling capabilities",
+      "description": "Designed to help you increase sales through powerful features like product recommendations on product and cart pages and sticky Add to cart.",
+      "image_src": "assets/feature-cross-selling.png"
+    }
+  ]
 }
