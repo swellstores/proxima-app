@@ -10,7 +10,6 @@ import {
 } from '@swell/apps-sdk';
 import Layout from '@/layouts/Layout.astro';
 import ThemeSections from './ThemeSections.astro';
-import EditorPage from './EditorPage.astro';
 import ErrorPage from './ErrorPage.astro';
 
 const sections = Astro.url.searchParams.get('sections');
@@ -31,7 +30,6 @@ export interface Props {
   props?: {
     [key: string]: any;
   };
-  easyblocks?: boolean;
   getData?: (swell: Swell, theme: SwellTheme) => Promise<SwellData> | SwellData;
 }
 
@@ -39,8 +37,6 @@ const { id, title, description, required, content, props, getData } =
   Astro.props;
 
 const { swell, theme } = await initSwellTheme(Astro, id);
-
-const isEditor = typeof Astro.url.searchParams.get('_editor') === 'string';
 
 let pageData, pageTitle, pageDescription, pageContent, pageError;
 
@@ -135,17 +131,7 @@ const layoutProps = {
     JSON.stringify(pageContent)
   ) : sectionId ? (
     <Fragment set:html={pageContent[sectionId]} />
-  ) : isEditor ? (
-    <html>
-      <EditorPage
-        swell={swell}
-        theme={theme}
-        pageProps={pageProps}
-        pageContent={pageContent}
-        layoutProps={layoutProps}
-      />
-    </html>
-  ) : (
+  ) :  (
     <Layout theme={theme} {...layoutProps}>
       <Fragment slot="content_for_layout">
         {typeof pageContent === 'string' ? (

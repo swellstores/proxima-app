@@ -26,10 +26,7 @@ export default defineConfig({
       warmup: {
         // Experimenting with warming up transforms
         ssrFiles: ['./src/**/*'],
-        clientFiles: [
-          './src/components/EasyblocksEditor.tsx',
-          './src/swell/**/*',
-        ],
+        clientFiles: ['./src/swell/**/*'],
       },
     },
   },
