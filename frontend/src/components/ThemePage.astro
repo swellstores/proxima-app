@@ -43,7 +43,15 @@ let pageData, pageTitle, pageDescription, pageContent, pageError;
 try {
   // Rendering page content
   pageData = getData && (await getData(swell, theme));
-  
+
+  if (required) {
+    const isFound = await get(pageData, required);
+
+    if (!isFound) {
+      throw new PageNotFound();
+    }
+  }
+
   theme.setCompatibilityData(pageData);
 
   [pageTitle, pageDescription, pageContent] = await Promise.all([
@@ -69,7 +77,7 @@ try {
             ...props,
             ...pageData,
           },
-          pageData?.theme_template
+          pageData?.theme_template,
         ),
   ]);
 
@@ -83,13 +91,6 @@ try {
   }
   if (!pageDescription && pageContent?.page?.description) {
     pageDescription = pageContent.page.description;
-  }
-
-  if (required) {
-    const isFound = await get(pageData, required);
-    if (!isFound) {
-      throw new PageNotFound();
-    }
   }
 } catch (err: any) {
   try {
@@ -121,7 +122,6 @@ const layoutProps = {
   content_for_header: theme.getContentForHeader(),
   props,
 };
-
 ---
 
 {
@@ -131,7 +131,7 @@ const layoutProps = {
     JSON.stringify(pageContent)
   ) : sectionId ? (
     <Fragment set:html={pageContent[sectionId]} />
-  ) :  (
+  ) : (
     <Layout theme={theme} {...layoutProps}>
       <Fragment slot="content_for_layout">
         {typeof pageContent === 'string' ? (
