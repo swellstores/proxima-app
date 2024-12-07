@@ -22,6 +22,8 @@ export const GET = handleServerRequest(
       resource = await new Resource(swell, slug, query).resolve(false);
     }
 
+    console.log('get resource', slug, query);
+
     return resource;
   },
 );
