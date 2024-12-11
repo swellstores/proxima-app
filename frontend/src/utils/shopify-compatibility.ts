@@ -1,11 +1,15 @@
-import { SwellTheme, ShopifyCompatibility } from '@swell/apps-sdk';
+import {
+  SwellTheme,
+  ShopifyCompatibility,
+  ShopifyFormResourceMap,
+} from '@swell/apps-sdk';
 
 export default class StorefrontShopifyCompatibility extends ShopifyCompatibility {
   constructor(theme: SwellTheme) {
     super(theme);
   }
 
-  getFormResourceMap() {
+  getFormResourceMap(): ShopifyFormResourceMap {
     return [
       {
         type: 'cart_add',
@@ -47,7 +51,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       },
       {
         type: 'cart_update',
-        shopifyType: null, // No Shopify equivalent, manually executed by the cart_update handler
+        shopifyType: undefined, // No Shopify equivalent, manually executed by the cart_update handler
         serverParams: async ({ params, theme }: any) => {
           const { line, quantity } = params;
 
@@ -80,7 +84,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       },
       {
         type: 'localization',
-        shopifyType: null, // Same form type as Shopify
+        shopifyType: undefined, // Same form type as Shopify
         serverParams: ({ params }: any) => {
           const { country_code, locale_code } = params;
 

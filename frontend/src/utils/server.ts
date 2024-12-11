@@ -24,6 +24,13 @@ export interface SwellServerContext extends APIContext {
   context: APIContext;
 }
 
+declare global {
+  interface Request {
+    parsedBody?: Record<string, any>;
+    parsedJson?: Record<string, any>;
+  }
+}
+
 export interface SwellServerNext extends MiddlewareNext {}
 
 export function handleServerRequest(
@@ -293,29 +300,40 @@ export async function getFormParams(
   const params: SwellData = qs.parse(searchParams.toString());
 
   // Form data
-  try {
+  if (!request.parsedBody) {
+    try {
+      request.parsedBody = await request.formData();
+    } catch {
+      // noop
+    }
+  }
+
+  // JSON data
+  if (!request.parsedJson) {
+    try {
+      request.parsedJson = await request.json();
+    } catch {
+      // noop
+    }
+  }
+
+  if (request.parsedBody) {
     // Use qs to parse because form may contain array[] properties
     let formData = '';
-    const body = await request.formData();
-    for (const [key, value] of body.entries()) {
+    for (const [key, value] of request.parsedBody.entries()) {
       formData += `${key}=${value}&`;
     }
+
     const formParams = qs.parse(formData);
     for (const key in formParams) {
       params[key] = formParams[key];
     }
-  } catch {
-    // noop
   }
 
-  // JSON data
-  try {
-    const body = await request.json();
-    for (const key in body) {
-      params[key] = body[key];
+  if (request.parsedJson) {
+    for (const key in request.parsedJson) {
+      params[key] = request.parsedJson[key];
     }
-  } catch {
-    // noop
   }
 
   return params;
