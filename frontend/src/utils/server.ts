@@ -195,6 +195,7 @@ export function sendServerError(err: any) {
   if (!err.code) {
     console.error(err);
   }
+
   return jsonResponse(
     {
       message: 'Something went wrong',
@@ -341,6 +342,7 @@ export async function getFormParams(
 
 export function jsonResponse(values: SwellData, options?: ResponseInit) {
   return new Response(JSON.stringify(values), {
+    status: 200,
     ...options,
     headers: {
       'Content-Type': 'application/json',
