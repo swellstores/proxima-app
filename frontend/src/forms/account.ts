@@ -76,7 +76,11 @@ export async function accountPasswordRecover({
   redirect,
   context,
 }: SwellServerContext) {
-  const { email } = params;
+  const { email, password_reset_key } = params;
+
+  if (password_reset_key) {
+    return accountPasswordReset(arguments[0]);
+  }
 
   // Send recovery email
   try {
@@ -87,6 +91,7 @@ export async function accountPasswordRecover({
     });
 
     theme.setGlobalData({ recover_success: true });
+    return;
   } catch (err) {
     console.log(err);
   }

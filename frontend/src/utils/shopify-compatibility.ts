@@ -141,6 +141,16 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         type: 'account_password_recover',
         shopifyType: 'recover_customer_password',
+        serverParams: ({ params }: any) => {
+          const { customer } = params;
+
+          if (customer) {
+            return {
+              password: customer.password,
+              password_confirmation: customer.password_confirmation,
+            };
+          }
+        },
       },
       {
         type: 'account_password_reset',
@@ -149,14 +159,6 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           return `
             <input type="hidden" name="password_reset_key" value="{{ password_reset_key }}" />
           `;
-        },
-        serverParams: ({ params }: any) => {
-          const { customer } = params;
-
-          return {
-            password: customer?.password,
-            password_confirmation: customer?.password_confirmation,
-          };
         },
       },
       {
