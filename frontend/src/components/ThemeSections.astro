@@ -18,6 +18,7 @@ type AllowedTags =
 interface Section {
   section: {
     type?: string;
+    id?: string;
   };
   output: string;
   tag: AllowedTags;
@@ -31,6 +32,6 @@ const sections = (await theme.renderPageSections(content, data)) as Section[];
   sections.map(({ section, output, tag: Tag }: Section) => {
     const { type = 'unknown' } = section;
     const TagComponent = Tag as keyof JSX.IntrinsicElements;
-    return <TagComponent data-swell-section={type} set:html={output} />;
+    return <TagComponent data-swell-section={type} id={section.id} set:html={output} />;
   })
 }
