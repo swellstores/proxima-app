@@ -13,5 +13,6 @@ declare namespace App {
   interface Locals extends Runtime {
     swell?: Swell;
     theme?: SwellTheme;
+    params?: SwellData;
   }
 }

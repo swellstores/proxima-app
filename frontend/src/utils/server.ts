@@ -131,7 +131,8 @@ export async function initServerContext(
   const theme = context.locals.theme || initTheme(swell);
   context.locals.theme = theme;
 
-  const params = await getFormParams(context.request, context.url.searchParams);
+  const params = context.locals.params || await getFormParams(context.request, context.url.searchParams);
+  context.locals.params = params;
 
   return {
     ...context,
