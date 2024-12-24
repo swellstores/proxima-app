@@ -46,7 +46,10 @@ export function handleServerRequest(
       }
 
       if (result instanceof Response) {
-        ensureSwellSessionCookieSet(context, result);
+        // IMPORTANT NOTE:
+        // Astro does not support setting multiple cookies in the same response
+        // Until a fix is made, we ensure the swell session cookie always takes precedence
+        setCookieToHeader(context, 'swell-session', result);
         return result;
       }
 
@@ -93,8 +96,13 @@ export function handleMiddlewareRequest(
       const result = await handler(serverContext, next);
 
       if (result instanceof Response) {
-        ensureSwellSessionCookieSet(context, result);
-        await preserveThemeRequestData(context, theme);
+        // IMPORTANT NOTE:
+        // Astro does not support setting multiple cookies in the same response
+        // Until a fix is made, we ensure:
+        //  in the case of form error swell-form-data cookie is set
+        //  otherwise the swell session cookie always takes precedence
+        setCookieToHeader(context, 'swell-session', result);
+        await preserveThemeRequestData(context, theme, result);
         return result;
       }
 
@@ -107,19 +115,6 @@ export function handleMiddlewareRequest(
       return sendServerError(err);
     }
   };
-}
-
-function ensureSwellSessionCookieSet(context: APIContext, response: Response) {
-  // IMPORTANT NOTE:
-  // Astro does not support setting multiple cookies in the same response
-  // Until a fix is made, we ensure the swell session cookie always takes precedence
-  const setCookies = Array.from(context.cookies.headers());
-  const swellSessionCookie = setCookies.find((cookie) =>
-    cookie.startsWith('swell-session='),
-  );
-  if (swellSessionCookie) {
-    response.headers.set('Set-Cookie', swellSessionCookie);
-  }
 }
 
 export async function initServerContext(
@@ -361,14 +356,43 @@ export function restoreThemeRequestData(
   }
 }
 
+function setCookieToHeader(
+  context: APIContext,
+  name: string,
+  response: Response,
+) {
+  const setCookies = Array.from(context.cookies.headers());
+  const swellCookie = setCookies.find((cookie) =>
+    cookie.startsWith(`${name}=`),
+  );
+
+  if (swellCookie) {
+    response.headers.set('Set-Cookie', `${swellCookie}`);
+  }
+}
+
 export async function preserveThemeRequestData(
   context: APIContext,
   theme: SwellTheme,
+  response: Response,
 ) {
   let serializedFormData = theme.serializeFormData();
   if (serializedFormData) {
     serializedFormData = await resolveAsyncResources(serializedFormData);
     setCookie(context, 'swell-form-data', JSON.stringify(serializedFormData));
+    let formHasErrors = false;
+    if (serializedFormData) {
+      for (const key of Object.keys(serializedFormData)) {
+        if (serializedFormData[key]?.errors?.length > 0) {
+          formHasErrors = true;
+          break;
+        }
+      }
+    }
+    if (formHasErrors) {
+      // use this cookie to show form errors
+      setCookieToHeader(context, 'swell-form-data', response);
+    }
   } else {
     let serializedGlobalData = theme.serializeGlobalData();
     if (serializedGlobalData) {
