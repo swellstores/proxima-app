@@ -16,6 +16,10 @@ import swellConfig from '../../swell.json';
 import shopifyCompatibilityConfig from '../../shopify_compatibility.json';
 import * as resources from '@/resources';
 
+interface SwellCookieValue {
+  [key: string]: string;
+}
+
 export async function initSwell(
   context: AstroGlobal | APIContext,
   options?: { [key: string]: any },
@@ -70,8 +74,13 @@ export function getCookie(context: AstroGlobal | APIContext, name: string) {
   if (!swellCookie) {
     return undefined;
   }
-  const cookieValue = JSON.parse(swellCookie);
-  return cookieValue[name] || undefined;
+  let cookieValue = undefined;
+  try {
+    cookieValue = JSON.parse(swellCookie);
+  } catch {
+    // noop
+  }
+  return cookieValue?.[name] || undefined;
 }
 
 export function setCookie(
@@ -86,7 +95,15 @@ export function setCookie(
     ...options,
   };
   const swellCookie = context.cookies.get('swell-data')?.value;
-  const cookieValue = swellCookie ? JSON.parse(swellCookie) : {};
+  let cookieValue: SwellCookieValue = {};
+  if (swellCookie) {
+    try {
+      cookieValue = JSON.parse(swellCookie);
+    } catch {
+      // noop
+    }
+  }
+
   cookieValue[name] = value;
   context.cookies.set('swell-data', JSON.stringify(cookieValue), cookieOptions);
 }
@@ -105,7 +122,16 @@ export function deleteCookie(
   if (!swellCookie) { 
     return;
   }
-  const cookieValue = JSON.parse(swellCookie);
+
+  let cookieValue: SwellCookieValue = {};
+  if (swellCookie) {
+    try {
+      cookieValue = JSON.parse(swellCookie);
+    } catch {
+      // noop
+    }
+  }
+
   delete cookieValue[name];
   context.cookies.set('swell-data', JSON.stringify(cookieValue), cookieOptions);
 }
