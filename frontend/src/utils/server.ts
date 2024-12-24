@@ -49,7 +49,7 @@ export function handleServerRequest(
         // IMPORTANT NOTE:
         // Astro does not support setting multiple cookies in the same response
         // Until a fix is made, we ensure the swell session cookie always takes precedence
-        setCookieToHeader(context, 'swell-session', result);
+        // setCookieToHeader(context, 'swell-session', result);
         return result;
       }
 
@@ -101,7 +101,7 @@ export function handleMiddlewareRequest(
         // Until a fix is made, we ensure:
         //  in the case of form error swell-form-data cookie is set
         //  otherwise the swell session cookie always takes precedence
-        setCookieToHeader(context, 'swell-session', result);
+        // setCookieToHeader(context, 'swell-session', result);
         await preserveThemeRequestData(context, theme, result);
         return result;
       }
@@ -391,7 +391,7 @@ export async function preserveThemeRequestData(
     }
     if (formHasErrors) {
       // use this cookie to show form errors
-      setCookieToHeader(context, 'swell-form-data', response);
+      // setCookieToHeader(context, 'swell-form-data', response);
     }
   } else {
     let serializedGlobalData = theme.serializeGlobalData();

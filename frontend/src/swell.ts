@@ -66,7 +66,12 @@ export function canUpdateCookies(
 }
 
 export function getCookie(context: AstroGlobal | APIContext, name: string) {
-  return context.cookies.get(name)?.value;
+  const swellCookie = context.cookies.get('swell-data')?.value;
+  if (!swellCookie) {
+    return undefined;
+  }
+  const cookieValue = JSON.parse(swellCookie);
+  return cookieValue[name] || undefined;
 }
 
 export function setCookie(
@@ -80,7 +85,10 @@ export function setCookie(
     samesite: 'lax',
     ...options,
   };
-  context.cookies.set(name, value, cookieOptions);
+  const swellCookie = context.cookies.get('swell-data')?.value;
+  const cookieValue = swellCookie ? JSON.parse(swellCookie) : {};
+  cookieValue[name] = value;
+  context.cookies.set('swell-data', JSON.stringify(cookieValue), cookieOptions);
 }
 
 export function deleteCookie(
@@ -93,7 +101,13 @@ export function deleteCookie(
     samesite: 'lax',
     ...options,
   };
-  context.cookies.delete(name, cookieOptions);
+  const swellCookie = context.cookies.get('swell-data')?.value;
+  if (!swellCookie) { 
+    return;
+  }
+  const cookieValue = JSON.parse(swellCookie);
+  delete cookieValue[name];
+  context.cookies.set('swell-data', JSON.stringify(cookieValue), cookieOptions);
 }
 
 function getResources(
