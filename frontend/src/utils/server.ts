@@ -92,7 +92,7 @@ export function handleMiddlewareRequest(
       const result = await handler(serverContext, next);
 
       if (result instanceof Response) {
-        await preserveThemeRequestData(context, theme, result);
+        await preserveThemeRequestData(context, theme);
         return result;
       }
 
@@ -364,7 +364,6 @@ function setCookieToHeader(
 export async function preserveThemeRequestData(
   context: APIContext,
   theme: SwellTheme,
-  response: Response,
 ) {
   let serializedFormData = theme.serializeFormData();
   if (serializedFormData) {

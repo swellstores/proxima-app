@@ -20,6 +20,8 @@ interface SwellCookieValue {
   [key: string]: string;
 }
 
+const SWELL_DATA_COOKIE = 'swell-data';
+
 export async function initSwell(
   context: AstroGlobal | APIContext,
   options?: { [key: string]: any },
@@ -70,7 +72,7 @@ export function canUpdateCookies(
 }
 
 export function getCookie(context: AstroGlobal | APIContext, name: string) {
-  const swellCookie = context.cookies.get('swell-data')?.value;
+  const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
   if (!swellCookie) {
     return undefined;
   }
@@ -94,7 +96,7 @@ export function setCookie(
     samesite: 'lax',
     ...options,
   };
-  const swellCookie = context.cookies.get('swell-data')?.value;
+  const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
   let cookieValue: SwellCookieValue = {};
   if (swellCookie) {
     try {
@@ -105,7 +107,7 @@ export function setCookie(
   }
 
   cookieValue[name] = value;
-  context.cookies.set('swell-data', JSON.stringify(cookieValue), cookieOptions);
+  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(cookieValue), cookieOptions);
 }
 
 export function deleteCookie(
@@ -118,7 +120,7 @@ export function deleteCookie(
     samesite: 'lax',
     ...options,
   };
-  const swellCookie = context.cookies.get('swell-data')?.value;
+  const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
   if (!swellCookie) { 
     return;
   }
@@ -133,7 +135,7 @@ export function deleteCookie(
   }
 
   delete cookieValue[name];
-  context.cookies.set('swell-data', JSON.stringify(cookieValue), cookieOptions);
+  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(cookieValue), cookieOptions);
 }
 
 function getResources(
