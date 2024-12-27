@@ -53,7 +53,6 @@ export function handleServerRequest(
       }
 
       if (result instanceof Response) {
-        ensureSwellSessionCookieSet(context, result);
         return result;
       }
 
@@ -100,7 +99,6 @@ export function handleMiddlewareRequest(
       const result = await handler(serverContext, next);
 
       if (result instanceof Response) {
-        ensureSwellSessionCookieSet(context, result);
         await preserveThemeRequestData(context, theme);
         return result;
       }
@@ -116,19 +114,6 @@ export function handleMiddlewareRequest(
   };
 }
 
-function ensureSwellSessionCookieSet(context: APIContext, response: Response) {
-  // IMPORTANT NOTE:
-  // Astro does not support setting multiple cookies in the same response
-  // Until a fix is made, we ensure the swell session cookie always takes precedence
-  const setCookies = Array.from(context.cookies.headers());
-  const swellSessionCookie = setCookies.find((cookie) =>
-    cookie.startsWith('swell-session='),
-  );
-  if (swellSessionCookie) {
-    response.headers.set('Set-Cookie', swellSessionCookie);
-  }
-}
-
 export async function initServerContext(
   context: APIContext,
 ): Promise<SwellServerContext> {
@@ -138,7 +123,8 @@ export async function initServerContext(
   const theme = context.locals.theme || initTheme(swell);
   context.locals.theme = theme;
 
-  const params = await getFormParams(context.request, context.url.searchParams);
+  const params = context.locals.params || await getFormParams(context.request, context.url.searchParams);
+  context.locals.params = params;
 
   return {
     ...context,
@@ -377,6 +363,21 @@ export function restoreThemeRequestData(
       }
     }
     deleteCookie(context, 'swell-global-data');
+  }
+}
+
+function setCookieToHeader(
+  context: APIContext,
+  name: string,
+  response: Response,
+) {
+  const setCookies = Array.from(context.cookies.headers());
+  const swellCookie = setCookies.find((cookie) =>
+    cookie.startsWith(`${name}=`),
+  );
+
+  if (swellCookie) {
+    response.headers.set('Set-Cookie', `${swellCookie}`);
   }
 }
 

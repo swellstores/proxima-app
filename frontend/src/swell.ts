@@ -16,6 +16,12 @@ import swellConfig from '../../swell.json';
 import shopifyCompatibilityConfig from '../../shopify_compatibility.json';
 import * as resources from '@/resources';
 
+interface SwellCookieValue {
+  [key: string]: string;
+}
+
+const SWELL_DATA_COOKIE = 'swell-data';
+
 export async function initSwell(
   context: AstroGlobal | APIContext,
   options?: { [key: string]: any },
@@ -66,7 +72,17 @@ export function canUpdateCookies(
 }
 
 export function getCookie(context: AstroGlobal | APIContext, name: string) {
-  return context.cookies.get(name)?.value;
+  const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
+  if (!swellCookie) {
+    return undefined;
+  }
+  let cookieValue = undefined;
+  try {
+    cookieValue = JSON.parse(swellCookie);
+  } catch {
+    // noop
+  }
+  return cookieValue?.[name] || undefined;
 }
 
 export function setCookie(
@@ -80,7 +96,18 @@ export function setCookie(
     samesite: 'lax',
     ...options,
   };
-  context.cookies.set(name, value, cookieOptions);
+  const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
+  let cookieValue: SwellCookieValue = {};
+  if (swellCookie) {
+    try {
+      cookieValue = JSON.parse(swellCookie);
+    } catch {
+      // noop
+    }
+  }
+
+  cookieValue[name] = value;
+  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(cookieValue), cookieOptions);
 }
 
 export function deleteCookie(
@@ -93,7 +120,22 @@ export function deleteCookie(
     samesite: 'lax',
     ...options,
   };
-  context.cookies.delete(name, cookieOptions);
+  const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
+  if (!swellCookie) { 
+    return;
+  }
+
+  let cookieValue: SwellCookieValue = {};
+  if (swellCookie) {
+    try {
+      cookieValue = JSON.parse(swellCookie);
+    } catch {
+      // noop
+    }
+  }
+
+  delete cookieValue[name];
+  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(cookieValue), cookieOptions);
 }
 
 function getResources(
