@@ -85,6 +85,7 @@
           "label": "Product list",
           "url": "/products",
           "icon": "tag",
+          "collection": "products",
           "json": true
         },
         {
@@ -100,6 +101,7 @@
           "id": "categories/index",
           "label": "Category list",
           "url": "/categories",
+          "collection": "categories",
           "icon": "tags",
           "json": true
         },
