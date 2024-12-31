@@ -24,7 +24,7 @@ export const getJSON = handleServerRequest(async ({ swell, context }) => {
 <ThemePage
   id="pages/page"
   required="page.id"
-  title="{{ page.meta_title | default: page.name }}"
+  title="{{ page.meta_title | default: page.title | default: page.name }}"
   description="{{ page.meta_description | default: page.description }}"
   getData={(swell) => getData(swell, Astro.params.slug)}
 />
