@@ -71,18 +71,24 @@ export function canUpdateCookies(
   return !(context as any).response && !swell?.sentResponse;
 }
 
-export function getCookie(context: AstroGlobal | APIContext, name: string) {
+function getSwellDataCookie(context: AstroGlobal | APIContext, defaultValue?: object) {
   const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
   if (!swellCookie) {
-    return undefined;
+    return defaultValue;
   }
-  let cookieValue = undefined;
+
   try {
-    cookieValue = JSON.parse(swellCookie);
+    return JSON.parse(swellCookie);
   } catch {
     // noop
   }
-  return cookieValue?.[name] || undefined;
+
+  return defaultValue;
+}
+
+export function getCookie(context: AstroGlobal | APIContext, name: string) {
+  const swellCookie = getSwellDataCookie(context);
+  return swellCookie?.[name] || undefined;
 }
 
 export function setCookie(
@@ -96,18 +102,10 @@ export function setCookie(
     samesite: 'lax',
     ...options,
   };
-  const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
-  let cookieValue: SwellCookieValue = {};
-  if (swellCookie) {
-    try {
-      cookieValue = JSON.parse(swellCookie);
-    } catch {
-      // noop
-    }
-  }
-
-  cookieValue[name] = value;
-  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(cookieValue), cookieOptions);
+  const swellCookie = getSwellDataCookie(context, {});
+ 
+  swellCookie[name] = value;
+  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(swellCookie), cookieOptions);
 }
 
 export function deleteCookie(
@@ -120,22 +118,10 @@ export function deleteCookie(
     samesite: 'lax',
     ...options,
   };
-  const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
-  if (!swellCookie) { 
-    return;
-  }
-
-  let cookieValue: SwellCookieValue = {};
-  if (swellCookie) {
-    try {
-      cookieValue = JSON.parse(swellCookie);
-    } catch {
-      // noop
-    }
-  }
-
-  delete cookieValue[name];
-  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(cookieValue), cookieOptions);
+  const swellCookie = getSwellDataCookie(context, {});
+ 
+  delete swellCookie[name];
+  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(swellCookie), cookieOptions);
 }
 
 function getResources(
