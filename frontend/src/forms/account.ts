@@ -4,7 +4,7 @@ import type { SwellServerContext } from '@/utils/server';
 
 export async function accountLogin(context: SwellServerContext) {
   const {
-    params: { account },
+    params: { account, isEditor },
     swell,
     theme,
     redirect,
@@ -12,6 +12,9 @@ export async function accountLogin(context: SwellServerContext) {
   const { email, password } = account || {};
 
   const result = await swell.storefront.account.login(email, password);
+  if (isEditor) {
+    return result;
+  }
 
   if (result) {
     return redirect('/account', 303);
@@ -27,10 +30,13 @@ export async function accountCreate({
   params,
   redirect,
 }: SwellServerContext) {
-  const { account } = params;
+  const { account, isEditor } = params;
 
   try {
     const result = await swell.storefront.account.create(account);
+    if (isEditor) {
+      return result;
+    }
     if (result && 'errors' in result) {
       await setCreateAccountErrors(theme, result.errors);
       return redirect('/account/signup', 303);
