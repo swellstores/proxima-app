@@ -4,8 +4,10 @@ import {
   SwellServerContext,
   getShopifyCompatibleServerParams,
   getShopifyCompatibleServerResponse,
+  FormRedirectResponse,
 } from '@/utils/server';
 import { restoreThemeRequestData as restoreHandler } from '@/utils/server';
+import { ValidRedirectStatus } from 'astro';
 
 export const formRoutes = forms.map((form) => {
   return handleMiddlewareRequest(
@@ -34,8 +36,19 @@ export const formRoutes = forms.map((form) => {
           }
         }
 
+        function formRedirectHandler(path: string, status?: ValidRedirectStatus, result?: object | null): FormRedirectResponse {
+          // return json in editor mode
+          if (compatParams.isEditor) {
+            return result;
+          }
+
+          // redirect
+          return redirect(path, status);
+        }
+
         let response = await form.handler({
           ...context,
+          formRedirect: formRedirectHandler,
           params: compatParams,
         });
 

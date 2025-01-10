@@ -1,10 +1,10 @@
 import {
-  SwellServerContext,
+  SwellServerFormContext,
   getShopifyCompatibleServerParams,
   getShopifyCompatibleServerResponse,
 } from '@/utils/server';
 
-export async function cartAdd({ params, swell, theme }: SwellServerContext) {
+export async function cartAdd({ params, swell, theme }: SwellServerFormContext) {
   const { product_id, variant_id, options, quantity } = params;
 
   await swell.storefront.cart.addItem({
@@ -24,7 +24,7 @@ export async function cartAdd({ params, swell, theme }: SwellServerContext) {
   return cart;
 }
 
-export async function cartUpdate(context: SwellServerContext) {
+export async function cartUpdate(context: SwellServerFormContext) {
   const { swell, theme } = context;
 
   // Manually handle cart_update compatibility
@@ -60,8 +60,8 @@ export async function cartUpdate(context: SwellServerContext) {
   return getShopifyCompatibleServerResponse('cart_update', context, response);
 }
 
-export async function cartCheckout(context: SwellServerContext) {
-  const { params, swell, theme, redirect } = context;
+export async function cartCheckout(context: SwellServerFormContext) {
+  const { params, swell, theme, formRedirect } = context;
   const { updates } = params;
 
   const cart = theme.globals.cart;
@@ -89,13 +89,13 @@ export async function cartCheckout(context: SwellServerContext) {
       }
 
       if (cart.checkout_url) {
-        return redirect(cart.checkout_url, 303);
+        return formRedirect(cart.checkout_url, 303);
       }
     }
   }
 
   // Fallback to cart page
-  return redirect('/cart', 307);
+  return formRedirect('/cart', 307);
 }
 
 export default [

@@ -1,71 +1,68 @@
 import { SwellTheme, SwellData } from '@swell/apps-sdk';
 
-import type { SwellServerContext } from '@/utils/server';
+import type { SwellServerFormContext } from '@/utils/server';
 
-export async function accountLogin(context: SwellServerContext) {
+export async function accountLogin(context: SwellServerFormContext) {
   const {
-    params: { account, isEditor },
+    params: { account },
     swell,
     theme,
-    redirect,
+    formRedirect,
   } = context;
   const { email, password } = account || {};
 
   const result = await swell.storefront.account.login(email, password);
-  if (isEditor) {
-    return result;
-  }
 
   if (result) {
-    return redirect('/account', 303);
+    return formRedirect('/account', 303, result);
   }
 
   await setLoginError(theme);
-  return redirect('/account/login', 303);
+  return formRedirect('/account/login', 303, null);
 }
 
 export async function accountCreate({
   swell,
   theme,
   params,
-  redirect,
-}: SwellServerContext) {
-  const { account, isEditor } = params;
+  formRedirect,
+}: SwellServerFormContext) {
+  const { account } = params;
 
+  let result;
   try {
-    const result = await swell.storefront.account.create(account);
-    if (isEditor) {
-      return result;
-    }
+    result = await swell.storefront.account.create(account);
+    
     if (result && 'errors' in result) {
       await setCreateAccountErrors(theme, result.errors);
-      return redirect('/account/signup', 303);
+      return formRedirect('/account/signup', 303, result);
     }
+
   } catch (err) {
     console.log(err);
   }
 
-  return redirect('/', 303);
+  return formRedirect('/', 303, result);
 }
 
 export async function accountSubscribe({
   swell,
   theme,
   params,
-}: SwellServerContext) {
+}: SwellServerFormContext) {
   const { account } = params;
-
+  let result;
   try {
     const loggedIn = await swell.storefront.account.get();
 
     if (loggedIn) {
       // Ignore email if already logged in
-      await swell.storefront.account.update({
+      result = await swell.storefront.account.update({
         email: undefined,
         ...account,
       });
     } else {
-      const result = await swell.storefront.account.create(account);
+      result = await swell.storefront.account.create(account);
       if (result && 'errors' in result) {
         await setSubscribeAccountErrors(theme, result.errors);
       }
@@ -79,9 +76,9 @@ export async function accountPasswordRecover({
   swell,
   theme,
   params,
-  redirect,
+  formRedirect,
   context,
-}: SwellServerContext) {
+}: SwellServerFormContext) {
   const { email, password_reset_key } = params;
 
   if (password_reset_key) {
@@ -102,19 +99,19 @@ export async function accountPasswordRecover({
     console.log(err);
   }
 
-  return redirect('/account/login', 303);
+  return formRedirect('/account/login', 303);
 }
 
 export async function accountPasswordReset({
   swell,
   theme,
   params,
-  redirect,
-}: SwellServerContext) {
+  formRedirect,
+}: SwellServerFormContext) {
   const { password_reset_key, password, password_confirmation } = params;
 
   if (!password_reset_key) {
-    return redirect('/account/login', 303);
+    return formRedirect('/account/login', 303);
   }
 
   // Submit new password
@@ -124,7 +121,7 @@ export async function accountPasswordReset({
       password !== password_confirmation
     ) {
       await setInvalidPasswordResetConfirmationError(theme);
-      return redirect(`/account/recover/${password_reset_key}`, 303);
+      return formRedirect(`/account/recover/${password_reset_key}`, 303);
     } else {
       const result = await swell.storefront.account.recover({
         password_reset_key,
@@ -133,7 +130,7 @@ export async function accountPasswordReset({
 
       if (result && !('errors' in result)) {
         await swell.storefront.account.login(result.email as string, password);
-        return redirect('/account', 303);
+        return formRedirect('/account', 303, result);
       }
     }
   } catch (err: any) {
@@ -143,21 +140,21 @@ export async function accountPasswordReset({
     } else {
       await setInvalidPasswordResetError(theme);
     }
-    return redirect(
+    return formRedirect(
       `/account/recover${password_reset_key ? `/${password_reset_key}` : ''}`,
       303,
     );
   }
 
-  return redirect('/account/login', 303);
+  return formRedirect('/account/login', 303);
 }
 
 export async function accountAddressCreateUpdate({
   url,
   params,
   swell,
-  redirect,
-}: SwellServerContext) {
+  formRedirect,
+}: SwellServerFormContext) {
   const { update_address_id, delete_address_id, address } = params;
 
   try {
@@ -181,7 +178,7 @@ export async function accountAddressCreateUpdate({
     console.log(err);
   }
 
-  return redirect('/account/addresses', 303);
+  return formRedirect('/account/addresses', 303);
 }
 
 async function setLoginError(theme: SwellTheme) {

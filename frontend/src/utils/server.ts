@@ -1,4 +1,4 @@
-import { APIContext, MiddlewareHandler, MiddlewareNext } from 'astro';
+import { APIContext, MiddlewareHandler, MiddlewareNext, ValidRedirectStatus } from 'astro';
 import {
   Swell,
   SwellTheme,
@@ -22,6 +22,11 @@ export interface SwellServerContext extends APIContext {
   swell: Swell;
   theme: SwellTheme;
   context: APIContext;
+}
+
+export type FormRedirectResponse = Response | object | null | undefined;
+export interface SwellServerFormContext extends SwellServerContext {
+  formRedirect: (path: string, status?: ValidRedirectStatus, result?: object | null) => FormRedirectResponse;
 }
 
 declare global {
