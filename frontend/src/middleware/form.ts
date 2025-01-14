@@ -39,7 +39,10 @@ export const formRoutes = forms.map((form) => {
         function formRedirectHandler(path: string, status?: ValidRedirectStatus, result?: object | null): FormRedirectResponse {
           // return json in editor mode
           if (compatParams.isEditor) {
-            return result;
+            return {
+              result,
+              isEditor: true,
+            };
           }
 
           // redirect

@@ -71,7 +71,7 @@ export function canUpdateCookies(
   return !(context as any).response && !swell?.sentResponse;
 }
 
-function getSwellDataCookie(context: AstroGlobal | APIContext, defaultValue?: object) {
+export function getSwellDataCookie(context: AstroGlobal | APIContext, defaultValue?: object) {
   const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
   if (!swellCookie) {
     return defaultValue;

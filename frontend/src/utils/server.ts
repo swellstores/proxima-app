@@ -12,6 +12,7 @@ import {
   getCookie,
   setCookie,
   deleteCookie,
+  getSwellDataCookie,
 } from '@/swell';
 import { minimatch } from 'minimatch';
 import { match } from 'path-to-regexp';
@@ -125,6 +126,12 @@ export async function initServerContext(
   const swell = context.locals.swell || await initSwell(context);
   context.locals.swell = swell;
 
+  // use request session if provided
+  const session = context.request.headers.get('X-Session');
+  if (session) {
+    setCookie(context, 'swell-session', session);
+  }
+
   const theme = context.locals.theme || initTheme(swell);
   context.locals.theme = theme;
 
@@ -177,6 +184,13 @@ export async function sendServerResponse(
         wrapSectionContent(theme, sectionId, sectionRendered as string),
       );
     }
+  }
+
+  if (response.isEditor) {
+    // set form cookies
+    await preserveThemeRequestData(context, theme);
+    // return swell-data cookie
+    response.swellData = getSwellDataCookie(context);
   }
 
   return jsonResponse(response);
