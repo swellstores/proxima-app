@@ -42,6 +42,8 @@ export const formRoutes = forms.map((form) => {
             return {
               result,
               isEditor: true,
+              redirect: path,
+              status,
             };
           }
 
