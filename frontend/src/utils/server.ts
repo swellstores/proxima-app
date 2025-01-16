@@ -13,6 +13,7 @@ import {
   setCookie,
   deleteCookie,
   getSwellDataCookie,
+  updateSwellDataCookie,
 } from '@/swell';
 import { minimatch } from 'minimatch';
 import { match } from 'path-to-regexp';
@@ -126,7 +127,12 @@ export async function initServerContext(
   const swell = context.locals.swell || await initSwell(context);
   context.locals.swell = swell;
 
-  // use request session if provided
+  // use request swell-data if provided
+  const swellData = context.request.headers.get('X-Swell-Data');
+  if (swellData) {
+    updateSwellDataCookie(context, swellData)
+  }
+  // use request session if provided. Can be provided without swell-data
   const session = context.request.headers.get('X-Session');
   if (session) {
     setCookie(context, 'swell-session', session);

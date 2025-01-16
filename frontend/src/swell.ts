@@ -86,6 +86,15 @@ export function getSwellDataCookie(context: AstroGlobal | APIContext, defaultVal
   return defaultValue;
 }
 
+const defaultCookieOptions = {
+  path: '/',
+  samesite: 'lax',
+};
+
+export function updateSwellDataCookie(context: AstroGlobal | APIContext, value: string) {
+  context.cookies.set(SWELL_DATA_COOKIE, value, defaultCookieOptions);
+}
+
 export function getCookie(context: AstroGlobal | APIContext, name: string) {
   const swellCookie = getSwellDataCookie(context);
   return swellCookie?.[name] || undefined;
@@ -98,8 +107,7 @@ export function setCookie(
   options?: AstroCookieSetOptions,
 ) {
   const cookieOptions = {
-    path: '/',
-    samesite: 'lax',
+    ...defaultCookieOptions,
     ...options,
   };
   const swellCookie = getSwellDataCookie(context, {});
