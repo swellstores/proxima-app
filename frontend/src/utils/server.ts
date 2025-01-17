@@ -26,9 +26,10 @@ export interface SwellServerContext extends APIContext {
   context: APIContext;
 }
 
+// redefine redirect method
 export type FormRedirectResponse = Response | object | null | undefined;
-export interface SwellServerFormContext extends SwellServerContext {
-  formRedirect: (path: string, status?: ValidRedirectStatus, result?: object | null) => FormRedirectResponse;
+export type SwellServerFormContext = Omit<SwellServerContext, 'redirect'> & {
+  redirect: (path: string, status?: ValidRedirectStatus, result?: object | null) => FormRedirectResponse;
 }
 
 declare global {

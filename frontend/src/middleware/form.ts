@@ -53,7 +53,7 @@ export const formRoutes = forms.map((form) => {
 
         let response = await form.handler({
           ...context,
-          formRedirect: formRedirectHandler,
+          redirect: formRedirectHandler,
           params: compatParams,
         });
 
