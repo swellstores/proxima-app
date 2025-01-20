@@ -5,7 +5,9 @@ import {
   ShopifyCompatibility,
   CFThemeEnv,
   ThemeResources,
+  ThemeLookupResourceFactory,
   SwellAppStorefrontThemeResources,
+  SwellAppShopifyCompatibilityConfig,
 } from '@swell/apps-sdk';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
 
@@ -16,40 +18,49 @@ import swellConfig from '../../swell.json';
 import shopifyCompatibilityConfig from '../../shopify_compatibility.json';
 import * as resources from '@/resources';
 
-interface SwellCookieValue {
-  [key: string]: string;
-}
+type ResourceType = typeof resources;
+type ResourceKey = keyof ResourceType;
+
+type LookupResourceType = {
+  [K in keyof ResourceType]: ResourceType[K] extends ThemeLookupResourceFactory
+    ? ResourceType[K]
+    : never
+};
+
+type LookupResourceKey = keyof LookupResourceType;
 
 const SWELL_DATA_COOKIE = 'swell-data';
 
 export async function initSwell(
   context: AstroGlobal | APIContext,
-  options?: { [key: string]: any },
+  options?: Record<string, any>,
 ): Promise<Swell> {
   const swell = new Swell({
     url: context.url,
-    shopifyCompatibilityConfig,
+    // TODO: fix SwellAppShopifyCompatibilityConfig type in apps-sdk
+    shopifyCompatibilityConfig:
+      shopifyCompatibilityConfig as unknown as SwellAppShopifyCompatibilityConfig,
     config: swellConfig as SwellAppConfig,
     serverHeaders: context.request.headers,
     workerEnv: context.locals.runtime?.env as CFThemeEnv,
-    getCookie: (name: string) => {
+    getCookie(name: string) {
       return getCookie(context, name);
     },
-    setCookie: (
+    setCookie(
       name: string,
       value: string,
       options?: AstroCookieSetOptions,
       swell?: Swell,
-    ) => {
+    ) {
       if (canUpdateCookies(context, swell)) {
         return setCookie(context, name, value, options);
       }
     },
-    deleteCookie: (
+    deleteCookie(
       name: string,
       options?: AstroCookieSetOptions,
       swell?: Swell,
-    ) => {
+    ) {
       if (canUpdateCookies(context, swell)) {
         return deleteCookie(context, name, options);
       }
@@ -67,7 +78,7 @@ export async function initSwell(
 export function canUpdateCookies(
   context: AstroGlobal | APIContext,
   swell?: Swell,
-) {
+): boolean {
   return !(context as any).response && !swell?.sentResponse;
 }
 
@@ -96,7 +107,7 @@ export function setCookie(
   name: string,
   value: string,
   options?: AstroCookieSetOptions,
-) {
+): void {
   const cookieOptions = {
     path: '/',
     samesite: 'lax',
@@ -112,7 +123,7 @@ export function deleteCookie(
   context: AstroGlobal | APIContext,
   name: string,
   options?: AstroCookieSetOptions,
-) {
+): void {
   const cookieOptions = {
     path: '/',
     samesite: 'lax',
@@ -124,26 +135,27 @@ export function deleteCookie(
   context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(swellCookie), cookieOptions);
 }
 
+function loadResources<T extends ResourceKey>(resourceList: Record<string, T>) {
+  return Object.fromEntries(
+    Object.entries(resourceList).map(([key, resource]) => [
+      key,
+      resources[resource],
+    ]),
+  );
+}
+
 function getResources(
   resourcesConfig: SwellAppStorefrontThemeResources,
 ): ThemeResources {
   const { singletons, records } = resourcesConfig;
 
-  const loadResources = (resourceList: Record<string, string>) =>
-    Object.fromEntries(
-      Object.entries(resourceList).map(([key, resource]) => [
-        key,
-        resources[resource],
-      ]),
-    );
-
   return {
-    singletons: loadResources(singletons),
-    records: loadResources(records),
+    singletons: loadResources(singletons as Record<string, ResourceKey>),
+    records: loadResources(records as Record<string, LookupResourceKey>) as Record<string, ThemeLookupResourceFactory>,
   };
 }
 
-export function initTheme(swell: Swell) {
+export function initTheme(swell: Swell): SwellTheme {
   return new SwellTheme(swell, {
     forms,
     resources: getResources(swellConfig.storefront.theme.resources),
@@ -155,7 +167,7 @@ export function initTheme(swell: Swell) {
 export async function initSwellTheme(
   Astro: AstroGlobal | APIContext,
   pageId?: string,
-) {
+): Promise<{ swell: Swell; theme: SwellTheme }> {
   const swell = Astro.locals.swell || (await initSwell(Astro));
 
   // Indicate response was sent to avoid mutating cookies

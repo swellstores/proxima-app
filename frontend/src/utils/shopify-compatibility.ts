@@ -150,6 +150,8 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
               password_confirmation: customer.password_confirmation,
             };
           }
+
+          return {};
         },
       },
       {

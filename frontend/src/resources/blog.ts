@@ -35,6 +35,7 @@ export class BlogResource extends SwellStorefrontRecord {
       }
 
       return {
+        id: blog?.id ?? blogSlug,
         ...(blog?.id ? blog._result : undefined),
         category,
       };
@@ -47,7 +48,7 @@ export class BlogCategoryResource extends SwellStorefrontRecord {
     super(swell, 'content/blog-categories', slug, query, async () => {
       const category = new SwellStorefrontRecord(
         swell,
-        `content/blog-categories`,
+        'content/blog-categories',
         slug,
         query,
       );
@@ -61,6 +62,7 @@ export class BlogCategoryResource extends SwellStorefrontRecord {
         : null;
 
       return {
+        id: category.id ?? slug,
         ...(category.id ? category._result : undefined),
         blogs,
       };
