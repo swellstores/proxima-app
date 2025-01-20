@@ -12,14 +12,14 @@ export class ProductResource extends SwellStorefrontRecord {
 }
 
 export const SORT_OPTIONS = [
-  { value: ``, name: 'Featured' },
-  { value: `popularity`, name: 'Popularity', query: 'popularity desc' },
-  { value: `price_asc`, name: 'Price, low to high', query: 'price asc' },
-  { value: `price_desc`, name: 'Price, high to low', query: 'price desc' },
-  { value: `date_asc`, name: 'Date, old to new', query: 'date asc' },
-  { value: `date_desc`, name: 'Date, new to old', query: 'date desc' },
-  { value: `name_asc`, name: 'Product name, A-Z', query: 'name asc' },
-  { value: `name_desc`, name: 'Product name, Z-A', query: 'name desc' },
+  { value: '', name: 'Featured' },
+  { value: 'popularity', name: 'Popularity', query: 'popularity desc' },
+  { value: 'price_asc', name: 'Price, low to high', query: 'price asc' },
+  { value: 'price_desc', name: 'Price, high to low', query: 'price desc' },
+  { value: 'date_asc', name: 'Date, old to new', query: 'date asc' },
+  { value: 'date_desc', name: 'Date, new to old', query: 'date desc' },
+  { value: 'name_asc', name: 'Product name, A-Z', query: 'name asc' },
+  { value: 'name_desc', name: 'Product name, Z-A', query: 'name desc' },
 ];
 
 export async function getFilteredProducts(
@@ -73,6 +73,10 @@ export async function getProductFiltersByQuery(
       ...query,
       sort: undefined,
     })) || [];
+
+  if (!Array.isArray(filters)) {
+    throw new Error('Product filters must be an array');
+  }
 
   for (const filter of filters) {
     filter.param_name = `filter_${filter.id}`;

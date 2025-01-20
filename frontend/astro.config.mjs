@@ -29,5 +29,8 @@ export default defineConfig({
         clientFiles: ['./src/swell/**/*'],
       },
     },
+    ssr: {
+      external: ['node:events'],
+    },
   },
 });

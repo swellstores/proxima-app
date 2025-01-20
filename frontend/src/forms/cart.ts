@@ -14,7 +14,7 @@ export async function cartAdd({ params, swell, theme }: SwellServerContext) {
     quantity,
   });
 
-  const cart = theme.fetchCart();
+  const cart = await theme.fetchCart();
 
   // Make sure cart items are loaded
   await cart.items;

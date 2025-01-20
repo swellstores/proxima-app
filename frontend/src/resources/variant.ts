@@ -1,4 +1,4 @@
-import { Swell, SwellData, SwellStorefrontRecord } from '@swell/apps-sdk';
+import { Swell, SwellData, SwellRecord, SwellStorefrontRecord } from '@swell/apps-sdk';
 
 export class VariantResource extends SwellStorefrontRecord {
   public product: SwellStorefrontRecord;
@@ -9,9 +9,10 @@ export class VariantResource extends SwellStorefrontRecord {
     id: string,
     query: SwellData = {},
   ) {
-    super(swell, 'variants', id, query, () =>
-      swell.get('/products:variants/{id}', { id }),
-    );
+    super(swell, 'variants', id, query, async () => {
+      const record = await swell.get('/products:variants/{id}', { id });
+      return record as SwellRecord ?? null;
+    });
 
     this.product = product;
   }

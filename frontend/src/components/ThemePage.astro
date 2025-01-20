@@ -1,16 +1,37 @@
 ---
 import get from 'lodash/get';
-import { initSwellTheme } from '@/swell';
+
 import {
   Swell,
   PageError,
   PageNotFound,
   SwellTheme,
   SwellData,
+  ThemeSectionGroup,
 } from '@swell/apps-sdk';
+
+import { initSwellTheme } from '@/swell';
+import { isTemplateConfig, isPageContentRecord } from '@/utils/types-guard';
 import Layout from '@/layouts/Layout.astro';
+
 import ThemeSections from './ThemeSections.astro';
 import ErrorPage from './ErrorPage.astro';
+
+// interface Props {
+//   title?: string | ((data: SwellData | undefined) => Promise<string>);
+//   description?: string | ((data: SwellData | undefined) => Promise<string>);
+// }
+// Doesn't work without a comment ^, probably a bug
+interface Props {
+  id: string;
+  title?: string | ((data: SwellData | undefined) => Promise<string>);
+  description?: string | ((data: SwellData | undefined) => Promise<string>);
+  required?: string;
+  requiredPath?: string;
+  content?: string;
+  props?: Record<string, any>;
+  getData?: (swell: Swell, theme: SwellTheme) => Promise<SwellData> | SwellData;
+}
 
 const sections = Astro.url.searchParams.get('sections');
 const sectionId = Astro.url.searchParams.get('section_id');
@@ -19,19 +40,6 @@ const sectionIds = sections
   : sectionId
     ? [sectionId]
     : null;
-
-export interface Props {
-  id: string;
-  title?: string | ((data: SwellData | undefined) => string);
-  description?: string | ((data: SwellData | undefined) => string);
-  required?: string;
-  requiredPath?: string;
-  content?: string;
-  props?: {
-    [key: string]: any;
-  };
-  getData?: (swell: Swell, theme: SwellTheme) => Promise<SwellData> | SwellData;
-}
 
 const { id, title, description, required, content, props, getData } =
   Astro.props;
@@ -52,7 +60,9 @@ try {
     }
   }
 
-  theme.setCompatibilityData(pageData);
+  if (pageData) {
+    theme.setCompatibilityData(pageData);
+  }
 
   [pageTitle, pageDescription, pageContent] = await Promise.all([
     typeof title === 'string'
@@ -68,7 +78,7 @@ try {
         : '',
 
     (content ?? sectionIds)
-      ? theme.renderAllSections(sectionIds, {
+      ? theme.renderAllSections(sectionIds ?? [], {
           ...props,
           ...pageData,
         })
@@ -86,11 +96,14 @@ try {
     throw new PageError('Invalid page content');
   }
 
-  if (!pageTitle && pageContent?.page?.title) {
-    pageTitle = pageContent.page.title;
-  }
-  if (!pageDescription && pageContent?.page?.description) {
-    pageDescription = pageContent.page.description;
+  if (isTemplateConfig(pageContent)) {
+    if (!pageTitle && pageContent.page?.title) {
+      pageTitle = pageContent.page.title;
+    }
+
+    if (!pageDescription && pageContent.page?.description) {
+      pageDescription = pageContent.page.description;
+    }
   }
 } catch (err: any) {
   try {
@@ -129,15 +142,15 @@ const layoutProps = {
     <ErrorPage {...pageError} />
   ) : sections ? (
     JSON.stringify(pageContent)
-  ) : sectionId ? (
+  ) : (sectionId && isPageContentRecord(pageContent, sectionId)) ? (
     <Fragment set:html={pageContent[sectionId]} />
   ) : (
     <Layout theme={theme} {...layoutProps}>
       <Fragment slot="content_for_layout">
-        {typeof pageContent === 'string' ? (
-          <Fragment set:html={pageContent} />
+        {isTemplateConfig(pageContent) ? (
+          <ThemeSections theme={theme} content={pageContent as ThemeSectionGroup} data={pageProps} />
         ) : (
-          <ThemeSections theme={theme} content={pageContent} data={pageProps} />
+          <Fragment set:html={pageContent} />
         )}
       </Fragment>
     </Layout>
