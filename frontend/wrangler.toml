@@ -3,3 +3,19 @@ pages_build_output_dir = "./dist"
 
 compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2024-09-26"
+
+kv_namespaces = [
+  { binding = "THEME", id = "40921157860042bcb7f1c746ba5e9b64" }
+]
+
+[env.preview]
+
+kv_namespaces = [
+  { binding = "THEME", id = "b0d940f80873469b968d9107fb1d914b" }
+]
+
+[env.production]
+
+kv_namespaces = [
+  { binding = "THEME", id = "a47205081eac414285418d8fe0851e47" }
+]
