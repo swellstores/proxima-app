@@ -12,6 +12,8 @@ import {
   getCookie,
   setCookie,
   deleteCookie,
+  getSwellDataCookie,
+  updateSwellDataCookie,
 } from '@/swell';
 import { minimatch } from 'minimatch';
 import { match } from 'path-to-regexp';
@@ -33,6 +35,25 @@ declare global {
 
 export interface SwellServerNext extends MiddlewareNext {}
 
+function isEditorRequest(context: APIContext | SwellServerContext): boolean {
+  // We can use context.request.headers.get('swell-deployment-mode') === 'editor' when different URLs are used
+  const isEditor = Boolean(context.request.headers.get('Swell-Is-Editor'));
+  return isEditor;
+}
+
+function handleResponse(result: Response, context: SwellServerContext) {
+  // return json for editor form actions instead of redirect
+  if (isEditorRequest(context)) {
+    return sendServerResponse({
+      isEditor: true,
+      redirect: result.headers.get('Location'),
+      status: result.status,
+    }, context);
+  }
+
+  return result;
+}
+
 export function handleServerRequest(
   handler: (context: SwellServerContext) => string | object,
 ): (
@@ -53,7 +74,7 @@ export function handleServerRequest(
       }
 
       if (result instanceof Response) {
-        return result;
+        return handleResponse(result, serverContext);
       }
 
       if (contextHandler) {
@@ -100,7 +121,7 @@ export function handleMiddlewareRequest(
 
       if (result instanceof Response) {
         await preserveThemeRequestData(context, theme);
-        return result;
+        return handleResponse(result, serverContext);
       }
 
       if (result === undefined) {
@@ -119,6 +140,17 @@ export async function initServerContext(
 ): Promise<SwellServerContext> {
   const swell = context.locals.swell || await initSwell(context);
   context.locals.swell = swell;
+
+  // use request swell-data if provided
+  const swellData = context.request.headers.get('Swell-Data');
+  if (swellData) {
+    updateSwellDataCookie(context, swellData)
+  }
+  // use request session if provided. Can be provided without swell-data
+  const session = context.request.headers.get('X-Session');
+  if (session) {
+    setCookie(context, 'swell-session', session);
+  }
 
   const theme = context.locals.theme || initTheme(swell);
   context.locals.theme = theme;
@@ -172,6 +204,13 @@ export async function sendServerResponse(
         wrapSectionContent(theme, sectionId, sectionRendered as string),
       );
     }
+  }
+
+  if (isEditorRequest(context)) {
+    // set form cookies
+    await preserveThemeRequestData(context, theme);
+    // return swell-data cookie
+    response.swellData = getSwellDataCookie(context);
   }
 
   return jsonResponse(response);
