@@ -135,7 +135,7 @@ export function handleMiddlewareRequest(
   };
 }
 
-export async function initServerContext(
+async function initServerContext(
   context: APIContext,
 ): Promise<SwellServerContext> {
   const swell = context.locals.swell || await initSwell(context);

@@ -32,8 +32,8 @@ export class AccountAddressesResource extends SwellStorefrontCollection {
       swell,
       'accounts:addresses',
       { page, limit, ...(query || undefined) },
-      function (this: SwellStorefrontCollection) {
-        return swell.storefront.account.listAddresses(this._query);
+      function () {
+        return swell.storefront.account.listAddresses(this._query) as any;
       },
     );
   }
@@ -42,7 +42,7 @@ export class AccountAddressesResource extends SwellStorefrontCollection {
 export class AccountOrderResource extends SwellStorefrontRecord {
   constructor(swell: Swell, orderId: string, query: SwellData = {}) {
     super(swell, 'accounts:orders', orderId, query, () => {
-      return swell.storefront.account.getOrder(orderId);
+      return swell.storefront.account.getOrder(orderId) as any;
     });
   }
 }
@@ -54,8 +54,8 @@ export class AccountOrdersResource extends SwellStorefrontCollection {
       swell,
       'accounts:orders',
       { page, limit, ...(query || undefined) },
-      function (this: SwellStorefrontCollection) {
-        return swell.storefront.account.listOrders(this._query);
+      function () {
+        return swell.storefront.account.listOrders(this._query) as any;
       },
     );
   }
@@ -68,8 +68,8 @@ export class AccountSubscriptionResource extends SwellStorefrontRecord {
       'accounts:subscriptions',
       subscriptionId,
       query,
-      function (this: SwellStorefrontRecord) {
-        return swell.storefront.subscriptions.get(subscriptionId, this._query);
+      function () {
+        return swell.storefront.subscriptions.get(subscriptionId, this._query) as any;
       },
     );
   }
@@ -82,8 +82,8 @@ export class AccountSubscriptionsResource extends SwellStorefrontCollection {
       swell,
       'accounts:subscriptions',
       { page, limit, ...(query || undefined) },
-      function (this: SwellStorefrontCollection) {
-        return swell.storefront.subscriptions.list(this._query);
+      function () {
+        return swell.storefront.subscriptions.list(this._query) as any;
       },
     );
   }

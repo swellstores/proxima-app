@@ -31,7 +31,7 @@ export async function getFilteredProducts(
     swell,
     'products',
     { page, limit, ...(productQuery || undefined) },
-    async function (this: SwellStorefrontCollection): Promise<any> {
+    async function (): Promise<any> {
       const filterQuery = productQueryWithFilters(swell, productQuery);
 
       let result;
