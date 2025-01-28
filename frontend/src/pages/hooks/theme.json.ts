@@ -1,5 +1,7 @@
 import { handleServerRequest } from '@/utils/server';
 
+import type { SwellTheme } from '@swell/apps-sdk';
+
 const handleThemeRequest = handleServerRequest(async ({ swell, context }) => {
   const { locals, request } = context;
 
@@ -31,7 +33,7 @@ const handleThemeRequest = handleServerRequest(async ({ swell, context }) => {
 /**
  * Pro-loads a theme into cache.
  */
-async function loadTheme(theme) {
+async function loadTheme(theme: SwellTheme) {
   // Ensure that the entire bundle is cached.
   // TODO: Implement new theme-version-manifest workflow
   await theme.getAllThemeConfigs(); 
