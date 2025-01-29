@@ -8,6 +8,10 @@ kv_namespaces = [
   { binding = "THEME", id = "40921157860042bcb7f1c746ba5e9b64" }
 ]
 
+[placement]
+
+mode = "smart"
+
 [env.preview]
 
 kv_namespaces = [
