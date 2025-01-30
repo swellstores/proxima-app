@@ -44,11 +44,14 @@ function isEditorRequest(context: APIContext | SwellServerContext): boolean {
 function handleResponse(result: Response, context: SwellServerContext) {
   // return json for editor form actions instead of redirect
   if (isEditorRequest(context)) {
-    return sendServerResponse({
-      isEditor: true,
-      redirect: result.headers.get('Location'),
-      status: result.status,
-    }, context);
+    return sendServerResponse(
+      {
+        isEditor: true,
+        redirect: result.headers.get('Location'),
+        status: result.status,
+      },
+      context,
+    );
   }
 
   return result;
@@ -138,13 +141,13 @@ export function handleMiddlewareRequest(
 async function initServerContext(
   context: APIContext,
 ): Promise<SwellServerContext> {
-  const swell = context.locals.swell || await initSwell(context);
+  const swell = context.locals.swell || (await initSwell(context));
   context.locals.swell = swell;
 
   // use request swell-data if provided
   const swellData = context.request.headers.get('Swell-Data');
   if (swellData) {
-    updateSwellDataCookie(context, swellData)
+    updateSwellDataCookie(context, swellData);
   }
   // use request session if provided. Can be provided without swell-data
   const session = context.request.headers.get('X-Session');
@@ -155,7 +158,9 @@ async function initServerContext(
   const theme = context.locals.theme || initTheme(swell);
   context.locals.theme = theme;
 
-  const params = context.locals.params || await getFormParams(context.request, context.url.searchParams);
+  const params =
+    context.locals.params ||
+    (await getFormParams(context.request, context.url.searchParams));
   context.locals.params = params;
 
   return {
@@ -385,7 +390,7 @@ export function restoreThemeRequestData(
     try {
       const formData = JSON.parse(serializedFormData);
       for (const [formId, data] of Object.entries(formData)) {
-        theme.setFormData(formId, data as unknown as SwellData);
+        theme.setFormData(formId, data as SwellData);
       }
     } catch (err) {
       console.log(err);

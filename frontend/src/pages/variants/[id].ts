@@ -1,7 +1,7 @@
 import { handleServerRequest } from '@/utils/server';
 import { ProductResource, VariantResource } from '@/resources';
 
-export const GET = handleServerRequest(async ({ context, swell }: any) => {
+export const GET = handleServerRequest(async ({ context, swell }) => {
   const { id } = context.params;
 
   // Find variant by ID first

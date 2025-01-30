@@ -63,15 +63,12 @@ export class AccountOrdersResource extends SwellStorefrontCollection {
 
 export class AccountSubscriptionResource extends SwellStorefrontRecord {
   constructor(swell: Swell, subscriptionId: string, query: SwellData = {}) {
-    super(
-      swell,
-      'accounts:subscriptions',
-      subscriptionId,
-      query,
-      function () {
-        return swell.storefront.subscriptions.get(subscriptionId, this._query) as any;
-      },
-    );
+    super(swell, 'accounts:subscriptions', subscriptionId, query, function () {
+      return swell.storefront.subscriptions.get(
+        subscriptionId,
+        this._query,
+      ) as any;
+    });
   }
 }
 

@@ -3,9 +3,9 @@
 
 type KVNamespace = import('@cloudflare/workers-types').KVNamespace;
 
-type ENV = {
+interface ENV {
   THEME: KVNamespace;
-};
+}
 
 type Runtime = import('@astrojs/cloudflare').Runtime<ENV>;
 

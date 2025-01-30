@@ -72,7 +72,7 @@ export async function cartCheckout(context: SwellServerContext) {
     if (cartItems?.length > 0) {
       // Update cart quantity if any changed
       if (updates instanceof Array) {
-        let promises = [];
+        const promises = [];
         for (let i = 0; i < updates.length; i++) {
           const item = cartItems[i];
           if (item && item.quantity !== Number(updates[i])) {

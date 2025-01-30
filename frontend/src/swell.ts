@@ -24,7 +24,7 @@ type ResourceKey = keyof ResourceType;
 type LookupResourceType = {
   [K in keyof ResourceType]: ResourceType[K] extends ThemeLookupResourceFactory
     ? ResourceType[K]
-    : never
+    : never;
 };
 
 type LookupResourceKey = keyof LookupResourceType;
@@ -56,11 +56,7 @@ export async function initSwell(
         return setCookie(context, name, value, options);
       }
     },
-    deleteCookie(
-      name: string,
-      options?: AstroCookieSetOptions,
-      swell?: Swell,
-    ) {
+    deleteCookie(name: string, options?: AstroCookieSetOptions, swell?: Swell) {
       if (canUpdateCookies(context, swell)) {
         return deleteCookie(context, name, options);
       }
@@ -82,7 +78,10 @@ export function canUpdateCookies(
   return !(context as any).response && !swell?.sentResponse;
 }
 
-export function getSwellDataCookie(context: AstroGlobal | APIContext, defaultValue?: object) {
+export function getSwellDataCookie(
+  context: AstroGlobal | APIContext,
+  defaultValue?: object,
+) {
   const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
   if (!swellCookie) {
     return defaultValue;
@@ -102,7 +101,10 @@ const defaultCookieOptions = {
   samesite: 'lax',
 };
 
-export function updateSwellDataCookie(context: AstroGlobal | APIContext, value: string) {
+export function updateSwellDataCookie(
+  context: AstroGlobal | APIContext,
+  value: string,
+) {
   context.cookies.set(SWELL_DATA_COOKIE, value, defaultCookieOptions);
 }
 
@@ -122,9 +124,13 @@ export function setCookie(
     ...options,
   };
   const swellCookie = getSwellDataCookie(context, {});
- 
+
   swellCookie[name] = value;
-  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(swellCookie), cookieOptions);
+  context.cookies.set(
+    SWELL_DATA_COOKIE,
+    JSON.stringify(swellCookie),
+    cookieOptions,
+  );
 }
 
 export function deleteCookie(
@@ -138,9 +144,13 @@ export function deleteCookie(
     ...options,
   };
   const swellCookie = getSwellDataCookie(context, {});
- 
+
   delete swellCookie[name];
-  context.cookies.set(SWELL_DATA_COOKIE, JSON.stringify(swellCookie), cookieOptions);
+  context.cookies.set(
+    SWELL_DATA_COOKIE,
+    JSON.stringify(swellCookie),
+    cookieOptions,
+  );
 }
 
 function loadResources<T extends ResourceKey>(resourceList: Record<string, T>) {
@@ -159,7 +169,9 @@ function getResources(
 
   return {
     singletons: loadResources(singletons as Record<string, ResourceKey>),
-    records: loadResources(records as Record<string, LookupResourceKey>) as Record<string, ThemeLookupResourceFactory>,
+    records: loadResources(
+      records as Record<string, LookupResourceKey>,
+    ) as Record<string, ThemeLookupResourceFactory>,
   };
 }
 

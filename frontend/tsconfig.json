@@ -13,7 +13,7 @@
     "incremental": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     },
     "lib": ["es2022", "dom"],
     "verbatimModuleSyntax": false,
@@ -23,7 +23,7 @@
   "exclude": [
     ".astro",
     ".wrangler",
-    ".prettierrc.mjs",
+    "../.prettierrc.mjs",
     "astro.config.mjs",
     "node_modules",
     "dist"
