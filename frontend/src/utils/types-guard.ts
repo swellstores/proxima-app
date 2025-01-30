@@ -4,14 +4,21 @@ export function isPageContentRecord(
   pageContent: unknown,
   sectionId?: string,
 ): pageContent is Record<string, string> {
-  return Boolean(sectionId && typeof pageContent === 'object' && pageContent);
+  return Boolean(
+    sectionId &&
+      typeof pageContent === 'object' &&
+      pageContent &&
+      !Array.isArray(pageContent),
+  );
 }
 
 export function isTemplateConfig(obj: unknown): obj is ThemePageTemplateConfig {
   return Boolean(
     typeof obj === 'object' &&
-    obj &&
-    'sections' in obj &&
-    typeof obj.sections === 'object'
+      obj &&
+      'sections' in obj &&
+      typeof obj.sections === 'object' &&
+      obj.sections &&
+      !Array.isArray(obj.sections),
   );
 }

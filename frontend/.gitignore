@@ -1,6 +1,7 @@
 # build output
 dist/
 .wrangler/
+tsconfig.tsbuildinfo
 
 # generated types
 .astro/

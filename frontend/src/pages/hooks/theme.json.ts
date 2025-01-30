@@ -17,17 +17,15 @@ const handleThemeRequest = handleServerRequest(async ({ swell, context }) => {
     theme: {
       id: themeId,
       version: themeVersion,
-    } 
+    },
   };
 
-  return new Response(
-    JSON.stringify(result), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
-  );
+  return new Response(JSON.stringify(result), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 });
 
 /**
@@ -36,7 +34,7 @@ const handleThemeRequest = handleServerRequest(async ({ swell, context }) => {
 async function loadTheme(theme: SwellTheme) {
   // Ensure that the entire bundle is cached.
   // TODO: Implement new theme-version-manifest workflow
-  await theme.getAllThemeConfigs(); 
+  await theme.getAllThemeConfigs();
 }
 
 // TODO: The GET handler exists solely for ease of debugging.
