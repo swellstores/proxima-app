@@ -194,5 +194,19 @@
       "id": "account_password_reset",
       "shopify_type": "reset_customer_password"
     }
-  ]
+  ],
+
+  "editor_configs": {
+    "checkout_form": "cart",
+    "redirect_to_page_start_forms": [
+      "account_password_recover"
+    ],
+    "script_actions_routes": {
+      "cart_add_url": "/cart/add",
+      "cart_change_url": "/cart/update",
+      "cart_update_url": "/cart/update",
+      "cart_url": "/cart",
+      "predictive_search_url": "/search/suggest"
+    }
+  }
 }
