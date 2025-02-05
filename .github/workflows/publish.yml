@@ -1,0 +1,32 @@
+name: Publish Proxima App
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      
+      - name: Install @swell-cli global
+        run: npm i -g ts-node @swell/cli@2.0.1-alpha.18
+      
+      - name: Install project dependencies
+        run: npm ci
+      
+      - name: Push app to Swell
+        run: swell app push --force
+        env:
+          SWELL_STORE_ID: ${{ secrets.SWELL_CONFIG_JSON_PRODUCTION }}
+          SWELL_SECRET_KEY: ${{ secrets.SWELL_ENV_JSON_PRODUCTION }}
