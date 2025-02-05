@@ -1,9 +1,10 @@
 name: Publish Proxima App
 
 on:
-  push:
-    branches:
-      - master
+  pull_request:
+  # push:
+  #   branches:
+  #     - master
 
 jobs:
   publish:
