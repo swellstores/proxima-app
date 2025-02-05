@@ -1,0 +1,25 @@
+---
+import { Swell } from '@swell/apps-sdk';
+import { CategoryResource } from '@/resources/category';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
+
+export async function getData(swell: Swell) {
+  return {
+    category: new CategoryResource(swell, 'all'),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  const data = await getData(swell);
+  return parseResources(data);
+});
+---
+
+<ThemePage
+  id="categories/category"
+  title="{{ category.meta_title | default: category.name }}"
+  description="{{ category.meta_description | default: category.description }}"
+  getData={getData}
+/>

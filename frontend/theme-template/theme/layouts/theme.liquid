@@ -1,0 +1,21 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="{{ "theme.css" | asset_url }}" rel="stylesheet">
+  <title>{{ page_title }}</title>
+  {{ content_for_header }}
+</head>
+
+<body>
+  {% section "header" %}
+
+  <main class="main-content" role="main">
+    {{ content_for_layout }}
+  </main>
+
+  {% section "footer" %}
+  </div>
+</body>
+</html>

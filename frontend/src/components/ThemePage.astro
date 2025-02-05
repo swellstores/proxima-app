@@ -1,0 +1,158 @@
+---
+import get from 'lodash/get';
+
+import {
+  Swell,
+  PageError,
+  PageNotFound,
+  SwellTheme,
+  SwellData,
+  ThemeSectionGroup,
+} from '@swell/apps-sdk';
+
+import { initSwellTheme } from '@/swell';
+import { isTemplateConfig, isPageContentRecord } from '@/utils/types-guard';
+import Layout from '@/layouts/Layout.astro';
+
+import ThemeSections from './ThemeSections.astro';
+import ErrorPage from './ErrorPage.astro';
+
+// interface Props {
+//   title?: string | ((data: SwellData | undefined) => Promise<string>);
+//   description?: string | ((data: SwellData | undefined) => Promise<string>);
+// }
+// Doesn't work without a comment ^, probably a bug
+interface Props {
+  id: string;
+  title?: string | ((data: SwellData | undefined) => Promise<string>);
+  description?: string | ((data: SwellData | undefined) => Promise<string>);
+  required?: string;
+  requiredPath?: string;
+  content?: string;
+  props?: Record<string, any>;
+  getData?: (swell: Swell, theme: SwellTheme) => Promise<SwellData> | SwellData;
+}
+
+const sections = Astro.url.searchParams.get('sections');
+const sectionId = Astro.url.searchParams.get('section_id');
+const sectionIds = sections
+  ? sections.split(',')
+  : sectionId
+    ? [sectionId]
+    : null;
+
+const { id, title, description, required, content, props, getData } =
+  Astro.props;
+
+const { swell, theme } = await initSwellTheme(Astro, id);
+
+let pageData, pageTitle, pageDescription, pageContent, pageError;
+
+try {
+  // Rendering page content
+  pageData = getData && (await getData(swell, theme));
+
+  if (required) {
+    const isFound = await get(pageData, required);
+
+    if (!isFound) {
+      throw new PageNotFound();
+    }
+  }
+
+  if (pageData) {
+    theme.setCompatibilityData(pageData);
+  }
+
+  [pageTitle, pageDescription, pageContent] = await Promise.all([
+    typeof title === 'string'
+      ? await theme.renderTemplateString(title, pageData)
+      : typeof title === 'function'
+        ? await title(pageData)
+        : '',
+
+    typeof description === 'string'
+      ? await theme.renderTemplateString(description, pageData)
+      : typeof description === 'function'
+        ? await description(pageData)
+        : '',
+
+    (content ?? sectionIds)
+      ? theme.renderAllSections(sectionIds ?? [], {
+          ...props,
+          ...pageData,
+        })
+      : theme.renderPage(
+          {
+            ...props,
+            ...pageData,
+          },
+          pageData?.theme_template,
+        ),
+  ]);
+
+  // TODO: replace with json schema validation
+  if (typeof pageContent !== 'string' && !pageContent) {
+    throw new PageError('Invalid page content');
+  }
+
+  if (isTemplateConfig(pageContent)) {
+    if (!pageTitle && pageContent.page?.title) {
+      pageTitle = pageContent.page.title;
+    }
+
+    if (!pageDescription && pageContent.page?.description) {
+      pageDescription = pageContent.page.description;
+    }
+  }
+} catch (err: any) {
+  try {
+    if (err instanceof PageNotFound) {
+      try {
+        pageTitle = err.message;
+        pageContent = await theme.renderPageTemplate('404');
+      } catch (renderErr: any) {
+        throw err;
+      }
+    } else {
+      throw err;
+    }
+  } catch {
+    console.error(err);
+    pageError = {
+      title: err.title,
+      status: err.status,
+      description: swell.isPreview ? err.description || err.message : undefined,
+    };
+  }
+}
+
+const pageProps = { ...props, ...pageData };
+
+const layoutProps = {
+  page_title: pageTitle || pageData?.title || theme.globals.store?.name,
+  page_description: pageDescription || pageData?.description,
+  content_for_header: theme.getContentForHeader(),
+  props,
+};
+---
+
+{
+  pageError ? (
+    <ErrorPage {...pageError} />
+  ) : sections ? (
+    JSON.stringify(pageContent)
+  ) : (sectionId && isPageContentRecord(pageContent, sectionId)) ? (
+    <Fragment set:html={pageContent[sectionId]} />
+  ) : (
+    <Layout theme={theme} {...layoutProps}>
+      <Fragment slot="content_for_layout">
+        {isTemplateConfig(pageContent) ? (
+          <ThemeSections theme={theme} content={pageContent as ThemeSectionGroup} data={pageProps} />
+        ) : (
+          <Fragment set:html={pageContent} />
+        )}
+      </Fragment>
+    </Layout>
+  )
+}

@@ -1,0 +1,37 @@
+---
+import { SwellTheme, SwellData, ThemeSectionGroup } from '@swell/apps-sdk';
+
+interface Props {
+  theme: SwellTheme;
+  content: ThemeSectionGroup;
+  data: SwellData;
+}
+
+type AllowedTags =
+  | 'article'
+  | 'aside'
+  | 'div'
+  | 'footer'
+  | 'header'
+  | 'section';
+
+interface Section {
+  section: {
+    type?: string;
+    id?: string;
+  };
+  output: string;
+  tag: AllowedTags;
+}
+
+const { theme, content, data } = Astro.props;
+const sections = (await theme.renderPageSections(content, data)) as Section[];
+---
+
+{
+  sections.map(({ section, output, tag: Tag }: Section) => {
+    const { type = 'unknown' } = section;
+    const TagComponent = Tag as keyof JSX.IntrinsicElements;
+    return <TagComponent data-swell-section={type} id={section.id} set:html={output} />;
+  })
+}

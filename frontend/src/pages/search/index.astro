@@ -1,0 +1,23 @@
+---
+import { Swell } from '@swell/apps-sdk';
+import { SearchResource } from '@/resources/search';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
+
+export async function getData(swell: Swell, query: string | null) {
+  return {
+    search: new SearchResource(swell, query),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  const data = await getData(swell, context.url.searchParams.get('q'));
+  return parseResources(data);
+});
+---
+
+<ThemePage
+  id="search"
+  getData={(swell) => getData(swell, Astro.url.searchParams.get('q'))}
+/>

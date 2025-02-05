@@ -1,0 +1,30 @@
+---
+import { Swell } from '@swell/apps-sdk';
+import { PageResource } from '@/resources/page';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
+
+export async function getData(swell: Swell, slug?: string) {
+  const page = new PageResource(swell, slug as string);
+  const theme_template = await page.theme_template;
+
+  return {
+    page,
+    theme_template,
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  const data = await getData(swell, context.params.slug);
+  return parseResources(data);
+});
+---
+
+<ThemePage
+  id="pages/page"
+  required="page.id"
+  title="{{ page.meta_title | default: page.title | default: page.name }}"
+  description="{{ page.meta_description | default: page.description }}"
+  getData={(swell) => getData(swell, Astro.params.slug)}
+/>

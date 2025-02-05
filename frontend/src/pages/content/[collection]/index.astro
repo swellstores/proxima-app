@@ -1,0 +1,33 @@
+---
+import {
+  Swell,
+  SwellStorefrontCollection,
+  getContentModel,
+} from '@swell/apps-sdk';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
+
+export async function getData(swell: Swell, collection?: string) {
+  const model = await getContentModel(swell, collection as string);
+  const entries = new SwellStorefrontCollection(swell, `content/${collection}`);
+
+  return {
+    model,
+    entries,
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  const data = await getData(swell, context.params.collection);
+  return parseResources(data);
+});
+---
+
+<ThemePage
+  id="content/index"
+  required="model.id"
+  title="{{ model.name }}"
+  description="{{ model.description }}"
+  getData={(swell) => getData(swell, Astro.params.collection)}
+/>

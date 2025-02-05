@@ -1,0 +1,26 @@
+---
+import { Swell } from '@swell/apps-sdk';
+import { ProductResource } from '@/resources/product';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
+
+export async function getData(swell: Swell, slug?: string) {
+  return {
+    product: new ProductResource(swell, slug as string),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  const data = await getData(swell, context.params.slug);
+  return parseResources(data);
+});
+---
+
+<ThemePage
+  id="products/product"
+  required="product.id"
+  title="{{ product.meta_title | default: product.name }}"
+  description="{{ product.meta_description | default: product.description }}"
+  getData={(swell) => getData(swell, Astro.params.slug)}
+/>

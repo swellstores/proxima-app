@@ -1,0 +1,24 @@
+---
+import { Swell } from '@swell/apps-sdk';
+import { AccountOrderResource } from '@/resources/account';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
+
+export async function getData(swell: Swell, id?: string) {
+  return {
+    order: new AccountOrderResource(swell, id as string),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  const data = await getData(swell, context.params.id);
+  return parseResources(data);
+});
+---
+
+<ThemePage
+  id="account/order"
+  required="order.id"
+  getData={(swell) => getData(swell, Astro.params.id)}
+/>

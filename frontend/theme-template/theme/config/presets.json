@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Light",
+    "settings": {
+      "header_font": "Assistant@600",
+      "body_font": "Assistant@400",
+      "color_schemes": {
+        "light": {
+          "settings": {
+            "background": "#ffffff",
+            "background_gradient": "",
+            "text": "#111111",
+            "button": "#111111",
+            "button_label": "#ffffff",
+            "secondary_button_label": "#222222",
+            "shadow": "#222222"
+          }
+        }
+      }
+    }
+  }
+]

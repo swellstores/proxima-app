@@ -1,0 +1,26 @@
+---
+import { Swell } from '@swell/apps-sdk';
+import { BlogCategoryResource } from '@/resources/blog';
+import { handleServerRequest } from '@/utils/server';
+import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
+
+export async function getData(swell: Swell, category?: string) {
+  return {
+    category: new BlogCategoryResource(swell, category as string),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  const data = await getData(swell, context.params.category);
+  return parseResources(data);
+});
+---
+
+<ThemePage
+  id="blogs/category"
+  required="category.id"
+  title="{{ category.meta_title | default: category.title }}"
+  description="{{ category.meta_description | default: category.description }}"
+  getData={(swell) => getData(swell, Astro.params.category)}
+/>

@@ -1,0 +1,87 @@
+{
+  "settings": [
+    {
+      "label": "Fonts",
+      "fields": [
+        {
+          "id": "header_font",
+          "type": "font",
+          "label": "Header font"
+        },
+        {
+          "id": "body_font",
+          "type": "font",
+          "label": "Body font"
+        }
+      ]
+    },
+    {
+      "label": "Colors",
+      "fields": [
+        {
+          "id": "color_schemes",
+          "label": "Color schemes",
+          "type": "color_scheme_group",
+          "definition": [
+            {
+              "id": "background",
+              "type": "color",
+              "label": "Background",
+              "default": "#ffffff"
+            },
+            {
+              "id": "background_gradient",
+              "type": "color_background",
+              "label": "Background gradient"
+            },
+            {
+              "id": "text",
+              "type": "color",
+              "label": "Text",
+              "default": "#222222"
+            },
+            {
+              "id": "button",
+              "type": "color",
+              "label": "Button",
+              "default": "#222222"
+            },
+            {
+              "id": "button_label",
+              "type": "color",
+              "label": "Button label",
+              "default": "#ffffff"
+            },
+            {
+              "id": "secondary_button_label",
+              "type": "color",
+              "label": "Secondary button label",
+              "default": "#222222"
+            },
+            {
+              "id": "shadow",
+              "type": "color",
+              "label": "Shadow",
+              "default": "#222222"
+            }
+          ],
+          "role": {
+            "text": "text",
+            "background": {
+              "solid": "background",
+              "gradient": "background_gradient"
+            },
+            "links": "secondary_button_label",
+            "icons": "text",
+            "primary_button": "button",
+            "on_primary_button": "button_label",
+            "primary_button_border": "button",
+            "secondary_button": "background",
+            "on_secondary_button": "secondary_button_label",
+            "secondary_button_border": "secondary_button_label"
+          }
+        }
+      ]
+    }
+  ]
+}

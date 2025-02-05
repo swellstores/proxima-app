@@ -1,0 +1,212 @@
+{
+  "page_types": {
+    "index": "index",
+    "products/product": "product",
+    "products/index": "collection",
+    "categories/category": "collection",
+    "categories/index": "list-collections",
+    "pages/page": "page",
+    "content/entry": "metaobject",
+    "blogs/blog": "article",
+    "blogs/category": "blog",
+    "account/index": "customers/account",
+    "account/activate": "customers/activate_account",
+    "account/addresses": "customers/addresses",
+    "account/login": "customers/login",
+    "account/order": "customers/order",
+    "account/signup": "customers/register",
+    "account/recover": "customers/reset_password",
+    "cart": "cart",
+    "404": "404",
+    "gift-card": "gift_card",
+    "search": "search"
+  },
+  "page_routes": {
+    "account_addresses_url": {
+      "page_id": "account/addresses"
+    },
+    "account_login_url": {
+      "page_id": "account/login"
+    },
+    "account_recover_url": {
+      "page_id": "account/recover"
+    },
+    "account_register_url": {
+      "page_id": "account/signup"
+    },
+    "account_url": {
+      "page_id": "account/index"
+    },
+    "all_products_collection_url": {
+      "page_id": "products/index"
+    },
+    "cart_url": {
+      "page_id": "cart"
+    },
+    "collections_url": {
+      "page_id": "categories/index"
+    },
+    "root_url": {
+      "page_id": "index"
+    },
+    "search_url": {
+      "page_id": "search"
+    },
+    "account_logout_url": "/account/logout",
+    "cart_add_url": "/cart/add",
+    "cart_change_url": "/cart/update",
+    "cart_clear_url": "/cart/clear",
+    "cart_update_url": "/cart/update",
+    "predictive_search_url": "/search/suggest",
+    "product_recommendations_url": null
+  },
+  "page_resources": [
+    {
+      "page": "collection",
+      "resources": [
+        {
+          "from": "category",
+          "to": "collection",
+          "object": "ShopifyCollection"
+        }
+      ]
+    },
+    {
+      "page": "list-collections",
+      "resources": [
+        {
+          "from": "categories",
+          "to": "collections",
+          "object": "ShopifyCollections"
+        }
+      ]
+    },
+    {
+      "page": "article",
+      "resources": [
+        {
+          "from": "blog",
+          "to": "article",
+          "object": "ShopifyArticle"
+        }
+      ]
+    },
+    {
+      "page": "blog",
+      "resources": [
+        {
+          "from": "category",
+          "to": "blog",
+          "object": "ShopifyBlog"
+        }
+      ]
+    }
+  ],
+  "object_resources": [
+    {
+      "from": "AccountResource",
+      "object": "ShopifyCustomer"
+    },
+    {
+      "from": "AccountOrderResource",
+      "object": "ShopifyOrder"
+    },
+    {
+      "from": "CartResource",
+      "object": "ShopifyCart"
+    },
+    {
+      "from": "CategoryResource",
+      "object": "ShopifyCollection"
+    },
+    {
+      "from": "PredictiveSearchResource",
+      "object": "ShopifyPredictiveSearch"
+    },
+    {
+      "from": "PageResource",
+      "object": "ShopifyPage"
+    },
+    {
+      "from": "ProductResource",
+      "object": "ShopifyProduct"
+    },
+    {
+      "from": "SearchResource",
+      "object": "ShopifySearch"
+    },
+    {
+      "from": "SwellStorefrontPagination",
+      "object": "ShopifyPaginate"
+    },
+    {
+      "from": "VariantResource",
+      "object": "ShopifyVariant"
+    }
+  ],
+
+  "forms": [
+    {
+      "id": "cart_add",
+      "shopify_type": "product",
+      "client_params": [
+        {
+          "name": "product_id",
+          "value": "{{ product.id }}"
+        }
+      ]
+    },
+    {
+      "id": "account_password_reset",
+      "client_params": [
+        {
+          "name": "password_reset_key",
+          "value": "{{ password_reset_key }}"
+        }
+      ]
+    },
+    {
+      "id": "account_address",
+      "client_params": [
+        {
+          "name": "account_address_id",
+          "value": "{{ address.id }}"
+        }
+      ]
+    },
+    {
+      "id": "account_login",
+      "shopify_type": "customer_login"
+    },
+    {
+      "id": "account_create",
+      "shopify_type": "create_customer"
+    },
+    {
+      "id": "account_subscribe",
+      "shopify_type": "customer"
+    },
+    {
+      "id": "account_password_recover",
+      "shopify_type": "recover_customer_password"
+    },
+    {
+      "id": "account_password_reset",
+      "shopify_type": "reset_customer_password"
+    }
+  ],
+
+  "editor_configs": {
+    "checkout_form": "cart",
+    "redirect_to_page_start_forms": [
+      "account_password_recover"
+    ],
+    "script_actions_routes": {
+      "cart_add_url": "/cart/add",
+      "cart_change_url": "/cart/update",
+      "cart_update_url": "/cart/update",
+      "cart_url": "/cart",
+      "predictive_search_url": "/search/suggest"
+    }
+  }
+}
