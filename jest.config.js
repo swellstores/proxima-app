@@ -10,7 +10,7 @@ export default {
   clearMocks: true,
   moduleFileExtensions: ['ts', 'js'],
   moduleNameMapper: pathsToModuleNameMapper(tsconfig.compilerOptions.paths),
-  modulePaths: [tsconfig.compilerOptions.baseUrl],
+  modulePaths: [tsconfig.compilerOptions.baseUrl + 'frontend/'],
   restoreMocks: true,
   roots: ['<rootDir>/frontend/src'],
   testEnvironment: 'node',
