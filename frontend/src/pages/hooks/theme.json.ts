@@ -1,44 +1,24 @@
 import { handleServerRequest } from '@/utils/server';
 
-import type { SwellTheme } from '@swell/apps-sdk';
+import type { SwellServerContext } from '@/utils/server';
 
-const handleThemeRequest = handleServerRequest(async ({ swell, context }) => {
-  const { locals, request } = context;
+export async function handleThemeRequest(serverContext: SwellServerContext) : Promise<Response> {
+  const { context: { request }, theme } = serverContext;
 
-  // Warm the theme cache.
-  await loadTheme(locals.theme);
+  if (request.headers.get('Content-Type') !== 'application/json') {
+    return new Response(null, { status: 400 });
+  }
 
-  const { swellHeaders } = swell;
-  const themeId = swellHeaders['theme-id'];
-  const themeVersion = String(swellHeaders['theme-config-version']);
+  // Preload manifest and any configs passed in via the request.
+  const { version, configs } = await request.json();
+  await theme.preloadThemeConfigs(version, configs);
 
-  const result = {
-    storefront: swell.instanceId,
-    theme: {
-      id: themeId,
-      version: themeVersion,
-    },
-  };
-
-  return new Response(JSON.stringify(result), {
+  return new Response(JSON.stringify({success: true}), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
     },
   });
-});
-
-/**
- * Pro-loads a theme into cache.
- */
-async function loadTheme(theme: SwellTheme) {
-  // Ensure that the entire bundle is cached.
-  // TODO: Implement new theme-version-manifest workflow
-  await theme.getAllThemeConfigs();
 }
 
-// TODO: The GET handler exists solely for ease of debugging.
-//       Remove the GET handler once POST request is fully implemented.
-export const GET = handleThemeRequest;
-
-export const POST = handleThemeRequest;
+export const POST = handleServerRequest(handleThemeRequest);

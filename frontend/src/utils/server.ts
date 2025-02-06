@@ -58,7 +58,7 @@ function handleResponse(result: Response, context: SwellServerContext) {
 }
 
 export function handleServerRequest(
-  handler: (context: SwellServerContext) => string | object,
+  handler: (context: SwellServerContext) => Promise<Response | string | object> | Response | string | object,
 ): (
   context: APIContext,
   contextHandler?: (context: any) => any,
@@ -407,21 +407,6 @@ export function restoreThemeRequestData(
       }
     }
     deleteCookie(context, 'swell-global-data');
-  }
-}
-
-function setCookieToHeader(
-  context: APIContext,
-  name: string,
-  response: Response,
-) {
-  const setCookies = Array.from(context.cookies.headers());
-  const swellCookie = setCookies.find((cookie) =>
-    cookie.startsWith(`${name}=`),
-  );
-
-  if (swellCookie) {
-    response.headers.set('Set-Cookie', `${swellCookie}`);
   }
 }
 
