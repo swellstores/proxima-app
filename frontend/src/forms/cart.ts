@@ -4,7 +4,8 @@ import {
   getShopifyCompatibleServerResponse,
 } from '@/utils/server';
 
-export async function cartAdd({ params, swell, theme }: SwellServerContext) {
+export async function cartAdd(context: SwellServerContext) {
+  const { params, swell, theme } = context;
   const { product_id, variant_id, options, quantity } = params;
 
   await swell.storefront.cart.addItem({
@@ -21,7 +22,7 @@ export async function cartAdd({ params, swell, theme }: SwellServerContext) {
 
   theme.setGlobals({ cart });
 
-  return cart;
+  return getShopifyCompatibleServerResponse('cart_add', context, cart);
 }
 
 export async function cartUpdate(context: SwellServerContext) {

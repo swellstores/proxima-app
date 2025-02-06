@@ -205,7 +205,10 @@
       "cart_add_url": "/cart/add",
       "cart_change_url": "/cart/update",
       "cart_update_url": "/cart/update",
-      "cart_url": "/cart",
+      "cart_url": "/cart"
+    },
+    "script_routes": {
+      "products": "/products",
       "predictive_search_url": "/search/suggest"
     }
   }
