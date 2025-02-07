@@ -210,6 +210,26 @@
     "script_routes": {
       "products": "/products",
       "predictive_search_url": "/search/suggest"
+    },
+    "page_access": {
+      "require_account": [
+        {
+          "page_id": "account/index",
+          "redirect_page_id": "account/login"
+        },
+        {
+          "page_id": "account/addresses",
+          "redirect_page_id": "account/login"
+        },
+        {
+          "page_id": "account/order",
+          "redirect_page_id": "account/login"
+        },
+        {
+          "page_id": "account/subscription",
+          "redirect_page_id": "account/login"
+        }
+      ]
     }
   }
 }
