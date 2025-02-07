@@ -15,6 +15,7 @@ export async function cartAdd(context: SwellServerContext) {
     quantity,
   });
 
+  swell.clearStoreFrontContext('cart');
   const cart = await theme.fetchCart();
 
   // Make sure cart items are loaded
@@ -46,6 +47,7 @@ export async function cartUpdate(context: SwellServerContext) {
       });
     }
 
+    swell.clearStoreFrontContext('cart');
     const cart = await theme.fetchCart();
 
     // Make sure cart items are loaded
