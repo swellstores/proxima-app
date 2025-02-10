@@ -58,7 +58,9 @@ function handleResponse(result: Response, context: SwellServerContext) {
 }
 
 export function handleServerRequest(
-  handler: (context: SwellServerContext) => Promise<Response | string | object> | Response | string | object,
+  handler: (
+    context: SwellServerContext,
+  ) => Promise<Response | string | object> | Response | string | object,
 ): (
   context: APIContext,
   contextHandler?: (context: any) => any,
@@ -156,6 +158,12 @@ async function initServerContext(
   }
 
   const theme = context.locals.theme || initTheme(swell);
+  const pageId = getCookie(context, 'swell-page-id');
+
+  if (!theme.pageId && pageId) {
+    await theme.initGlobals(pageId);
+  }
+
   context.locals.theme = theme;
 
   const params =

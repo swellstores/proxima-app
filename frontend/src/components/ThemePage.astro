@@ -10,7 +10,7 @@ import {
   ThemeSectionGroup,
 } from '@swell/apps-sdk';
 
-import { initSwellTheme } from '@/swell';
+import { initSwellTheme, setCookie } from '@/swell';
 import { isTemplateConfig, isPageContentRecord } from '@/utils/types-guard';
 import Layout from '@/layouts/Layout.astro';
 
@@ -43,6 +43,8 @@ const sectionIds = sections
 
 const { id, title, description, required, content, props, getData } =
   Astro.props;
+
+setCookie(Astro, 'swell-page-id', id);
 
 const { swell, theme } = await initSwellTheme(Astro, id);
 
