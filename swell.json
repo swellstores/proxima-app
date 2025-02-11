@@ -113,7 +113,7 @@
           "json": true
         },
         {
-          "id": "pages/page",
+          "id": "page",
           "label": "Page",
           "url": "/pages/:slug",
           "icon": "page",
