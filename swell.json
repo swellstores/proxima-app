@@ -229,7 +229,8 @@
 	},
 	"use_cases": [
 		"direct_to_consumer",
-		"wholesale"
+		"wholesale",
+		"digital_goods"
 	],
 	"purchase_options": [
 		"standard",
