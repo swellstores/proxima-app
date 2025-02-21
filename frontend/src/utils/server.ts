@@ -58,7 +58,9 @@ function handleResponse(result: Response, context: SwellServerContext) {
 }
 
 export function handleServerRequest(
-  handler: (context: SwellServerContext) => Promise<Response | string | object> | Response | string | object,
+  handler: (
+    context: SwellServerContext,
+  ) => Promise<Response | string | object> | Response | string | object,
 ): (
   context: APIContext,
   contextHandler?: (context: any) => any,
@@ -330,8 +332,13 @@ export async function getFormParams(
   // First parse the query string and then form data
   const params: SwellData = qs.parse(searchParams.toString());
 
+  const requestContentType = request.headers.get('Content-Type') || '';
+
   // Form data
-  if (!request.parsedBody) {
+  if (
+    !request.parsedBody &&
+    requestContentType.includes('multipart/form-data')
+  ) {
     try {
       request.parsedBody = await request.formData();
     } catch {
@@ -340,7 +347,7 @@ export async function getFormParams(
   }
 
   // JSON data
-  if (!request.parsedJson) {
+  if (!request.parsedJson && requestContentType === 'application/json') {
     try {
       request.parsedJson = await request.json();
     } catch {

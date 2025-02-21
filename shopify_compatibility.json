@@ -67,6 +67,11 @@
           "from": "category",
           "to": "collection",
           "object": "ShopifyCollection"
+        },
+        {
+          "from": "product.recommendations",
+          "to": "recommendations",
+          "object": "ShopifyRecommendations"
         }
       ]
     },
@@ -197,9 +202,7 @@
 
   "editor_configs": {
     "checkout_form": "cart",
-    "redirect_to_page_start_forms": [
-      "account_password_recover"
-    ],
+    "redirect_to_page_start_forms": ["account_password_recover"],
     "script_actions_routes": {
       "cart_add_url": "/cart/add",
       "cart_change_url": "/cart/update",

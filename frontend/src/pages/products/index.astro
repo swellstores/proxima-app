@@ -1,13 +1,21 @@
 ---
+import { AstroGlobal } from 'astro';
 import { Swell } from '@swell/apps-sdk';
-import { CategoryResource } from '@/resources/category';
+import { CategoryResource, ProductResource } from '@/resources';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
 
-export async function getData(swell: Swell) {
+export async function getData(swell: Swell, Astro?: AstroGlobal) {
+  const productId = Astro?.url?.searchParams?.get('product_id');
+
   return {
     category: new CategoryResource(swell, 'all'),
+    product: productId
+      ? new ProductResource(swell, productId, {
+          $recommendations: true,
+        })
+      : null,
   };
 }
 
@@ -21,5 +29,5 @@ export const getJSON = handleServerRequest(async ({ swell, context }) => {
   id="categories/category"
   title="{{ category.meta_title | default: category.name }}"
   description="{{ category.meta_description | default: category.description }}"
-  getData={getData}
+  getData={(swell) => getData(swell, Astro)}
 />
