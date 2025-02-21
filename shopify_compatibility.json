@@ -18,7 +18,6 @@
     "account/recover": "customers/reset_password",
     "cart": "cart",
     "404": "404",
-    "gift-card": "gift_card",
     "search": "search"
   },
   "page_routes": {
