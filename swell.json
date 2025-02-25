@@ -224,7 +224,8 @@
 					"icon": "search",
 					"json": true
 				}
-			]
+			],
+			"cache_hook": "/hooks/theme"
 		}
 	},
 	"use_cases": [

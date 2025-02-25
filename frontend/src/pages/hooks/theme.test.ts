@@ -2,7 +2,7 @@ import { Swell, SwellTheme } from '@swell/apps-sdk';
 
 import type { SwellServerContext } from '@/utils/server';
 
-import { handleThemeRequest } from './theme.json';
+import { handleThemeRequest } from './theme';
 
 describe('#handleThemeRequest', () => {
   it('invokes theme preloader', async () => {
@@ -17,43 +17,39 @@ describe('#handleThemeRequest', () => {
 
     const theme = new SwellTheme(swell, {});
 
-    const request = new Request(
-      new URL('http://localhost/hooks/theme.json'),
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
+    const request = new Request(new URL('http://localhost/hooks/theme'), {
+      headers: {
+        'Content-Type': 'application/json',
       },
-    );
+      method: 'POST',
+    });
 
     const requestParams = {
       version: {
         hash: 'versionhash',
         manifest: {},
       },
-      configs: [
-        { hash: 'confighash' },
-      ],
+      configs: [{ hash: 'confighash' }],
     };
-
-    // Simulate a request with 
-    jest.spyOn(request, 'json').mockResolvedValue(requestParams);
 
     const serverContext = {
       context: { request },
-      params: {},
+      params: requestParams,
       swell,
       theme,
-    } as SwellServerContext;
+    };
 
     const spy = jest.spyOn(theme, 'preloadThemeConfigs');
 
-    const response = await handleThemeRequest(serverContext);
+    const response = (await handleThemeRequest(
+      serverContext as unknown as SwellServerContext,
+    )) as any;
 
-    expect(response.status).toEqual(200);
-    expect(await response.json()).toEqual({ success: true });
+    expect(response).toEqual({ success: true });
 
-    expect(spy).toHaveBeenCalledWith(requestParams.version, requestParams.configs);
+    expect(spy).toHaveBeenCalledWith(
+      requestParams.version,
+      requestParams.configs,
+    );
   });
 });
