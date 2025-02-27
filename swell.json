@@ -228,6 +228,8 @@
 			"cache_hook": "/hooks/theme"
 		}
 	},
+	"preview_src": "assets/preview-proxima.png",
+	"preview_mobile_src": "",
 	"use_cases": [
 		"direct_to_consumer",
 		"wholesale",
@@ -253,7 +255,7 @@
 		{
 			"id": "tell-your-story",
 			"title": "Tell your story",
-			"description": "With more than 20 built-in sections, create unique and creative landing pages to engage your customers and promote your brand identity.",
+			"description": "With more than 21 built-in sections, create unique and creative landing pages to engage your customers and promote your brand identity.",
 			"image_src": "assets/feature-tell-your-story.png"
 		},
 		{
