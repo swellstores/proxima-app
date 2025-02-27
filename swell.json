@@ -228,7 +228,7 @@
 			"cache_hook": "/hooks/theme"
 		}
 	},
-	"preview_src": "assets/preview-proxima.png",
+	"preview_src": "assets/preview-proxima.jpg",
 	"preview_mobile_src": "",
 	"use_cases": [
 		"direct_to_consumer",
