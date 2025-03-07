@@ -25,10 +25,12 @@ export class BlogResource extends SwellStorefrontRecord {
         await category.id;
       }
 
-      const blog =
-        category && category.id
-          ? new SwellStorefrontRecord(swell, 'content/blogs', blogSlug, query)
-          : null;
+      const blog = new SwellStorefrontRecord(
+        swell,
+        'content/blogs',
+        blogSlug,
+        query,
+      );
 
       if (blog) {
         await blog.id;

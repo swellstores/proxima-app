@@ -147,6 +147,10 @@
     {
       "from": "VariantResource",
       "object": "ShopifyVariant"
+    },
+    {
+      "from": "BlogResource",
+      "object": "ShopifyBlog"
     }
   ],
 
