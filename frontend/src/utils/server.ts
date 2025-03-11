@@ -14,6 +14,7 @@ import {
   deleteCookie,
   getSwellDataCookie,
   updateSwellDataCookie,
+  ensureStorefrontLocalization,
 } from '@/swell';
 import { minimatch } from 'minimatch';
 import { match } from 'path-to-regexp';
@@ -143,9 +144,6 @@ export function handleMiddlewareRequest(
 async function initServerContext(
   context: APIContext,
 ): Promise<SwellServerContext> {
-  const swell = context.locals.swell || (await initSwell(context));
-  context.locals.swell = swell;
-
   // use request swell-data if provided
   const swellData = context.request.headers.get('Swell-Data');
   if (swellData) {
@@ -156,6 +154,12 @@ async function initServerContext(
   if (session) {
     setCookie(context, 'swell-session', session);
   }
+
+  const swell = context.locals.swell || (await initSwell(context));
+
+  await ensureStorefrontLocalization(swell, context);
+
+  context.locals.swell = swell;
 
   const theme = context.locals.theme || initTheme(swell);
   context.locals.theme = theme;
