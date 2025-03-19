@@ -28,7 +28,9 @@ export class CategoryResource extends SwellStorefrontRecord {
 
       const filteredProps = await getFilteredProducts(
         swell,
-        categoryFilter ? { category: categoryFilter } : {},
+        categoryFilter
+          ? { category: categoryFilter, $variants: true }
+          : { $variants: true },
       );
 
       return {
