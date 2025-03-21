@@ -124,7 +124,7 @@
 				{
 					"id": "blogs/blog",
 					"label": "Blog post",
-					"url": "/blogs/:category/:slug",
+					"url": "/blogs/:category.slug/:slug",
 					"icon": "rss",
 					"templates": true,
 					"collection": "content/blogs",
