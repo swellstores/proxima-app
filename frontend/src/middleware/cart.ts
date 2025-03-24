@@ -1,10 +1,7 @@
-import { cartCheckout } from '@/forms/cart';
+import { cartGet, cartCheckout } from '@/forms/cart';
 import { handleMiddlewareRequest } from '@/utils/server';
 
-export const submitCheckout = handleMiddlewareRequest(
-  'POST',
-  '/cart',
-  cartCheckout,
-);
+const getCart = handleMiddlewareRequest('GET', '/cart', cartGet);
+const submitCheckout = handleMiddlewareRequest('POST', '/cart', cartCheckout);
 
-export default [submitCheckout];
+export default [getCart, submitCheckout];

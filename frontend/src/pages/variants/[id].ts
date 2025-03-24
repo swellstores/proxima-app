@@ -12,7 +12,7 @@ export const GET = handleServerRequest(async ({ context, swell }) => {
 
   const product = new ProductResource(swell, variantRecord?.parent_id);
 
-  const product_variant = new VariantResource(swell, product, id);
+  const product_variant = new VariantResource(swell, product, id as string);
 
   return { product_variant };
 });
