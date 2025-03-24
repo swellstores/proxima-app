@@ -1,8 +1,34 @@
 import {
+  SwellServerNext,
   SwellServerContext,
   getShopifyCompatibleServerParams,
   getShopifyCompatibleServerResponse,
 } from '@/utils/server';
+
+export async function cartGet(
+  context: SwellServerContext,
+  next: SwellServerNext,
+) {
+  const {
+    theme,
+    context: { request },
+  } = context;
+
+  // Skip handler if something else is expected instead of json
+  if (!(request.headers.get('accept') ?? '').startsWith('application/json')) {
+    await next();
+    return;
+  }
+
+  const cart = await theme.fetchCart();
+
+  // Make sure cart items are loaded
+  await cart.items;
+
+  theme.setGlobals({ cart });
+
+  return cart;
+}
 
 export async function cartAdd(context: SwellServerContext) {
   const { params, swell, theme } = context;
@@ -72,9 +98,9 @@ export async function cartCheckout(context: SwellServerContext) {
 
     if (cartItems?.length > 0) {
       // Update cart quantity if any changed
-      if (updates instanceof Array) {
+      if (Array.isArray(updates)) {
         const promises = [];
-        for (let i = 0; i < updates.length; i++) {
+        for (let i = 0; i < updates.length; ++i) {
           const item = cartItems[i];
           if (item && item.quantity !== Number(updates[i])) {
             promises.push(

@@ -4,6 +4,8 @@ import {
   ShopifyFormResourceMap,
 } from '@swell/apps-sdk';
 
+import type { SwellServerContext } from './server';
+
 export default class StorefrontShopifyCompatibility extends ShopifyCompatibility {
   constructor(theme: SwellTheme) {
     super(theme);
@@ -19,7 +21,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             <input type="hidden" name="product_id" value="{{ product.id }}" />
           `;
         },
-        serverParams: async ({ params, theme }: any) => {
+        serverParams: async ({ params, theme }: SwellServerContext) => {
           const { id, product_id } = params;
           const prevItems = await theme.globals.cart?.items;
 
@@ -52,7 +54,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         type: 'cart_update',
         shopifyType: undefined, // No Shopify equivalent, manually executed by the cart_update handler
-        serverParams: async ({ params, theme }: any) => {
+        serverParams: async ({ params, theme }: SwellServerContext) => {
           const { line, quantity } = params;
 
           // Convert line number to item_id
@@ -85,7 +87,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         type: 'localization',
         shopifyType: undefined, // Same form type as Shopify
-        serverParams: ({ params }: any) => {
+        serverParams: ({ params }: SwellServerContext) => {
           const { country_code, locale_code } = params;
 
           return {
@@ -97,7 +99,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         type: 'account_login',
         shopifyType: 'customer_login',
-        serverParams: ({ params }: any) => {
+        serverParams: ({ params }: aSwellServerContextny) => {
           const { customer } = params;
 
           return {
@@ -111,7 +113,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         type: 'account_create',
         shopifyType: 'create_customer',
-        serverParams: ({ params }: any) => {
+        serverParams: ({ params }: SwellServerContext) => {
           const { customer } = params;
 
           return {
@@ -127,7 +129,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         type: 'account_subscribe',
         shopifyType: 'customer',
-        serverParams: ({ params }: any) => {
+        serverParams: ({ params }: SwellServerContext) => {
           const { contact } = params;
 
           return {
@@ -141,7 +143,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         type: 'account_password_recover',
         shopifyType: 'recover_customer_password',
-        serverParams: ({ params }: any) => {
+        serverParams: ({ params }: SwellServerContext) => {
           const { customer } = params;
 
           if (customer) {
@@ -173,7 +175,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             `;
           }
         },
-        serverParams: ({ params }: any) => {
+        serverParams: ({ params }: SwellServerContext) => {
           const { address } = params;
 
           const hasName = address?.first_name || address?.last_name;
