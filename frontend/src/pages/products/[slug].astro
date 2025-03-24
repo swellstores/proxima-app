@@ -6,8 +6,12 @@ import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
 
 export async function getData(swell: Swell, slug?: string) {
+  const product = new ProductResource(swell, slug as string, {
+    $recommendations: true,
+  });
+
   return {
-    product: new ProductResource(swell, slug as string),
+    product,
   };
 }
 
