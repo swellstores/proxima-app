@@ -14,7 +14,6 @@ import {
   deleteCookie,
   getSwellDataCookie,
   updateSwellDataCookie,
-  ensureStorefrontLocalization,
 } from '@/swell';
 import { minimatch } from 'minimatch';
 import { match } from 'path-to-regexp';
@@ -156,9 +155,6 @@ async function initServerContext(
   }
 
   const swell = context.locals.swell || (await initSwell(context));
-
-  await ensureStorefrontLocalization(swell, context);
-
   context.locals.swell = swell;
 
   const theme = context.locals.theme || initTheme(swell);
