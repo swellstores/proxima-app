@@ -64,10 +64,6 @@ export async function initSwell(
     ...options,
   });
 
-  await swell.updateCacheModified(
-    context.request.headers.get('swell-cache-modified') ?? '',
-  );
-
   return swell;
 }
 
@@ -191,39 +187,11 @@ export function initTheme(swell: Swell): SwellTheme {
   });
 }
 
-export async function ensureStorefrontLocalization(
-  swell: Swell,
-  context: AstroGlobal | APIContext,
-) {
-  const store = await swell.storefront.settings.get('store');
-  const { locale: currentLocale, currency: currentCurrency } =
-    swell.getStorefrontLocalization();
-  const swellData = getSwellDataCookie(context);
-  const cookieLocale = swellData?.['swell-locale'];
-  const cookieCurrency = swellData?.['swell-currency'];
-  const locale =
-    typeof cookieLocale === 'string' ? cookieLocale : store.locale || 'en-US';
-  const currency =
-    typeof cookieCurrency === 'string'
-      ? cookieCurrency
-      : store.currency || 'USD';
-
-  if (typeof locale === 'string' && locale !== currentLocale) {
-    await swell.storefront.locale.select(locale);
-  }
-
-  if (typeof currency === 'string' && currency !== currentCurrency) {
-    await swell.storefront.currency.select(currency);
-  }
-}
-
 export async function initSwellTheme(
   Astro: AstroGlobal | APIContext,
   pageId?: string,
 ): Promise<{ swell: Swell; theme: SwellTheme }> {
   const swell = Astro.locals.swell || (await initSwell(Astro));
-
-  await ensureStorefrontLocalization(swell, Astro);
 
   // Indicate response was sent to avoid mutating cookies
   if (Astro.locals.swell) {
