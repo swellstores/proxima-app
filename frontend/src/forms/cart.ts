@@ -32,13 +32,14 @@ export async function cartGet(
 
 export async function cartAdd(context: SwellServerContext) {
   const { params, swell, theme } = context;
-  const { product_id, variant_id, options, quantity } = params;
+  const { product_id, variant_id, options, quantity, purchase_option } = params;
 
   await swell.storefront.cart.addItem({
     product_id,
     variant_id,
     options,
     quantity,
+    purchase_option,
   });
 
   const cart = await theme.fetchCart();
