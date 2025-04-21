@@ -88,8 +88,9 @@ export async function cartUpdate(context: SwellServerContext) {
   return getShopifyCompatibleServerResponse('cart_update', context, response);
 }
 
-export async function cartCheckout(context: SwellServerContext) {
-  const { params, swell, theme, redirect } = context;
+export async function cartCheckout(swellContext: SwellServerContext) {
+  const { params, swell, theme, context } = swellContext;
+  const { redirect } = context;
   const { updates } = params;
 
   const cart = theme.globals.cart;

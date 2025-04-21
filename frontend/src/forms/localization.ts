@@ -1,4 +1,4 @@
-import { SwellServerContext } from '@/utils/server';
+import type { SwellServerContext } from '@/utils/server';
 
 export async function localizationUpdate(context: SwellServerContext) {
   const { params, swell } = context;

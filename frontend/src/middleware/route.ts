@@ -1,33 +1,46 @@
-import { handleMiddlewareRequest, SwellServerContext } from '@/utils/server';
-import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 import { pathToRegexp } from 'path-to-regexp';
+import { decodeHTML } from 'entities';
 
-export const getThemePage = handleMiddlewareRequest(
+import {
+  handleMiddlewareRequest,
+  SwellServerContext,
+  SwellServerNext,
+} from '@/utils/server';
+import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
+
+const getThemePage = handleMiddlewareRequest(
   'GET',
   () => true,
   initThemePageHandler,
 );
 
-export const postThemePage = handleMiddlewareRequest(
+const getPageSections = handleMiddlewareRequest(
+  'GET',
+  () => true,
+  renderSeparateSections,
+);
+
+const postThemePage = handleMiddlewareRequest(
   'POST',
   () => true,
   initThemePageHandler,
 );
 
-async function initThemePageHandler(context: SwellServerContext) {
-  const { theme, redirect, url } = context;
+async function initThemePageHandler(swellContext: SwellServerContext) {
+  const { theme, context } = swellContext;
+  const { redirect, url } = context;
 
-  if (theme.props.pages instanceof Array) {
-    const pagePath = url.pathname.replace(/\.[^\/]+$/, '');
+  if (Array.isArray(theme.props.pages)) {
+    const pagePath = url.pathname.replace(/\.[^/]+$/, '');
 
-    const page = theme.props.pages.find((page: any) => {
+    const page = theme.props.pages.find((page) => {
       const regexp = pathToRegexp(page.url);
-      return Boolean(regexp.exec(pagePath));
+      return regexp.test(pagePath);
     });
 
     if (page) {
       // If using .json extension, make sure page supports json or return 404
-      const ext = url.pathname.match(/\.[^\/]+$/)?.[0].replace('.', '');
+      const ext = url.pathname.match(/\.[^/]+$/)?.[0].replace('.', '');
       if (ext && !page.json) {
         return new Response(null, { status: 404 });
       }
@@ -50,4 +63,48 @@ async function initThemePageHandler(context: SwellServerContext) {
   }
 }
 
-export default [getThemePage, postThemePage];
+async function renderSeparateSections(
+  swellContext: SwellServerContext,
+  next: SwellServerNext,
+) {
+  const { context } = swellContext;
+
+  const sections = context.url.searchParams.get('sections');
+  const section_id = context.url.searchParams.get('section_id');
+
+  if (!sections && !section_id) {
+    return next();
+  }
+
+  // Prevent response modification
+  context.locals.raw = true;
+
+  if (section_id) {
+    return next();
+  }
+
+  const response = await next();
+  response.headers.set('Content-Type', 'application/json');
+
+  return new Response(parseHtmlEncodedJson(await response.text()), {
+    headers: response.headers,
+  });
+}
+
+function parseHtmlEncodedJson(encoded: string): string {
+  let str = encoded.trim();
+
+  if (str.startsWith('<!')) {
+    const pos = str.indexOf('>');
+
+    if (pos !== -1) {
+      str = str.slice(pos + 1);
+    }
+
+    str = decodeHTML(str);
+  }
+
+  return str;
+}
+
+export default [getThemePage, getPageSections, postThemePage];
