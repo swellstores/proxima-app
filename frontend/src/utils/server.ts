@@ -19,7 +19,7 @@ import { minimatch } from 'minimatch';
 import { match } from 'path-to-regexp';
 import qs from 'qs';
 
-export interface SwellServerContext extends APIContext {
+export interface SwellServerContext {
   params: SwellData;
   swell: Swell;
   theme: SwellTheme;
@@ -33,24 +33,24 @@ declare global {
   }
 }
 
-export interface SwellServerNext extends MiddlewareNext {}
+export type SwellServerNext = MiddlewareNext;
 
-function isEditorRequest(context: APIContext | SwellServerContext): boolean {
+function isEditorRequest(context: APIContext): boolean {
   // We can use context.request.headers.get('swell-deployment-mode') === 'editor' when different URLs are used
   const isEditor = Boolean(context.request.headers.get('Swell-Is-Editor'));
-  return isEditor;
+  return isEditor && !context.locals.raw;
 }
 
-function handleResponse(result: Response, context: SwellServerContext) {
+function handleResponse(result: Response, swellContext: SwellServerContext) {
   // return json for editor form actions instead of redirect
-  if (isEditorRequest(context)) {
+  if (isEditorRequest(swellContext.context)) {
     return sendServerResponse(
       {
         isEditor: true,
         redirect: result.headers.get('Location'),
         status: result.status,
       },
-      context,
+      swellContext,
     );
   }
 
@@ -63,11 +63,11 @@ export function handleServerRequest(
   ) => Promise<Response | string | object> | Response | string | object,
 ): (
   context: APIContext,
-  contextHandler?: (context: any) => any,
+  contextHandler?: (context: SwellServerContext) => void,
 ) => Promise<Response | undefined> {
   return async (
     context: APIContext,
-    contextHandler?: (context: any) => any,
+    contextHandler?: (context: SwellServerContext) => void,
   ) => {
     const serverContext = await initServerContext(context);
 
@@ -95,7 +95,7 @@ export function handleServerRequest(
 
 export function handleMiddlewareRequest(
   method: string,
-  urlParam: string | string[] | Function,
+  urlParam: string | string[] | ((pathname: string) => boolean),
   handler: (context: SwellServerContext, next: SwellServerNext) => any,
 ): MiddlewareHandler {
   const matchHandler = getMiddlewareMatcher(urlParam);
@@ -166,7 +166,6 @@ async function initServerContext(
   context.locals.params = params;
 
   return {
-    ...context,
     params,
     swell,
     theme,
@@ -176,9 +175,9 @@ async function initServerContext(
 
 export async function sendServerResponse(
   result: any,
-  context: SwellServerContext,
+  swellContext: SwellServerContext,
 ): Promise<Response> {
-  const { theme, params } = context;
+  const { theme, context } = swellContext;
 
   let response: any;
 
@@ -196,21 +195,6 @@ export async function sendServerResponse(
     };
   } else if (!response) {
     response = {};
-  }
-
-  if (params.sections) {
-    const sectionsRendered = await theme.renderAllSections(params.sections);
-    if (sectionsRendered) {
-      response.sections = sectionsRendered;
-    }
-  } else {
-    const sectionId = context.url.searchParams.get('section_id');
-    if (sectionId) {
-      const sectionRendered = await theme.renderSection(sectionId, response);
-      return new Response(
-        wrapSectionContent(theme, sectionId, sectionRendered as string),
-      );
-    }
   }
 
   if (isEditorRequest(context)) {
@@ -245,9 +229,9 @@ export function sendServerError(err: any) {
 
 export async function getShopifyCompatibleServerParams(
   formType: string,
-  context: SwellServerContext,
+  swellContext: SwellServerContext,
 ) {
-  const { theme, params } = context;
+  const { theme, params } = swellContext;
 
   let result = params;
 
@@ -255,7 +239,7 @@ export async function getShopifyCompatibleServerParams(
     const compatParams =
       await theme.shopifyCompatibility.getAdaptedFormServerParams(
         formType,
-        context,
+        swellContext,
       );
     if (compatParams !== undefined) {
       result = compatParams;
@@ -267,17 +251,17 @@ export async function getShopifyCompatibleServerParams(
 
 export async function getShopifyCompatibleServerResponse(
   formType: string,
-  context: SwellServerContext,
+  swellContext: SwellServerContext,
   response: any,
 ) {
-  const { theme } = context;
+  const { theme } = swellContext;
 
   let result = response;
 
   if (theme.shopifyCompatibility) {
     const compatResponse =
       await theme.shopifyCompatibility.getAdaptedFormServerResponse(formType, {
-        ...context,
+        ...swellContext.context,
         response,
       });
     if (compatResponse !== undefined) {
@@ -288,14 +272,18 @@ export async function getShopifyCompatibleServerResponse(
   return result;
 }
 
-function getMiddlewareMatcher(urlParam: string | string[] | Function) {
+function getMiddlewareMatcher(
+  urlParam: string | string[] | ((pathname: string) => boolean),
+): (
+  context: APIContext,
+) => Partial<Record<string, string | string[]>> | boolean {
   if (typeof urlParam === 'function') {
-    return (context: APIContext) => {
+    return (context: APIContext): boolean => {
       return urlParam(context.url.pathname);
     };
   }
 
-  const urlParamArr = urlParam instanceof Array ? urlParam : [urlParam];
+  const urlParamArr = Array.isArray(urlParam) ? urlParam : [urlParam];
 
   try {
     const urlMatchers = urlParamArr.map((urlMatch) =>
@@ -305,11 +293,13 @@ function getMiddlewareMatcher(urlParam: string | string[] | Function) {
         : match(urlMatch),
     );
 
-    return (context: APIContext) => {
-      for (let i = 0; i < urlMatchers.length; i++) {
-        const check = urlMatchers[i](context.url.pathname) as any;
+    return (
+      context: APIContext,
+    ): Partial<Record<string, string | string[]>> | boolean => {
+      for (const matcher of urlMatchers) {
+        const check = matcher(context.url.pathname);
         if (check) {
-          if (check.params) {
+          if (typeof check === 'object' && check.params) {
             return check.params;
           }
           return true;
@@ -438,7 +428,7 @@ export async function preserveThemeRequestData(
   }
 }
 
-function wrapSectionContent(
+export function wrapSectionContent(
   theme: SwellTheme,
   sectionId: string,
   content: string,

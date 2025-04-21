@@ -11,8 +11,9 @@ export const formRoutes = forms.map((form) => {
   return handleMiddlewareRequest(
     'POST',
     form.url,
-    async (context: SwellServerContext) => {
-      const { theme, params, redirect } = context;
+    async (swellContext: SwellServerContext) => {
+      const { theme, params, context } = swellContext;
+      const { redirect } = context;
 
       if (form) {
         let compatParams = params;
@@ -24,7 +25,7 @@ export const formRoutes = forms.map((form) => {
         if (theme.shopifyCompatibility) {
           compatParams = await getShopifyCompatibleServerParams(
             form.id,
-            context,
+            swellContext,
           );
           if (compatParams) {
             compatParams = {
@@ -35,14 +36,14 @@ export const formRoutes = forms.map((form) => {
         }
 
         let response = await form.handler({
-          ...context,
+          ...swellContext,
           params: compatParams,
         });
 
         if (theme.shopifyCompatibility) {
           response = await getShopifyCompatibleServerResponse(
             form.id,
-            { ...context, params: compatParams },
+            { ...swellContext, params: compatParams },
             response,
           );
         }
@@ -62,7 +63,8 @@ export const formRoutes = forms.map((form) => {
 export const restoreThemeRequestData = handleMiddlewareRequest(
   'GET',
   () => true,
-  async (context: SwellServerContext) => {
-    restoreHandler(context, context.theme);
+  async (swellContext: SwellServerContext) => {
+    const { theme, context } = swellContext;
+    restoreHandler(context, theme);
   },
 );

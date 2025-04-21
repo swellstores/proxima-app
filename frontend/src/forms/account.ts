@@ -2,13 +2,14 @@ import { SwellTheme, SwellData } from '@swell/apps-sdk';
 
 import type { SwellServerContext } from '@/utils/server';
 
-export async function accountLogin(context: SwellServerContext) {
+export async function accountLogin(swellContext: SwellServerContext) {
   const {
     params: { account },
     swell,
     theme,
-    redirect,
-  } = context;
+    context,
+  } = swellContext;
+  const { redirect } = context;
   const { email, password } = account || {};
 
   const result = await swell.storefront.account.login(email, password);
@@ -25,8 +26,9 @@ export async function accountCreate({
   swell,
   theme,
   params,
-  redirect,
+  context,
 }: SwellServerContext) {
+  const { redirect } = context;
   const { account } = params;
 
   try {
@@ -73,9 +75,9 @@ export async function accountPasswordRecover({
   swell,
   theme,
   params,
-  redirect,
   context,
 }: SwellServerContext) {
+  const { redirect } = context;
   const { email, password_reset_key } = params;
 
   if (password_reset_key) {
@@ -103,8 +105,9 @@ export async function accountPasswordReset({
   swell,
   theme,
   params,
-  redirect,
+  context,
 }: SwellServerContext) {
+  const { redirect } = context;
   const { password_reset_key, password, password_confirmation } = params;
 
   if (!password_reset_key) {
@@ -147,11 +150,11 @@ export async function accountPasswordReset({
 }
 
 export async function accountAddressCreateUpdate({
-  url,
   params,
   swell,
-  redirect,
+  context,
 }: SwellServerContext) {
+  const { redirect } = context;
   const { update_address_id, delete_address_id, address } = params;
 
   try {
