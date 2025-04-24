@@ -25,11 +25,16 @@ export class BlogResource extends SwellStorefrontRecord {
         await category.id;
       }
 
+      const blogQuery = {
+        ...(query || {}),
+        expand: 'author',
+      };
+
       const blog = new SwellStorefrontRecord(
         swell,
         'content/blogs',
         blogSlug,
-        query,
+        blogQuery,
       );
 
       if (blog) {
@@ -60,6 +65,7 @@ export class BlogCategoryResource extends SwellStorefrontRecord {
       const blogs = categoryId
         ? new SwellStorefrontCollection(swell, 'content/blogs', {
             category_id: categoryId,
+            expand: 'author',
           })
         : null;
 
