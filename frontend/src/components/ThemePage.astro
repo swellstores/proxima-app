@@ -149,6 +149,8 @@ const layoutProps = {
       <Fragment slot="content_for_layout">
         {isTemplateConfig(pageContent) ? (
           <ThemeSections theme={theme} content={pageContent as ThemeSectionGroup} data={pageProps} />
+        ) : theme.isShopify1HomePage(id, pageContent) ? (
+          <Fragment set:html={theme.renderShopify1HomePage(pageContent)} />
         ) : (
           <Fragment set:html={pageContent} />
         )}
