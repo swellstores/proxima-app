@@ -4,6 +4,7 @@ import {
   SwellAppConfig,
   ShopifyCompatibility,
   CFThemeEnv,
+  CFWorkerContext,
   ThemeResources,
   ThemeLookupResourceFactory,
   SwellAppStorefrontThemeResources,
@@ -43,6 +44,7 @@ export async function initSwell(
     config: swellConfig as SwellAppConfig,
     serverHeaders: context.request.headers,
     workerEnv: context.locals.runtime?.env as CFThemeEnv,
+    workerCtx: context.locals.runtime?.ctx as CFWorkerContext,
     getCookie(name: string) {
       return getCookie(context, name);
     },
