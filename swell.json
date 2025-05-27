@@ -2,7 +2,7 @@
 	"id": "proxima",
 	"name": "Proxima",
 	"type": "storefront",
-	"version": "1.0.51",
+	"version": "1.0.52",
 	"description": "Official storefront app for Swell",
 	"storefront": {
 		"theme": {
