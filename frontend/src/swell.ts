@@ -193,16 +193,16 @@ export async function initSwellTheme(
   Astro: AstroGlobal | APIContext,
   pageId?: string,
 ): Promise<{ swell: Swell; theme: SwellTheme }> {
-  const swell = Astro.locals.swell || (await initSwell(Astro));
+  const swell: Swell = Astro.locals.swell || (await initSwell(Astro));
 
   // Indicate response was sent to avoid mutating cookies
   if (Astro.locals.swell) {
     swell.sentResponse = true;
   }
 
-  const theme = Astro.locals.theme || initTheme(swell);
+  const theme: SwellTheme = Astro.locals.theme || initTheme(swell);
 
-  if (!theme.pageId) {
+  if (!theme.pageId && pageId) {
     await theme.initGlobals(pageId);
   }
 
