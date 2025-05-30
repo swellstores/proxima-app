@@ -154,11 +154,17 @@ async function initServerContext(
     setCookie(context, 'swell-session', session);
   }
 
-  const swell = context.locals.swell || (await initSwell(context));
+  const swell: Swell = context.locals.swell || (await initSwell(context));
   context.locals.swell = swell;
 
-  const theme = context.locals.theme || initTheme(swell);
-  context.locals.theme = theme;
+  const theme: SwellTheme = context.locals.theme || initTheme(swell);
+
+  if (!context.locals.theme) {
+    // Initialize currency and locale
+    await theme.swell.getStorefrontSettings();
+
+    context.locals.theme = theme;
+  }
 
   const params =
     context.locals.params ||
