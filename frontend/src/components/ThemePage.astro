@@ -2,12 +2,12 @@
 import get from 'lodash/get';
 
 import {
-  Swell,
   PageError,
   PageNotFound,
-  SwellTheme,
-  SwellData,
-  ThemeSectionGroup,
+  type Swell,
+  type SwellTheme,
+  type SwellData,
+  type ThemeSectionGroup,
 } from '@swell/apps-sdk';
 
 import { initSwellTheme } from '@/swell';
@@ -17,11 +17,6 @@ import Layout from '@/layouts/Layout.astro';
 import ThemeSections from './ThemeSections.astro';
 import ErrorPage from './ErrorPage.astro';
 
-// interface Props {
-//   title?: string | ((data: SwellData | undefined) => Promise<string>);
-//   description?: string | ((data: SwellData | undefined) => Promise<string>);
-// }
-// Doesn't work without a comment ^, probably a bug
 interface Props {
   id: string;
   title?: string | ((data: SwellData | undefined) => Promise<string>);
@@ -129,6 +124,10 @@ try {
 
 const pageProps = { ...props, ...pageData };
 
+const layoutName = typeof pageContent === 'object'
+  ? (pageContent as any)?.layout
+  : undefined;
+
 const layoutProps = {
   page_title: pageTitle || pageData?.title || theme.globals.store?.name,
   page_description: pageDescription || pageData?.description,
@@ -145,7 +144,7 @@ const layoutProps = {
   ) : (sectionId && isPageContentRecord(pageContent, sectionId)) ? (
     <Fragment set:html={pageContent[sectionId]} />
   ) : (
-    <Layout theme={theme} {...layoutProps}>
+    <Layout layout={layoutName} theme={theme} {...layoutProps}>
       <Fragment slot="content_for_layout">
         {isTemplateConfig(pageContent) ? (
           <ThemeSections theme={theme} content={pageContent as ThemeSectionGroup} data={pageProps} />
