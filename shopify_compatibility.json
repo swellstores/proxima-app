@@ -134,7 +134,7 @@
     },
     {
       "from": "ProductResource",
-      "object": "SwellProduct"
+      "object": "SwellShopifyProduct"
     },
     {
       "from": "SearchResource",
@@ -146,7 +146,7 @@
     },
     {
       "from": "VariantResource",
-      "object": "ShopifyVariant"
+      "object": "SwellShopifyVariant"
     },
     {
       "from": "BlogResource",
