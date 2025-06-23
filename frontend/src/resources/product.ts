@@ -1,15 +1,11 @@
 import {
   Swell,
   SwellData,
-  SwellStorefrontRecord,
+  SwellProduct,
   SwellStorefrontCollection,
 } from '@swell/apps-sdk';
 
-export class ProductResource extends SwellStorefrontRecord {
-  constructor(swell: Swell, slug: string, query: SwellData = {}) {
-    super(swell, 'products', slug, query);
-  }
-}
+export class ProductResource extends SwellProduct {}
 
 export const SORT_OPTIONS = [
   { value: '', name: 'Featured' },
