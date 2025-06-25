@@ -191,7 +191,6 @@ export function initTheme(swell: Swell): SwellTheme {
 
 export async function initSwellTheme(
   Astro: AstroGlobal | APIContext,
-  pageId?: string,
 ): Promise<{ swell: Swell; theme: SwellTheme }> {
   const swell: Swell = Astro.locals.swell || (await initSwell(Astro));
 
@@ -202,8 +201,8 @@ export async function initSwellTheme(
 
   const theme: SwellTheme = Astro.locals.theme || initTheme(swell);
 
-  if (!theme.pageId && pageId) {
-    await theme.initGlobals(pageId);
+  if (!theme.pageId) {
+    await theme.initGlobals();
   }
 
   return { swell, theme };
