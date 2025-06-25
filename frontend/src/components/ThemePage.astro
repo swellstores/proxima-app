@@ -28,6 +28,7 @@ interface Props {
   getData?: (swell: Swell, theme: SwellTheme) => Promise<SwellData> | SwellData;
 }
 
+let altTemplate = Astro.url.searchParams.get('view') ?? undefined;
 const sections = Astro.url.searchParams.get('sections');
 const sectionId = Astro.url.searchParams.get('section_id');
 const sectionIds = sections
@@ -39,7 +40,7 @@ const sectionIds = sections
 const { id, title, description, required, content, props, getData } =
   Astro.props;
 
-const { swell, theme } = await initSwellTheme(Astro, id);
+const { swell, theme } = await initSwellTheme(Astro);
 
 let pageData, pageTitle, pageDescription, pageContent, pageError;
 
@@ -53,7 +54,14 @@ try {
     if (!isFound) {
       throw new PageNotFound();
     }
+
+    if (typeof altTemplate !== 'string') {
+      const path = required.slice(0, required.indexOf('.'));
+      altTemplate = await get(pageData, `${path}.theme_template`);
+    }
   }
+
+  await theme.initPageGlobals(id, altTemplate);
 
   if (pageData) {
     theme.setCompatibilityData(pageData);
@@ -82,7 +90,7 @@ try {
             ...props,
             ...pageData,
           },
-          pageData?.theme_template,
+          altTemplate,
         ),
   ]);
 
