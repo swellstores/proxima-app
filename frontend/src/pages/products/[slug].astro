@@ -6,8 +6,15 @@ import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
 
 export async function getData(swell: Swell, slug?: string) {
+  const { options, purchase_option, quantity = 1 } = swell.queryParams;
+
   const product = new ProductResource(swell, slug as string, {
     $recommendations: true,
+    $pricing: {
+      quantity,
+      options,
+      purchase_option,
+    },
   });
 
   return {
@@ -26,5 +33,5 @@ export const getJSON = handleServerRequest(async ({ swell, context }) => {
   required="product.id"
   title="{{ product.meta_title | default: product.name }}"
   description="{{ product.meta_description | default: product.description }}"
-  getData={(swell) => getData(swell, Astro.params.slug)}
+  getData={(swell: Swell) => getData(swell, Astro.params.slug)}
 />
