@@ -201,9 +201,5 @@ export async function initSwellTheme(
 
   const theme: SwellTheme = Astro.locals.theme || initTheme(swell);
 
-  if (!theme.pageId) {
-    await theme.initGlobals();
-  }
-
   return { swell, theme };
 }
