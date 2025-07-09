@@ -1,5 +1,21 @@
 ---
+import { AstroGlobal } from 'astro';
+import { Swell } from '@swell/apps-sdk';
+import { CartResource } from '@/resources';
+import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
+import { parseResources } from '@/utils/server-resources';
+
+export async function getData(swell: Swell, Astro?: AstroGlobal) {
+  return {
+    cart: new CartResource(swell),
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  const data = await getData(swell);
+  return parseResources(data);
+});
 ---
 
-<ThemePage id="cart" />
+<ThemePage id="cart" getData={(swell: Swell) => getData(swell, Astro)} />
