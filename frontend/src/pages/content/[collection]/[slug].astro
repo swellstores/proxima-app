@@ -34,7 +34,7 @@ export const getJSON = handleServerRequest(async ({ swell, context }) => {
 ---
 
 <ThemePage
-  id="content/index"
+  id="content/entry"
   required="entry.id"
   title="{{ entry.meta_title | default: entry.title | default: entry.name }}"
   description="{{ entry.meta_description | default: entry.description }}"
