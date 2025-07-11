@@ -32,10 +32,10 @@ type LookupResourceKey = keyof LookupResourceType;
 
 const SWELL_DATA_COOKIE = 'swell-data';
 
-export async function initSwell(
+export function initSwell(
   context: AstroGlobal | APIContext,
-  options?: Record<string, any>,
-): Promise<Swell> {
+  options?: Record<string, unknown>,
+): Swell {
   const swell = new Swell({
     url: context.url,
     // TODO: fix SwellAppShopifyCompatibilityConfig type in apps-sdk
@@ -78,8 +78,8 @@ export function canUpdateCookies(
 
 export function getSwellDataCookie(
   context: AstroGlobal | APIContext,
-  defaultValue?: object,
-) {
+  defaultValue?: Record<string, unknown>,
+): Record<string, unknown> | undefined {
   const swellCookie = context.cookies.get(SWELL_DATA_COOKIE)?.value;
   if (!swellCookie) {
     return defaultValue;
@@ -113,9 +113,17 @@ export function updateSwellDataCookie(
   );
 }
 
-export function getCookie(context: AstroGlobal | APIContext, name: string) {
+export function getCookie(
+  context: AstroGlobal | APIContext,
+  name: string,
+): string | undefined {
   const swellCookie = getSwellDataCookie(context);
-  return swellCookie?.[name] || undefined;
+
+  if (swellCookie) {
+    return (swellCookie[name] as string) || undefined;
+  }
+
+  return undefined;
 }
 
 export function setCookie(
@@ -130,7 +138,10 @@ export function setCookie(
   };
   const swellCookie = getSwellDataCookie(context, {});
 
-  swellCookie[name] = value;
+  if (swellCookie) {
+    swellCookie[name] = value;
+  }
+
   context.cookies.set(
     SWELL_DATA_COOKIE,
     JSON.stringify(swellCookie),
@@ -150,7 +161,10 @@ export function deleteCookie(
   };
   const swellCookie = getSwellDataCookie(context, {});
 
-  delete swellCookie[name];
+  if (swellCookie) {
+    delete swellCookie[name];
+  }
+
   context.cookies.set(
     SWELL_DATA_COOKIE,
     JSON.stringify(swellCookie),
@@ -158,7 +172,9 @@ export function deleteCookie(
   );
 }
 
-function loadResources<T extends ResourceKey>(resourceList: Record<string, T>) {
+function loadResources<T extends ResourceKey>(
+  resourceList: Record<string, T>,
+): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(resourceList).map(([key, resource]) => [
       key,

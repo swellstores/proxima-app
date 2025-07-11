@@ -1,9 +1,10 @@
 import { handleServerRequest } from '@/utils/server';
 
 import type { SwellServerContext } from '@/utils/server';
+import type { SwellThemePreload } from '@swell/apps-sdk';
 
 export async function handleThemeRequest(
-  serverContext: SwellServerContext,
+  serverContext: SwellServerContext<SwellThemePreload>,
 ): Promise<object> {
   const {
     context: { request },
@@ -16,8 +17,7 @@ export async function handleThemeRequest(
   }
 
   // Preload manifest and any configs passed in via the request.
-  const { version, configs } = params;
-  await theme.preloadThemeConfigs(version, configs);
+  await theme.preloadThemeConfigs(params);
 
   return { success: true };
 }
