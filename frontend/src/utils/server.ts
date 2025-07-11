@@ -1,4 +1,7 @@
 import { APIContext, MiddlewareHandler, MiddlewareNext } from 'astro';
+import { minimatch } from 'minimatch';
+import { match } from 'path-to-regexp';
+import qs from 'qs';
 import {
   Swell,
   SwellTheme,
@@ -6,6 +9,7 @@ import {
   dehydrateSwellRefsInStorefrontResources,
   SwellData,
 } from '@swell/apps-sdk';
+
 import {
   initSwell,
   initTheme,
@@ -15,12 +19,9 @@ import {
   getSwellDataCookie,
   updateSwellDataCookie,
 } from '@/swell';
-import { minimatch } from 'minimatch';
-import { match } from 'path-to-regexp';
-import qs from 'qs';
 
-export interface SwellServerContext {
-  params: SwellData;
+export interface SwellServerContext<T extends SwellData = SwellData> {
+  params: T;
   swell: Swell;
   theme: SwellTheme;
   context: APIContext;
@@ -28,8 +29,8 @@ export interface SwellServerContext {
 
 declare global {
   interface Request {
-    parsedBody?: Record<string, any>;
-    parsedJson?: Record<string, any>;
+    parsedBody?: FormData;
+    parsedJson?: Record<string, unknown>;
   }
 }
 
@@ -41,7 +42,10 @@ function isEditorRequest(context: APIContext): boolean {
   return isEditor && !context.locals.raw;
 }
 
-function handleResponse(result: Response, swellContext: SwellServerContext) {
+async function handleResponse<T extends SwellData = SwellData>(
+  result: Response,
+  swellContext: SwellServerContext<T>,
+): Promise<Response> {
   // return json for editor form actions instead of redirect
   if (isEditorRequest(swellContext.context)) {
     return sendServerResponse(
@@ -57,19 +61,19 @@ function handleResponse(result: Response, swellContext: SwellServerContext) {
   return result;
 }
 
-export function handleServerRequest(
+export function handleServerRequest<T extends SwellData = SwellData>(
   handler: (
-    context: SwellServerContext,
+    context: SwellServerContext<T>,
   ) => Promise<Response | string | object> | Response | string | object,
 ): (
   context: APIContext,
-  contextHandler?: (context: SwellServerContext) => void,
+  contextHandler?: (context: SwellServerContext<T>) => void,
 ) => Promise<Response | undefined> {
   return async (
     context: APIContext,
-    contextHandler?: (context: SwellServerContext) => void,
+    contextHandler?: (context: SwellServerContext<T>) => void,
   ) => {
-    const serverContext = await initServerContext(context);
+    const serverContext = await initServerContext<T>(context);
 
     try {
       const result = await handler(serverContext);
@@ -87,16 +91,16 @@ export function handleServerRequest(
       }
 
       return sendServerResponse(result, serverContext);
-    } catch (err: any) {
+    } catch (err: unknown) {
       return sendServerError(err);
     }
   };
 }
 
-export function handleMiddlewareRequest(
+export function handleMiddlewareRequest<T extends SwellData = SwellData>(
   method: string,
   urlParam: string | string[] | ((pathname: string) => boolean),
-  handler: (context: SwellServerContext, next: SwellServerNext) => any,
+  handler: (context: SwellServerContext<T>, next: SwellServerNext) => unknown,
 ): MiddlewareHandler {
   const matchHandler = getMiddlewareMatcher(urlParam);
 
@@ -110,7 +114,7 @@ export function handleMiddlewareRequest(
       return next();
     }
 
-    const serverContext = await initServerContext(context);
+    const serverContext = await initServerContext<T>(context);
 
     if (typeof matchParam === 'object') {
       serverContext.params = {
@@ -134,15 +138,15 @@ export function handleMiddlewareRequest(
       }
 
       return sendServerResponse(result, serverContext);
-    } catch (err: any) {
+    } catch (err: unknown) {
       return sendServerError(err);
     }
   };
 }
 
-async function initServerContext(
+async function initServerContext<T extends SwellData = SwellData>(
   context: APIContext,
-): Promise<SwellServerContext> {
+): Promise<SwellServerContext<T>> {
   // use request swell-data if provided
   const swellData = context.request.headers.get('Swell-Data');
   if (swellData) {
@@ -154,7 +158,7 @@ async function initServerContext(
     setCookie(context, 'swell-session', session);
   }
 
-  const swell: Swell = context.locals.swell || (await initSwell(context));
+  const swell: Swell = context.locals.swell || initSwell(context);
   context.locals.swell = swell;
 
   const theme: SwellTheme = context.locals.theme || initTheme(swell);
@@ -179,19 +183,17 @@ async function initServerContext(
   };
 }
 
-export async function sendServerResponse(
-  result: any,
-  swellContext: SwellServerContext,
+export async function sendServerResponse<T extends SwellData = SwellData>(
+  result: unknown,
+  swellContext: SwellServerContext<T>,
 ): Promise<Response> {
   const { theme, context } = swellContext;
 
-  let response: any;
-
   if (theme.shopifyCompatibility) {
-    theme.setCompatibilityData(result);
+    theme.setCompatibilityData(result as SwellData);
   }
 
-  response = await resolveAsyncResources(result);
+  let response = await resolveAsyncResources(result as SwellData);
 
   dehydrateSwellRefsInStorefrontResources(response);
 
@@ -213,7 +215,7 @@ export async function sendServerResponse(
   return jsonResponse(response);
 }
 
-export function sendServerError(err: any) {
+export function sendServerError(err: unknown): Response {
   if (!err.code) {
     console.error(err);
   }
@@ -222,9 +224,7 @@ export function sendServerError(err: any) {
     {
       message: 'Something went wrong',
       description: err.code ? err.message : 'Internal server error',
-      errors: err.code && {
-        [err.code]: err.message,
-      },
+      errors: err.code ? { [err.code]: err.message } : undefined,
       status: err.status || 500,
     },
     {
@@ -313,9 +313,9 @@ function getMiddlewareMatcher(
       }
       return false;
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.log(
-      `Middleware URL match parameter invalid - ${JSON.stringify(urlParam)} - ${err.toString()}`,
+      `Middleware URL match parameter invalid - ${JSON.stringify(urlParam)} - ${String(err)}`,
     );
     return () => false;
   }
@@ -355,25 +355,28 @@ export async function getFormParams(
     // Use qs to parse because form may contain array[] properties
     let formData = '';
     for (const [key, value] of request.parsedBody.entries()) {
-      formData += `${key}=${value}&`;
+      formData += `&${key}=${value}`;
     }
 
-    const formParams = qs.parse(formData);
-    for (const key in formParams) {
-      params[key] = formParams[key];
+    const formParams = qs.parse(formData.slice(1));
+    for (const [key, value] of Object.entries(formParams)) {
+      params[key] = value;
     }
   }
 
   if (request.parsedJson) {
-    for (const key in request.parsedJson) {
-      params[key] = request.parsedJson[key];
+    for (const [key, value] of Object.entries(request.parsedJson)) {
+      params[key] = value;
     }
   }
 
   return params;
 }
 
-export function jsonResponse(values: SwellData, options?: ResponseInit) {
+export function jsonResponse(
+  values: SwellData,
+  options?: ResponseInit,
+): Response {
   return new Response(JSON.stringify(values), {
     status: 200,
     ...options,
@@ -387,28 +390,36 @@ export function jsonResponse(values: SwellData, options?: ResponseInit) {
 export function restoreThemeRequestData(
   context: APIContext,
   theme: SwellTheme,
-) {
+): void {
   const serializedFormData = getCookie(context, 'swell-form-data');
+
   if (serializedFormData) {
     try {
-      const formData = JSON.parse(serializedFormData);
+      const formData = JSON.parse(serializedFormData) as Record<
+        string,
+        unknown
+      >;
+
       for (const [formId, data] of Object.entries(formData)) {
         theme.setFormData(formId, data as SwellData);
       }
     } catch (err) {
       console.log(err);
     }
+
     deleteCookie(context, 'swell-form-data');
   } else {
     const serializedGlobalData = getCookie(context, 'swell-global-data');
+
     if (serializedGlobalData) {
       try {
-        const globalData = JSON.parse(serializedGlobalData);
+        const globalData = JSON.parse(serializedGlobalData) as SwellData;
         theme.setGlobals(globalData);
       } catch (err) {
         console.log(err);
       }
     }
+
     deleteCookie(context, 'swell-global-data');
   }
 }
@@ -416,13 +427,15 @@ export function restoreThemeRequestData(
 export async function preserveThemeRequestData(
   context: APIContext,
   theme: SwellTheme,
-) {
+): Promise<void> {
   let serializedFormData = theme.serializeFormData();
+
   if (serializedFormData) {
     serializedFormData = await resolveAsyncResources(serializedFormData);
     setCookie(context, 'swell-form-data', JSON.stringify(serializedFormData));
   } else {
     let serializedGlobalData = theme.serializeGlobalData();
+
     if (serializedGlobalData) {
       serializedGlobalData = await resolveAsyncResources(serializedGlobalData);
       setCookie(
@@ -438,40 +451,47 @@ export function wrapSectionContent(
   theme: SwellTheme,
   sectionId: string,
   content: string,
-) {
+): string {
   if (theme.shopifyCompatibility) {
     // TODO: figure out a way to use compatibility class for this
-    return `
-        <div id="shopify-section-${sectionId}" class="shopify-section">${content}</div>
-      `.trim();
-  } else {
-    return `
-        <div id="swell-section-${sectionId}" class="swell-section">${content}</div>
-      `.trim();
+    return `<div id="shopify-section-${sectionId}" class="shopify-section">${content}</div>`;
   }
+
+  return `<div id="swell-section-${sectionId}" class="swell-section">${content}</div>`;
 }
 
 // TODO: replace with util from storefrontjs
-export async function resolveAsyncResources(response: any) {
+export async function resolveAsyncResources<T>(response: T): Promise<T> {
   if (response instanceof StorefrontResource) {
-    return await response.resolve();
+    return response.resolve() as T;
   }
 
-  if (response instanceof Array) {
-    return await Promise.all(
-      response.map(async (item: any) => {
+  if (Array.isArray(response)) {
+    return Promise.all(
+      response.map((item: unknown) => {
         if (item instanceof StorefrontResource) {
-          return await item.resolve();
+          return item.resolve();
         }
+
         return item;
       }),
-    );
-  } else if (typeof response === 'object' && response !== null) {
-    for (const [key] of Object.entries(response)) {
-      if (response[key] instanceof StorefrontResource) {
-        response[key] = await response[key].resolve();
+    ) as T;
+  }
+
+  if (typeof response === 'object' && response !== null) {
+    const promises: Promise<unknown>[] = [];
+
+    for (const [key, value] of Object.entries(response)) {
+      if (value instanceof StorefrontResource) {
+        promises.push(
+          value.resolve().then((value) => {
+            (response as Record<string, unknown>)[key] = value;
+          }),
+        );
       }
     }
+
+    await Promise.all(promises);
   }
 
   return response;
