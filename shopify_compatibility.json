@@ -15,7 +15,7 @@
     "account/login": "customers/login",
     "account/order": "customers/order",
     "account/signup": "customers/register",
-    "account/recover": "customers/reset_password",
+    "account/reset-password": "customers/reset_password",
     "cart": "cart",
     "404": "404",
     "gift-card": "gift_card",
