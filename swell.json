@@ -165,7 +165,7 @@
 				},
 				{
 					"id": "account/reset-password",
-					"label": "Customer password recovery",
+					"label": "Customer password reset",
 					"url": "/account/reset-password",
 					"group": "customer",
 					"icon": "user"
