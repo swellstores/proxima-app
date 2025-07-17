@@ -30,7 +30,7 @@ export default defineConfig({
       },
     },
     ssr: {
-      external: ['node:events'],
+      external: ['node:events', 'events'],
     },
   },
 });
