@@ -12,6 +12,8 @@
     "account/index": "customers/account",
     "account/activate": "customers/activate_account",
     "account/addresses": "customers/addresses",
+    "account/subscriptions": "customers/subscriptions",
+    "account/subscription": "customers/subscription",
     "account/login": "customers/login",
     "account/order": "customers/order",
     "account/signup": "customers/register",
@@ -24,6 +26,9 @@
   "page_routes": {
     "account_addresses_url": {
       "page_id": "account/addresses"
+    },
+     "account_subscriptions_url": {
+      "page_id": "account/subscriptions"
     },
     "account_login_url": {
       "page_id": "account/login"

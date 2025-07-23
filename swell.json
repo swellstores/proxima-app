@@ -188,6 +188,15 @@
 					"json": true
 				},
 				{
+					"id": "account/subscriptions",
+					"label": "Customer subscriptions",
+					"url": "/account/subscriptions",
+					"group": "customer",
+					"icon": "shopping-cart",
+					"collection": "subscriptions",
+					"json": true
+				},
+				{
 					"id": "account/subscription",
 					"label": "Customer subscription",
 					"url": "/account/subscriptions/:id",
