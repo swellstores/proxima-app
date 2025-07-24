@@ -26,7 +26,7 @@ const postThemePage = handleMiddlewareRequest(
   initThemePageHandler,
 );
 
-async function initThemePageHandler(swellContext: SwellServerContext) {
+function initThemePageHandler(swellContext: SwellServerContext) {
   const { theme, context } = swellContext;
   const { redirect, url } = context;
 
@@ -44,8 +44,6 @@ async function initThemePageHandler(swellContext: SwellServerContext) {
       if (ext && !page.json) {
         return new Response(null, { status: 404 });
       }
-
-      await theme.initGlobals(page.id);
     }
   }
 
