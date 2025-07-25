@@ -78,19 +78,24 @@ const pauseSubscription = handleMiddlewareRequest(
   '/subscriptions/pause',
   async ({ swell, params, context }: SwellServerContext) => {
     const { id, date_pause_end } = params;
-    console.log('PAUSE SUBSCRIPTION', id);
 
     try {
       await swell.storefront.subscriptions.update(id as string, {
         paused: true,
         date_pause_end: (date_pause_end as string) || null,
       });
-      await swell.storefront.subscriptions.get(id as string);
+      const sub = await swell.storefront.subscriptions.get(id as string);
+      if (sub) {
+        return jsonResponse(sub);
+      }
     } catch (err) {
       console.log(err);
     }
 
-    return context.redirect(`/account/subscriptions/${id}`, 303);
+    return jsonResponse({
+      error: 'Cannot pause subscription',
+    });
+    // return context.redirect(`/account/subscriptions/${id}`, 303);
   },
 );
 
@@ -101,20 +106,22 @@ const resumeSubscription = handleMiddlewareRequest(
     const { id } = params;
 
     try {
-      console.log('resumeSubscription resumeSubscription');
       await swell.storefront.subscriptions.update(id as string, {
         paused: false,
         date_pause_end: null,
       });
-      const newSub = await swell.storefront.subscriptions.get(id as string);
-      if (newSub) {
-        return jsonResponse(newSub);
+      const sub = await swell.storefront.subscriptions.get(id as string);
+      if (sub) {
+        return jsonResponse(sub);
       }
     } catch (err) {
       console.log(err);
     }
 
-    return context.redirect(`/account/subscriptions/${id}`, 303);
+    return jsonResponse({
+      error: 'Cannot resume subscription',
+    });
+    // return context.redirect(`/account/subscriptions/${id}`, 303);
   },
 );
 
@@ -123,18 +130,23 @@ const cancelSubscription = handleMiddlewareRequest(
   '/subscriptions/cancel',
   async ({ swell, params, context }: SwellServerContext) => {
     const { id } = params;
-    console.log('CANCEL SUBSCRIPTION', id);
 
     try {
       await swell.storefront.subscriptions.update(id as string, {
         canceled: true,
       });
-      await swell.storefront.subscriptions.get(id as string);
+      const sub = await swell.storefront.subscriptions.get(id as string);
+      if (sub) {
+        return jsonResponse(sub);
+      }
     } catch (err) {
       console.log(err);
     }
 
-    return context.redirect(`/account/subscriptions/${id}`, 303);
+    return jsonResponse({
+      error: 'Cannot cancel subscription',
+    });
+    // return context.redirect(`/account/subscriptions/${id}`, 303);
   },
 );
 
