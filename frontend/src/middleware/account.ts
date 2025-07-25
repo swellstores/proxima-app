@@ -1,5 +1,9 @@
 import { setInvalidResetKeyError } from '@/forms/account';
-import { handleMiddlewareRequest, SwellServerContext } from '@/utils/server';
+import {
+  handleMiddlewareRequest,
+  jsonResponse,
+  SwellServerContext,
+} from '@/utils/server';
 
 const doLogout = handleMiddlewareRequest(
   'GET',
@@ -69,9 +73,77 @@ const deleteAddress = handleMiddlewareRequest(
   },
 );
 
+const pauseSubscription = handleMiddlewareRequest(
+  'POST',
+  '/subscriptions/pause',
+  async ({ swell, params, context }: SwellServerContext) => {
+    const { id, date_pause_end } = params;
+    console.log('PAUSE SUBSCRIPTION', id);
+
+    try {
+      await swell.storefront.subscriptions.update(id as string, {
+        paused: true,
+        date_pause_end: (date_pause_end as string) || null,
+      });
+      await swell.storefront.subscriptions.get(id as string);
+    } catch (err) {
+      console.log(err);
+    }
+
+    return context.redirect(`/account/subscriptions/${id}`, 303);
+  },
+);
+
+const resumeSubscription = handleMiddlewareRequest(
+  'POST',
+  '/subscriptions/resume',
+  async ({ swell, params, context }: SwellServerContext) => {
+    const { id } = params;
+
+    try {
+      console.log('resumeSubscription resumeSubscription');
+      await swell.storefront.subscriptions.update(id as string, {
+        paused: false,
+        date_pause_end: null,
+      });
+      const newSub = await swell.storefront.subscriptions.get(id as string);
+      if (newSub) {
+        return jsonResponse(newSub);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
+    return context.redirect(`/account/subscriptions/${id}`, 303);
+  },
+);
+
+const cancelSubscription = handleMiddlewareRequest(
+  'POST',
+  '/subscriptions/cancel',
+  async ({ swell, params, context }: SwellServerContext) => {
+    const { id } = params;
+    console.log('CANCEL SUBSCRIPTION', id);
+
+    try {
+      await swell.storefront.subscriptions.update(id as string, {
+        canceled: true,
+      });
+      await swell.storefront.subscriptions.get(id as string);
+    } catch (err) {
+      console.log(err);
+    }
+
+    return context.redirect(`/account/subscriptions/${id}`, 303);
+  },
+);
+
 export default [
   doLogout,
   validateAccountResetKey,
   ensureAccountLoggedIn,
   deleteAddress,
+  pauseSubscription,
+  resumeSubscription,
+  cancelSubscription,
 ];
