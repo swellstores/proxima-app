@@ -2,15 +2,16 @@ import {
   Swell,
   SwellData,
   StorefrontResource,
+  SwellCategory,
   SwellStorefrontRecord,
   SwellStorefrontCollection,
 } from '@swell/apps-sdk';
 
-import { getFilteredProducts } from './product';
+import { getProductFilters } from './product';
 
-export class CategoryResource extends SwellStorefrontRecord {
+export class CategoryResource extends SwellCategory {
   constructor(swell: Swell, slug: string, query: SwellData = {}) {
-    super(swell, 'categories', slug, query, async (): Promise<any> => {
+    super(swell, slug, query, async (): Promise<any> => {
       const category = new SwellStorefrontRecord(
         swell,
         'categories',
@@ -25,8 +26,7 @@ export class CategoryResource extends SwellStorefrontRecord {
       }
 
       const categoryFilter = category.id || (slug === 'all' ? undefined : slug);
-
-      const filteredProps = await getFilteredProducts(
+      const productFilters = await getProductFilters(
         swell,
         categoryFilter
           ? { category: categoryFilter, $variants: true }
@@ -38,7 +38,7 @@ export class CategoryResource extends SwellStorefrontRecord {
           ? category._result
           : // TODO: remove this once backend is implemented for "all"
             { name: 'Products', id: 'all', slug: 'all' }),
-        ...filteredProps,
+        ...productFilters,
       };
     });
   }
