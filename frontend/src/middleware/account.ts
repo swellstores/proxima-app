@@ -1,9 +1,5 @@
 import { setInvalidResetKeyError } from '@/forms/account';
-import {
-  handleMiddlewareRequest,
-  jsonResponse,
-  SwellServerContext,
-} from '@/utils/server';
+import { handleMiddlewareRequest, SwellServerContext } from '@/utils/server';
 
 const doLogout = handleMiddlewareRequest(
   'GET',
