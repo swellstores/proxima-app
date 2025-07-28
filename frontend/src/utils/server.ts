@@ -39,7 +39,9 @@ export type SwellServerNext = MiddlewareNext;
 function isEditorRequest(context: APIContext): boolean {
   // We can use context.request.headers.get('swell-deployment-mode') === 'editor' when different URLs are used
   const isEditor = Boolean(context.request.headers.get('Swell-Is-Editor'));
-  return isEditor && !context.locals.raw;
+  const isRawRequest = Boolean(context.request.headers.get('Swell-Raw-Data'));
+
+  return isEditor && !context.locals.raw && !isRawRequest;
 }
 
 async function handleResponse<T extends SwellData = SwellData>(

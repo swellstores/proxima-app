@@ -84,18 +84,18 @@ const pauseSubscription = handleMiddlewareRequest(
         paused: true,
         date_pause_end: (date_pause_end as string) || null,
       });
-      const sub = await swell.storefront.subscriptions.get(id as string);
-      if (sub) {
-        return jsonResponse(sub);
-      }
     } catch (err) {
       console.log(err);
     }
 
-    return jsonResponse({
-      error: 'Cannot pause subscription',
-    });
-    // return context.redirect(`/account/subscriptions/${id}`, 303);
+    return context.rewrite(
+      new Request(new URL(`/account/subscriptions/${id}`, context.url.origin), {
+        headers: {
+          // Prevent response modification in the editor
+          'Swell-Raw-Data': 'true',
+        },
+      }),
+    );
   },
 );
 
@@ -110,18 +110,18 @@ const resumeSubscription = handleMiddlewareRequest(
         paused: false,
         date_pause_end: null,
       });
-      const sub = await swell.storefront.subscriptions.get(id as string);
-      if (sub) {
-        return jsonResponse(sub);
-      }
     } catch (err) {
       console.log(err);
     }
 
-    return jsonResponse({
-      error: 'Cannot resume subscription',
-    });
-    // return context.redirect(`/account/subscriptions/${id}`, 303);
+    return context.rewrite(
+      new Request(new URL(`/account/subscriptions/${id}`, context.url.origin), {
+        headers: {
+          // Prevent response modification in the editor
+          'Swell-Raw-Data': 'true',
+        },
+      }),
+    );
   },
 );
 
@@ -135,18 +135,18 @@ const cancelSubscription = handleMiddlewareRequest(
       await swell.storefront.subscriptions.update(id as string, {
         canceled: true,
       });
-      const sub = await swell.storefront.subscriptions.get(id as string);
-      if (sub) {
-        return jsonResponse(sub);
-      }
     } catch (err) {
       console.log(err);
     }
 
-    return jsonResponse({
-      error: 'Cannot cancel subscription',
-    });
-    // return context.redirect(`/account/subscriptions/${id}`, 303);
+    return context.rewrite(
+      new Request(new URL(`/account/subscriptions/${id}`, context.url.origin), {
+        headers: {
+          // Prevent response modification in the editor
+          'Swell-Raw-Data': 'true',
+        },
+      }),
+    );
   },
 );
 
