@@ -2,7 +2,8 @@ import { defineMiddleware } from 'astro:middleware';
 import { initializeLoggerFromEnv, logger } from '@/utils/logger';
 
 // Generate unique ID for this worker instance
-const WORKER_INSTANCE_ID = crypto.randomUUID();
+//const WORKER_INSTANCE_ID = crypto.randomUUID();
+const WORKER_INSTANCE_ID = `worker-${Date.now()}`;
 
 // Initialize logger from environment variables
 export const initLogger = defineMiddleware(async (context, next) => {
