@@ -1,3 +1,4 @@
+import pick from 'lodash/pick';
 import { setInvalidResetKeyError } from '@/forms/account';
 import { handleMiddlewareRequest, SwellServerContext } from '@/utils/server';
 
@@ -69,68 +70,15 @@ const deleteAddress = handleMiddlewareRequest(
   },
 );
 
-const pauseSubscription = handleMiddlewareRequest(
-  'POST',
-  '/subscriptions/pause',
-  async ({ swell, params, context }: SwellServerContext) => {
-    const { id, date_pause_end } = params;
-
-    try {
-      await swell.storefront.subscriptions.update(id as string, {
-        paused: true,
-        date_pause_end: (date_pause_end as string) || null,
-      });
-    } catch (err) {
-      console.log(err);
-    }
-
-    return context.rewrite(
-      new Request(new URL(`/account/subscriptions/${id}`, context.url.origin), {
-        headers: {
-          // Prevent response modification in the editor
-          'Swell-Raw-Data': 'true',
-        },
-      }),
-    );
-  },
-);
-
-const resumeSubscription = handleMiddlewareRequest(
-  'POST',
-  '/subscriptions/resume',
+const updateSubscription = handleMiddlewareRequest(
+  'PUT',
+  '/account/subscriptions/:id',
   async ({ swell, params, context }: SwellServerContext) => {
     const { id } = params;
+    const update = pick(params, ['paused', 'date_pause_end', 'canceled']);
 
     try {
-      await swell.storefront.subscriptions.update(id as string, {
-        paused: false,
-        date_pause_end: null,
-      });
-    } catch (err) {
-      console.log(err);
-    }
-
-    return context.rewrite(
-      new Request(new URL(`/account/subscriptions/${id}`, context.url.origin), {
-        headers: {
-          // Prevent response modification in the editor
-          'Swell-Raw-Data': 'true',
-        },
-      }),
-    );
-  },
-);
-
-const cancelSubscription = handleMiddlewareRequest(
-  'POST',
-  '/subscriptions/cancel',
-  async ({ swell, params, context }: SwellServerContext) => {
-    const { id } = params;
-
-    try {
-      await swell.storefront.subscriptions.update(id as string, {
-        canceled: true,
-      });
+      await swell.storefront.subscriptions.update(id as string, update);
     } catch (err) {
       console.log(err);
     }
@@ -151,7 +99,5 @@ export default [
   validateAccountResetKey,
   ensureAccountLoggedIn,
   deleteAddress,
-  pauseSubscription,
-  resumeSubscription,
-  cancelSubscription,
+  updateSubscription,
 ];
