@@ -337,6 +337,34 @@ async function setSubscribeAccountErrors(theme: SwellTheme, errors: SwellData) {
   });
 }
 
+export async function accountSubscriptionUpdate({
+  params,
+  swell,
+  context,
+}: SwellServerContext) {
+  const { subscription_id: id, date_pause_end, paused, canceled } = params;
+  const datePauseEndValue =
+    date_pause_end === 'null' ? null : (date_pause_end as string);
+  const pausedValue =
+    paused === 'true' ? true : paused === 'false' ? false : undefined;
+  const canceledValue =
+    canceled === 'true' ? true : canceled === 'false' ? false : undefined;
+  const update = {
+    paused: pausedValue,
+    date_pause_end: datePauseEndValue,
+    canceled: canceledValue,
+  };
+
+  try {
+    await swell.storefront.subscriptions.update(id as string, update);
+  } catch (err) {
+    console.log(err);
+  }
+
+  // force the editor to reload subscription with status 302
+  return context.redirect(`/account/subscriptions/${id}`, 302);
+}
+
 export default [
   {
     id: 'account_login',
@@ -376,6 +404,17 @@ export default [
     params: [
       {
         name: 'update_address_id',
+        value: '{{ value.id }}',
+      },
+    ],
+  },
+  {
+    id: 'account_subscription',
+    url: '/account/subscriptions',
+    handler: accountSubscriptionUpdate,
+    params: [
+      {
+        name: 'id',
         value: '{{ value.id }}',
       },
     ],
