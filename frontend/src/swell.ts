@@ -36,6 +36,17 @@ export function initSwell(
   context: AstroGlobal | APIContext,
   options?: Record<string, unknown>,
 ): Swell {
+  const env = context.locals.runtime?.env;
+  
+  // Build logger config only if env vars are set
+  const loggerConfig: any = {};
+  if (env?.LOG_LEVEL) {
+    loggerConfig.level = env.LOG_LEVEL;
+  }
+  if (env?.STRUCTURED_LOGS) {
+    loggerConfig.structured = env.STRUCTURED_LOGS === 'true';
+  }
+
   const swell = new Swell({
     url: context.url,
     // TODO: fix SwellAppShopifyCompatibilityConfig type in apps-sdk
@@ -43,8 +54,10 @@ export function initSwell(
       shopifyCompatibilityConfig as unknown as SwellAppShopifyCompatibilityConfig,
     config: swellConfig as SwellAppConfig,
     serverHeaders: context.request.headers,
-    workerEnv: context.locals.runtime?.env as CFThemeEnv,
+    workerEnv: env as CFThemeEnv,
     workerCtx: context.locals.runtime?.ctx as CFWorkerContext,
+    // Only pass logger config if we have any settings
+    ...(Object.keys(loggerConfig).length > 0 && { logger: loggerConfig }),
     getCookie(name: string) {
       return getCookie(context, name);
     },
