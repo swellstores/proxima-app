@@ -1,9 +1,4 @@
-import {
-  Swell,
-  SwellData,
-  SwellProduct,
-  SwellStorefrontCollection,
-} from '@swell/apps-sdk';
+import { Swell, SwellData, SwellProduct } from '@swell/apps-sdk';
 
 export class ProductResource extends SwellProduct {}
 
@@ -18,43 +13,15 @@ export const SORT_OPTIONS = [
   { value: 'name_desc', name: 'Product name, Z-A', query: 'name desc' },
 ];
 
-export async function getFilteredProducts(
+export async function getProductFilters(
   swell: Swell,
   productQuery?: SwellData,
 ) {
-  const { page, limit } = swell.queryParams;
-  const resource = new SwellStorefrontCollection(
-    swell,
-    'products',
-    { page, limit, ...(productQuery || undefined) },
-    async function (): Promise<any> {
-      const filterQuery = productQueryWithFilters(swell, productQuery);
-
-      let result;
-      if (productQuery !== undefined) {
-        this._query = {
-          ...this._query,
-          ...filterQuery,
-        };
-        result = await this._defaultGetter().call(this);
-      }
-
-      const filter_options =
-        result !== undefined && ((result?.count as number) || 0) < 5000
-          ? await getProductFiltersByQuery(swell, filterQuery)
-          : [];
-
-      return {
-        ...result,
-        filter_options,
-      };
-    },
-  );
-
   const sortBy = swell.queryParams.sort || '';
+  const filterQuery = productQueryWithFilters(swell, productQuery);
 
   return {
-    products: resource,
+    filter_options: await getProductFiltersByQuery(swell, filterQuery),
     sort: SORT_OPTIONS.find((option) => option.value === sortBy)?.value,
     sort_options: SORT_OPTIONS,
   };
