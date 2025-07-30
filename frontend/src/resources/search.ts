@@ -3,14 +3,14 @@ import {
   StorefrontResource,
   SwellStorefrontCollection,
 } from '@swell/apps-sdk';
-import { getFilteredProducts } from './product';
+import { getProductFilters } from './product';
 
 export class SearchResource extends StorefrontResource {
   constructor(swell: Swell, query: string | null) {
     super(async () => {
       const performed = isSearchPerformed(query);
 
-      const filteredProps = await getFilteredProducts(
+      const productFilters = await getProductFilters(
         swell,
         performed ? { search: query } : undefined,
       );
@@ -18,7 +18,7 @@ export class SearchResource extends StorefrontResource {
       return {
         query,
         performed,
-        ...filteredProps,
+        ...productFilters,
       };
     });
   }
