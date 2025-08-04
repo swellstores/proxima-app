@@ -12,6 +12,7 @@
     "account/index": "customers/account",
     "account/activate": "customers/activate_account",
     "account/addresses": "customers/addresses",
+    "account/subscription": "customers/subscription",
     "account/login": "customers/login",
     "account/order": "customers/order",
     "account/signup": "customers/register",

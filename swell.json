@@ -57,6 +57,14 @@
 					"url": "/account/addresses"
 				},
 				{
+					"id": "account_order",
+					"url": "/account/order_update"
+				},
+				{
+					"id": "account_subscription",
+					"url": "/account/subscription_update"
+				},
+				{
 					"id": "cart_add",
 					"url": "/cart/add"
 				},
