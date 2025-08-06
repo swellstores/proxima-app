@@ -4,6 +4,14 @@ Proxima is an open-source Astro application designed for small to medium stores,
 
 ## How to run
 
+Install modules
+
+```bash
+npm i
+```
+
+Start in dev mode:
+
 ```bash
 npm run dev
 ```
