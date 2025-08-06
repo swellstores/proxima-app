@@ -22,4 +22,4 @@ jobs:
         run: |
           npm i -g @swell/cli@latest
           npm ci
-          swell app push --force --store $SWELL_STORE_ID --secret-key $SWELL_SECRET_KEY
+          swell app push --force
