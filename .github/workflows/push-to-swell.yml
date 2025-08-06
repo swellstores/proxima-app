@@ -18,6 +18,13 @@ jobs:
         with:
           node-version: '18.16.1'
 
+      - name: Configure Swell CLI
+        env:
+          SWELL_CONFIG: ${{ secrets.SWELL_CONFIG }}
+        run: |
+          mkdir -p ~/.swell
+          echo "$SWELL_CONFIG" > ~/.swell/config.json
+
       - name: Install dependencies and push to Swell
         run: |
           npm i -g @swell/cli@latest
