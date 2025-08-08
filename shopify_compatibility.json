@@ -38,6 +38,7 @@
     "account_url": {
       "page_id": "account/index"
     },
+    "account_update_url": "/account/update",
     "all_products_collection_url": {
       "page_id": "products/index"
     },

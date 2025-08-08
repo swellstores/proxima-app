@@ -41,6 +41,10 @@
 					"url": "/account"
 				},
 				{
+					"id": "account_update",
+					"url": "/account/update"
+				},
+				{
 					"id": "account_subscribe",
 					"url": "/account/subscribe"
 				},

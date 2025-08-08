@@ -365,6 +365,39 @@ export async function accountSubscriptionUpdate({
   return context.redirect(`/account/subscriptions/${id}`, 307);
 }
 
+export async function accountUpdate({
+  params,
+  swell,
+  theme,
+}: SwellServerContext) {
+  const result = await swell.storefront.account.update(params.customer);
+
+  if (!result || !('errors' in result)) {
+    return;
+  }
+
+  if (result.errors.email?.code === 'UNIQUE') {
+    theme.setFormData('account_update', {
+      errors: [
+        {
+          code: 'email_already_exists',
+          field_name: 'customer[email]',
+          field_label: await theme.lang(
+            'customer.details.email',
+            null,
+            'Email',
+          ),
+          message: await theme.lang(
+            'customer.details.email_already_exists',
+            { email: params.customer.email },
+            'This email is already in use',
+          ),
+        },
+      ],
+    });
+  }
+}
+
 export default [
   {
     id: 'account_login',
@@ -375,6 +408,11 @@ export default [
     id: 'account_create',
     url: '/account',
     handler: accountCreate,
+  },
+  {
+    id: 'account_update',
+    url: '/account/update',
+    handler: accountUpdate,
   },
   {
     id: 'account_subscribe',

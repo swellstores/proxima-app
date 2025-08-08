@@ -432,7 +432,14 @@ export async function preserveThemeRequestData(
 
   if (serializedFormData) {
     serializedFormData = await resolveAsyncResources(serializedFormData);
-    setCookie(context, 'swell-form-data', JSON.stringify(serializedFormData));
+
+    if (!serializedFormData.preserved) {
+      setCookie(
+        context,
+        'swell-form-data',
+        JSON.stringify({ ...serializedFormData, preserved: true }),
+      );
+    }
   } else {
     let serializedGlobalData = theme.serializeGlobalData();
 
