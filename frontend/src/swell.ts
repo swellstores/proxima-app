@@ -1,18 +1,19 @@
 import {
   Swell,
   SwellTheme,
-  SwellAppConfig,
-  ShopifyCompatibility,
-  CFThemeEnv,
-  CFWorkerContext,
-  ThemeResources,
-  ThemeLookupResourceFactory,
-  SwellAppStorefrontThemeResources,
-  SwellAppShopifyCompatibilityConfig,
+  type SwellAppConfig,
+  type ShopifyCompatibility,
+  type CFThemeEnv,
+  type CFWorkerContext,
+  type ThemeResources,
+  type ThemeLookupResourceFactory,
+  type SwellAppStorefrontThemeResources,
+  type SwellAppShopifyCompatibilityConfig,
 } from '@swell/apps-sdk';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
 
 import forms from '@/forms';
+import { isResponseSent } from '@/utils/server';
 import StorefrontShopifyCompatibility from '@/utils/shopify-compatibility';
 
 import swellConfig from '../../swell.json';
@@ -116,6 +117,10 @@ export function updateSwellDataCookie(
   context: AstroGlobal | APIContext,
   value: string,
 ) {
+  if (isResponseSent(context.request)) {
+    return;
+  }
+
   const swellData = getSwellDataCookie(context, {});
   const valueData = JSON.parse(value) || {};
 
@@ -145,6 +150,10 @@ export function setCookie(
   value: string,
   options?: AstroCookieSetOptions,
 ): void {
+  if (isResponseSent(context.request)) {
+    return;
+  }
+
   const cookieOptions = {
     ...defaultCookieOptions,
     ...options,

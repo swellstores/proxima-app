@@ -1,13 +1,12 @@
-import { APIContext, MiddlewareHandler, MiddlewareNext } from 'astro';
 import { minimatch } from 'minimatch';
 import { match } from 'path-to-regexp';
 import qs from 'qs';
 import {
-  Swell,
-  SwellTheme,
+  type Swell,
+  type SwellTheme,
+  type SwellData,
   StorefrontResource,
   dehydrateSwellRefsInStorefrontResources,
-  SwellData,
 } from '@swell/apps-sdk';
 
 import {
@@ -19,6 +18,8 @@ import {
   getSwellDataCookie,
   updateSwellDataCookie,
 } from '@/swell';
+
+import type { APIContext, MiddlewareHandler, MiddlewareNext } from 'astro';
 
 export interface SwellServerContext<T extends SwellData = SwellData> {
   params: T;
@@ -181,6 +182,10 @@ async function initServerContext<T extends SwellData = SwellData>(
     theme,
     context,
   };
+}
+
+export function isResponseSent(request: Request): boolean {
+  return Boolean(Reflect.get(request, Symbol.for('astro.responseSent')));
 }
 
 export async function sendServerResponse<T extends SwellData = SwellData>(
