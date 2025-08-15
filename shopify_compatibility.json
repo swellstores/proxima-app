@@ -10,7 +10,6 @@
     "blogs/blog": "article",
     "blogs/category": "blog",
     "account/index": "customers/account",
-    "account/activate": "customers/activate_account",
     "account/addresses": "customers/addresses",
     "account/subscription": "customers/subscription",
     "account/login": "customers/login",

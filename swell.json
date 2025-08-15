@@ -155,13 +155,6 @@
 					"collection": "accounts"
 				},
 				{
-					"id": "account/activate",
-					"label": "Customer account activation",
-					"url": "/account/activate",
-					"group": "customer",
-					"icon": "user"
-				},
-				{
 					"id": "account/login",
 					"label": "Customer login",
 					"url": "/account/login",
