@@ -41,10 +41,6 @@
 					"url": "/account"
 				},
 				{
-					"id": "account_update",
-					"url": "/account/update"
-				},
-				{
 					"id": "account_subscribe",
 					"url": "/account/subscribe"
 				},
@@ -58,7 +54,17 @@
 				},
 				{
 					"id": "account_address",
-					"url": "/account/addresses"
+					"url": "/account/addresses",
+					"params": [
+						{
+							"name": "update_address_id",
+							"value": "{{ value.id }}"
+						},
+						{
+							"name": "delete_address_id",
+							"value": "{{ value.id }}"
+						}
+					]
 				},
 				{
 					"id": "account_order",
