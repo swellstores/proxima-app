@@ -155,7 +155,13 @@ export async function accountAddressCreateUpdate({
   context,
 }: SwellServerContext) {
   const { redirect } = context;
-  const { update_address_id, delete_address_id, address } = params;
+  const {
+    update_address_id,
+    delete_address_id,
+    return_to,
+    address,
+    is_default,
+  } = params;
 
   try {
     if (delete_address_id) {
@@ -172,13 +178,17 @@ export async function accountAddressCreateUpdate({
       }
       if (result && 'errors' in result) {
         console.log(result.errors);
+      } else if (is_default) {
+        await swell.storefront.account.update({
+          shipping: { account_address_id: result.id },
+        });
       }
     }
   } catch (err) {
     console.log(err);
   }
 
-  return redirect('/account/addresses', 303);
+  return redirect(return_to || '/account/addresses', 303);
 }
 
 async function setLoginError(theme: SwellTheme) {
@@ -365,39 +375,6 @@ export async function accountSubscriptionUpdate({
   return context.redirect(`/account/subscriptions/${id}`, 307);
 }
 
-export async function accountUpdate({
-  params,
-  swell,
-  theme,
-}: SwellServerContext) {
-  const result = await swell.storefront.account.update(params.customer);
-
-  if (!result || !('errors' in result)) {
-    return;
-  }
-
-  if (result.errors.email?.code === 'UNIQUE') {
-    theme.setFormData('account_update', {
-      errors: [
-        {
-          code: 'email_already_exists',
-          field_name: 'customer[email]',
-          field_label: await theme.lang(
-            'customer.details.email',
-            null,
-            'Email',
-          ),
-          message: await theme.lang(
-            'customer.details.email_already_exists',
-            { email: params.customer.email },
-            'This email is already in use',
-          ),
-        },
-      ],
-    });
-  }
-}
-
 export default [
   {
     id: 'account_login',
@@ -408,11 +385,6 @@ export default [
     id: 'account_create',
     url: '/account',
     handler: accountCreate,
-  },
-  {
-    id: 'account_update',
-    url: '/account/update',
-    handler: accountUpdate,
   },
   {
     id: 'account_subscribe',
@@ -442,6 +414,10 @@ export default [
     params: [
       {
         name: 'update_address_id',
+        value: '{{ value.id }}',
+      },
+      {
+        name: 'delete_address_id',
         value: '{{ value.id }}',
       },
     ],

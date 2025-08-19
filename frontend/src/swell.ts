@@ -38,7 +38,7 @@ export function initSwell(
   options?: Record<string, unknown>,
 ): Swell {
   const env = context.locals.runtime?.env;
-
+  
   // Build logger config only if env vars are set
   const loggerConfig: any = {};
   if (env?.LOG_LEVEL) {

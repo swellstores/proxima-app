@@ -193,6 +193,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
               zip: address?.zip,
               phone: address?.phone,
             },
+            is_default: Boolean(address?.default),
           };
         },
       },
