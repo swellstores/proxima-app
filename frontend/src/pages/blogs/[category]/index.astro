@@ -1,9 +1,10 @@
 ---
-import { Swell } from '@swell/apps-sdk';
 import { BlogCategoryResource } from '@/resources/blog';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
+
+import type { Swell } from '@swell/apps-sdk';
 
 export async function getData(swell: Swell, category?: string) {
   return {

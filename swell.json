@@ -103,6 +103,7 @@
 					"label": "Product list",
 					"url": "/products",
 					"icon": "tag",
+					"record": "category",
 					"json": true
 				},
 				{
@@ -111,6 +112,7 @@
 					"url": "/products/:slug",
 					"icon": "tag",
 					"collection": "products",
+					"record": "product",
 					"json": true
 				},
 				{
@@ -118,6 +120,7 @@
 					"label": "Category list",
 					"url": "/categories",
 					"icon": "tags",
+					"record": "categories",
 					"json": true
 				},
 				{
@@ -126,6 +129,7 @@
 					"url": "/categories/:slug",
 					"icon": "tags",
 					"collection": "categories",
+					"record": "category",
 					"json": true
 				},
 				{
@@ -134,6 +138,7 @@
 					"url": "/pages/:slug",
 					"icon": "page",
 					"collection": "content/pages",
+					"record": "page",
 					"json": true
 				},
 				{
@@ -142,6 +147,7 @@
 					"url": "/blogs/:category.slug/:slug",
 					"icon": "rss",
 					"collection": "content/blogs",
+					"record": "blog",
 					"json": true
 				},
 				{
@@ -150,6 +156,7 @@
 					"url": "/blogs/:slug",
 					"icon": "rss",
 					"collection": "content/blog-categories",
+					"record": "category",
 					"json": true
 				},
 				{
@@ -213,7 +220,8 @@
 					"url": "/cart",
 					"group": "checkout",
 					"icon": "shopping-cart",
-					"collection": "carts"
+					"collection": "carts",
+					"record": "cart"
 				},
 				{
 					"id": "404",

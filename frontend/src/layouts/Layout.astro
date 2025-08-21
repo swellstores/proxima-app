@@ -4,26 +4,21 @@ import type { SwellTheme } from '@swell/apps-sdk';
 interface Props {
   theme: SwellTheme;
   layout?: string;
-  page_title?: string;
-  page_description?: string;
-  content_for_header?: string;
-  props?: {
-    [key: string]: any;
-  };
+  props?: Record<string, unknown>;
 }
-const { theme, layout, page_title, page_description, content_for_header, props } =
+
+const { theme, layout, props } =
   Astro.props;
 
 const contentForHeader = await Astro.slots.render('content_for_header');
 const contentForLayout = await Astro.slots.render('content_for_layout');
 
-const content = await theme.renderLayout(layout || '', {
-  page_title,
-  page_description,
-  content_for_header: `${content_for_header || ''}\n${contentForHeader || ''}`,
-  content_for_layout: contentForLayout,
-  ...props,
-});
+const content = await theme.renderLayout(
+  layout || '',
+  props,
+  contentForLayout,
+  `${theme.getContentForHeader()}\n${contentForHeader || ''}`,
+);
 ---
 
 <Fragment set:html={content} />
