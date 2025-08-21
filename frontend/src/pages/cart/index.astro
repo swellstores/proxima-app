@@ -1,10 +1,11 @@
 ---
-import { AstroGlobal } from 'astro';
-import { Swell } from '@swell/apps-sdk';
 import { CartResource } from '@/resources';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
+
+import type { AstroGlobal } from 'astro';
+import type { Swell } from '@swell/apps-sdk';
 
 export async function getData(swell: Swell, Astro?: AstroGlobal) {
   return {
