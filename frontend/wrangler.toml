@@ -19,6 +19,7 @@ kv_namespaces = [
 ]
 
 [env.production]
+vars = { KV_FLAVOR = "cf" }
 
 kv_namespaces = [
   { binding = "THEME", id = "a47205081eac414285418d8fe0851e47" }
