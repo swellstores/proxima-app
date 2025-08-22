@@ -17,7 +17,7 @@ export async function handleThemeRequest(
   }
 
   // Preload manifest and any configs passed in via the request.
-  await theme.updateThemeConfigs(params);
+  await theme.preloadThemeConfigs(params);
 
   return { success: true };
 }
