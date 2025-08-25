@@ -1,5 +1,5 @@
 ---
-import { PageResource } from '@/resources/page';
+import { PageResource } from '@/resources';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
@@ -8,11 +8,9 @@ import type { Swell } from '@swell/apps-sdk';
 
 export async function getData(swell: Swell, slug?: string) {
   const page = new PageResource(swell, slug as string);
-  const theme_template = await page.theme_template;
 
   return {
     page,
-    theme_template,
   };
 }
 

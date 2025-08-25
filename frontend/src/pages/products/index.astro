@@ -1,5 +1,5 @@
 ---
-import { CategoryResource, ProductResource } from '@/resources';
+import { CategoryResource, ProductRecommendationsResource } from '@/resources';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
@@ -13,14 +13,12 @@ export async function getData(swell: Swell, Astro?: AstroGlobal) {
   return {
     category: new CategoryResource(swell, 'all'),
     product: productId
-      ? new ProductResource(swell, productId, {
-          $recommendations: true,
-        })
+      ? new ProductRecommendationsResource(swell, productId)
       : null,
   };
 }
 
-export const getJSON = handleServerRequest(async ({ swell, context }) => {
+export const getJSON = handleServerRequest(async ({ swell }) => {
   const data = await getData(swell);
   return parseResources(data);
 });

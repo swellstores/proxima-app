@@ -4,19 +4,18 @@ import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
 
-import type { AstroGlobal } from 'astro';
 import type { Swell } from '@swell/apps-sdk';
 
-export async function getData(swell: Swell, Astro?: AstroGlobal) {
+export async function getData(swell: Swell) {
   return {
     cart: new CartResource(swell),
   };
 }
 
-export const getJSON = handleServerRequest(async ({ swell, context }) => {
+export const getJSON = handleServerRequest(async ({ swell }) => {
   const data = await getData(swell);
   return parseResources(data);
 });
 ---
 
-<ThemePage id="cart" getData={(swell: Swell) => getData(swell, Astro)} />
+<ThemePage id="cart" getData={(swell: Swell) => getData(swell)} />

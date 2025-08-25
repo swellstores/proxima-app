@@ -1,5 +1,5 @@
 ---
-import { PredictiveSearchResource } from '@/resources/search';
+import { PredictiveSearchResource } from '@/resources';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
@@ -8,7 +8,7 @@ import type { Swell } from '@swell/apps-sdk';
 
 export async function getData(swell: Swell, query: string | null) {
   return {
-    predictive_search: new PredictiveSearchResource(swell, query),
+    predictive_search: new PredictiveSearchResource(swell, query ?? undefined),
   };
 }
 
