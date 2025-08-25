@@ -1,34 +1,19 @@
-import {
-  AccountResource,
-  AccountAddressesResource,
-  AccountOrderResource,
-  AccountOrdersResource,
-  AccountSubscriptionResource,
-  AccountSubscriptionsResource,
-} from './account';
-import { BlogResource, BlogCategoryResource } from './blog';
-import { CartResource } from './cart';
-import { CategoryResource, CategoriesResource } from './category';
-import { PageResource } from './page';
-import { ProductResource } from './product';
-import { SearchResource, PredictiveSearchResource } from './search';
-import { VariantResource } from './variant';
-
 export {
-  AccountResource,
-  AccountAddressesResource,
-  AccountOrderResource,
-  AccountOrdersResource,
-  AccountSubscriptionResource,
-  AccountSubscriptionsResource,
-  BlogResource,
-  BlogCategoryResource,
-  CartResource,
-  CategoryResource,
-  CategoriesResource,
-  PageResource,
-  PredictiveSearchResource,
-  ProductResource,
-  SearchResource,
-  VariantResource,
-};
+  SwellAccount as AccountResource,
+  SwellAddresses as AccountAddressesResource,
+  SwellBlog as BlogResource,
+  SwellBlogCategory as BlogCategoryResource,
+  SwellCart as CartResource,
+  SwellCategories as CategoriesResource,
+  SwellCategory as CategoryResource,
+  SwellOrder as AccountOrderResource,
+  SwellOrders as AccountOrdersResource,
+  SwellPage as PageResource,
+  SwellPredictiveSearch as PredictiveSearchResource,
+  SwellProduct as ProductResource,
+  SwellProductRecommendations as ProductRecommendationsResource,
+  SwellSearch as SearchResource,
+  SwellSubscription as AccountSubscriptionResource,
+  SwellSubscriptions as AccountSubscriptionsResource,
+  SwellVariant as VariantResource,
+} from '@swell/apps-sdk';

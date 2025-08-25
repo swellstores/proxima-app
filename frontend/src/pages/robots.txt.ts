@@ -41,7 +41,7 @@ export const GET: APIRoute = async (context) => {
           list.push(String(group.sitemap.valueOf()));
         }
 
-        return list.join('\n');
+        return list.join('');
       })
       .join('\n');
   }
