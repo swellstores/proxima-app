@@ -99,7 +99,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
       {
         type: 'account_login',
         shopifyType: 'customer_login',
-        serverParams: ({ params }: aSwellServerContextny) => {
+        serverParams: ({ params }: SwellServerContext) => {
           const { customer } = params;
 
           return {

@@ -1,4 +1,5 @@
 import { sequence } from 'astro:middleware';
+import { htmlCacheMiddleware } from './html-cache';
 import { initLogger } from './logger';
 import globalRoutes from './route';
 import { formRoutes, restoreThemeRequestData } from './form';
@@ -7,6 +8,7 @@ import cartRoutes from './cart';
 
 export const onRequest = sequence(
   initLogger,
+  htmlCacheMiddleware,
   ...globalRoutes,
   ...accountRoutes,
   ...cartRoutes,

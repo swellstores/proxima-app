@@ -2,8 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { initializeLoggerFromEnv, logger } from '@/utils/logger';
 
 // Generate unique ID for this worker instance
-//const WORKER_INSTANCE_ID = crypto.randomUUID();
-const WORKER_INSTANCE_ID = `worker-${Date.now()}`;
+const WORKER_INSTANCE_ID = (Math.random() + 1).toString(36).substring(7);
 
 // Initialize logger from environment variables
 export const initLogger = defineMiddleware(async (context, next) => {
@@ -11,9 +10,10 @@ export const initLogger = defineMiddleware(async (context, next) => {
   if (context.locals.runtime?.env) {
     initializeLoggerFromEnv(context.locals.runtime.env);
   }
-  
-  // Log worker instance ID for each request
-  logger.info('[PROXIMA] Worker instance', { workerId: WORKER_INSTANCE_ID });
-  
+
+  logger.info('[PROXIMA] Worker instance:', {
+    workerId: WORKER_INSTANCE_ID,
+  });
+
   return next();
 });
