@@ -1,6 +1,23 @@
 import { SwellTheme, SwellData } from '@swell/apps-sdk';
 
 import type { SwellServerContext } from '@/utils/server';
+import { APIContext } from 'astro';
+
+function redirectToUrl(context: APIContext, url: string) {
+  const { redirect, request } = context;
+  if (request.headers.get('HX-REQUEST')) {
+    // provide HX-Redirect header to force redirection
+    return new Response(null, {
+      status: 200,
+      statusText: 'Success',
+      headers: {
+        'HX-Redirect': url,
+      },
+    });
+  }
+
+  return redirect(url, 303);
+}
 
 export async function accountLogin(swellContext: SwellServerContext) {
   const {
@@ -15,7 +32,7 @@ export async function accountLogin(swellContext: SwellServerContext) {
   const result = await swell.storefront.account.login(email, password);
 
   if (result) {
-    return redirect('/account', 303);
+    return redirectToUrl(context, '/account');
   }
 
   await setLoginError(theme);
@@ -38,10 +55,28 @@ export async function accountCreate({
       return redirect('/account/signup', 303);
     }
   } catch (err) {
-    console.log(err);
+    // handle special errors
+    const isMustLogoutError =
+      err.message === 'You must be logged out to create an account';
+    const code = isMustLogoutError ? 'logout_error' : 'unknown_error';
+    const error_text = isMustLogoutError
+      ? await theme.lang(
+          'sections.register.logout_error',
+          null,
+          'You must be logged out to create an account',
+        )
+      : await theme.lang(
+          'sections.register.unknown_error',
+          null,
+          'Cannot create account',
+        );
+
+    await setCreateAccountErrors(theme, { email: { code } }, code, error_text);
+
+    return redirect('/account/signup', 303);
   }
 
-  return redirect('/', 303);
+  return redirectToUrl(context, '/account');
 }
 
 export async function accountSubscribe({
@@ -78,9 +113,9 @@ export async function accountPasswordRecover({
   context,
 }: SwellServerContext) {
   const { redirect } = context;
-  const { email, password_reset_key } = params;
+  const { email, password_reset_key, reset_key } = params;
 
-  if (password_reset_key) {
+  if (password_reset_key || reset_key || !email) {
     return accountPasswordReset(arguments[0]);
   }
 
@@ -93,12 +128,11 @@ export async function accountPasswordRecover({
     });
 
     theme.setGlobalData({ recover_success: true });
-    return;
   } catch (err) {
     console.log(err);
   }
 
-  return redirect('/account/login', 303);
+  return redirect('/account/login#recover', 303);
 }
 
 export async function accountPasswordReset({
@@ -108,31 +142,41 @@ export async function accountPasswordReset({
   context,
 }: SwellServerContext) {
   const { redirect } = context;
-  const { password_reset_key, password, password_confirmation } = params;
+  const { password_reset_key, reset_key, password, password_confirmation } =
+    params;
+  const key = password_reset_key || reset_key;
 
-  if (!password_reset_key) {
-    return redirect('/account/login', 303);
+  // missed key
+  if (!key) {
+    await setInvalidResetKeyError(theme);
+    return redirect(`/account/recover/error`, 303);
   }
 
   // Submit new password
   try {
+    // password !== confirmation
     if (
       password_confirmation !== undefined &&
       password !== password_confirmation
     ) {
       await setInvalidPasswordResetConfirmationError(theme);
-      return redirect(`/account/recover/${password_reset_key}`, 303);
-    } else {
-      const result = await swell.storefront.account.recover({
-        password_reset_key,
-        password,
-      });
-
-      if (result && !('errors' in result)) {
-        await swell.storefront.account.login(result.email as string, password);
-        return redirect('/account', 303);
-      }
+      return redirect(`/account/recover/${key}`, 303);
     }
+
+    // try recover password
+    const result = await swell.storefront.account.recover({
+      password_reset_key: key,
+      password,
+    });
+
+    // success
+    if (result && !('errors' in result)) {
+      await swell.storefront.account.login(result.email as string, password);
+      return redirectToUrl(context, '/account');
+    }
+
+    // error
+    return redirect(`/account/recover/${key}`, 303);
   } catch (err: any) {
     console.log(err);
     if (err.message.includes('password_reset_key')) {
@@ -140,13 +184,8 @@ export async function accountPasswordReset({
     } else {
       await setInvalidPasswordResetError(theme);
     }
-    return redirect(
-      `/account/recover${password_reset_key ? `/${password_reset_key}` : ''}`,
-      303,
-    );
+    return redirect(`/account/recover${key ? `/${key}` : '/error'}`, 303);
   }
-
-  return redirect('/account/login', 303);
 }
 
 export async function accountAddressCreateUpdate({
@@ -197,15 +236,11 @@ async function setLoginError(theme: SwellTheme) {
       {
         code: 'invalid_credentials',
         field_name: 'email',
-        field_label: await theme.lang(
-          'forms.account_login.email',
-          null,
-          'Email',
-        ),
+        field_label: await theme.lang('sections.login.email', null, 'Email'),
         message: await theme.lang(
-          'forms.account_login.invalid_credentials',
+          'sections.login.invalid_credentials',
           null,
-          'Invalid email or password',
+          'Invalid email or password.',
         ),
       },
     ],
@@ -219,25 +254,9 @@ export async function setInvalidResetKeyError(theme: SwellTheme) {
         code: 'invalid_reset_key',
         field_name: 'password_reset_key',
         message: await theme.lang(
-          'forms.account_recover.invalid_reset_key',
+          'sections.reset-password.invalid_reset_key',
           null,
           'Invalid account recovery key',
-        ),
-      },
-    ],
-  });
-}
-
-export async function setMissingResetKeyError(theme: SwellTheme) {
-  theme.setFormData('account_password_reset', {
-    errors: [
-      {
-        code: 'invalid_reset_key',
-        field_name: 'password_reset_key',
-        message: await theme.lang(
-          'forms.account_recover.invalid_reset_key',
-          null,
-          'Missing account recovery key',
         ),
       },
     ],
@@ -251,7 +270,7 @@ async function setInvalidPasswordResetError(theme: SwellTheme) {
         code: 'invalid_password_reset',
         field_name: 'password',
         message: await theme.lang(
-          'forms.account_recover.invalid_password_reset',
+          'sections.reset-password.invalid_password_reset',
           null,
           'Invalid password',
         ),
@@ -267,7 +286,7 @@ async function setInvalidPasswordResetConfirmationError(theme: SwellTheme) {
         code: 'invalid_password_confirmation',
         field_name: 'password_confirmation',
         message: await theme.lang(
-          'forms.account_recover.invalid_password_confirmation',
+          'sections.reset-password.invalid_password_confirmation',
           null,
           'Password confirmation must match the provided password',
         ),
@@ -276,7 +295,12 @@ async function setInvalidPasswordResetConfirmationError(theme: SwellTheme) {
   });
 }
 
-async function setCreateAccountErrors(theme: SwellTheme, errors: SwellData) {
+async function setCreateAccountErrors(
+  theme: SwellTheme,
+  errors: SwellData,
+  code: string = '',
+  message: string = '',
+) {
   if (!errors.email && !errors.password) {
     return;
   }
@@ -285,18 +309,20 @@ async function setCreateAccountErrors(theme: SwellTheme, errors: SwellData) {
       ...(errors.email
         ? [
             {
-              code: 'invalid_email',
-              field_name: 'email',
+              code: code || 'invalid_email',
+              field_name: 'customer[email]',
               field_label: await theme.lang(
-                'forms.account_signup.email',
+                'sections.register.email',
                 null,
                 'Email',
               ),
-              message: await theme.lang(
-                'forms.account_signup.invalid_email',
-                null,
-                'Invalid email address',
-              ),
+              message:
+                message ||
+                (await theme.lang(
+                  'sections.register.invalid_email_error',
+                  null,
+                  'Invalid email address',
+                )),
             },
           ]
         : []),
@@ -304,14 +330,14 @@ async function setCreateAccountErrors(theme: SwellTheme, errors: SwellData) {
         ? [
             {
               code: 'invalid_password',
-              field_name: 'password',
+              field_name: 'customer[password]',
               field_label: await theme.lang(
-                'forms.account_signup.password',
+                'sections.register.password',
                 null,
                 'Password',
               ),
               message: await theme.lang(
-                'forms.account_signup.invalid_password',
+                'sections.register.invalid_password_error',
                 null,
                 'Invalid password',
               ),
@@ -384,6 +410,11 @@ export default [
   {
     id: 'account_create',
     url: '/account',
+    handler: accountCreate,
+  },
+  {
+    id: 'account_create',
+    url: '/account/signup',
     handler: accountCreate,
   },
   {
