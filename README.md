@@ -14,7 +14,7 @@ nvm use
 Install modules
 
 ```bash
-npm i
+npm i --legacy-peer-deps
 ```
 
 Start in dev mode:
