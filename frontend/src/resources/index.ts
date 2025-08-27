@@ -16,4 +16,5 @@ export {
   SwellSubscription as AccountSubscriptionResource,
   SwellSubscriptions as AccountSubscriptionsResource,
   SwellVariant as VariantResource,
+  createSwellResource,
 } from '@swell/apps-sdk';

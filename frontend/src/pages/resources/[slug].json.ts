@@ -14,11 +14,15 @@ export const GET = handleServerRequest(async ({ swell, params, context }) => {
 
   let resource;
 
+  // Use the factory function from apps-sdk to create the resource
+  // This encapsulates all knowledge of constructor signatures within apps-sdk
+  const instance = resources.createSwellResource(Resource, swell, slug, query);
+
   if (path) {
-    resource = await new Resource(swell, slug, query)[path.replace('/', '.')];
+    resource = await instance[path.replace('/', '.')];
     resource = await resource.resolve(false);
   } else {
-    resource = await new Resource(swell, slug, query).resolve(false);
+    resource = await instance.resolve(false);
   }
 
   return resource ?? null;
