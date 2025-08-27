@@ -7,6 +7,7 @@ Proxima is an open-source Astro application designed for small to medium stores,
 Switch your node version:
 
 ```bash
+nvm install 18.16.1
 nvm use
 ```
 
