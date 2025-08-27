@@ -3,6 +3,7 @@ import { WorkerHtmlCache, type CacheResult } from '@swell/apps-sdk';
 import { logger } from '@/utils/logger';
 
 export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
+  // Ensure HTML_CACHE_EPOCH is set
   const epoch = context.locals.runtime?.env?.HTML_CACHE_EPOCH;
 
   if (typeof epoch !== 'string' || !epoch) {
@@ -13,38 +14,38 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
   const isRevalidation =
     context.request.headers.get('X-Cache-Bypass') === 'revalidation';
 
-  // Try cache if not a revalidation request
-  // For middleware with SWR pattern
   if (!isRevalidation) {
-    let cached: CacheResult | null = null;
+    const cached = await htmlCache.getWithConditionals(context.request);
 
-    try {
-      cached = await htmlCache.get(context.request);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-    }
-
-    if (cached?.found === true && cached.response) {
-      if (cached.stale === true) {
-        // Revalidation
-        const waitUntil = context.locals.runtime?.ctx?.waitUntil;
-        // Check if env supports waitUntil (Cloudflare Workers)
-        if (typeof waitUntil === 'function') {
-          const revalidateHeaders = new Headers(context.request.headers);
-          revalidateHeaders.set('X-Cache-Bypass', 'revalidation');
-
-          const revalidateRequest = new Request(context.request.url, {
-            method: context.request.method,
-            headers: revalidateHeaders,
-          });
-
-          // Just fire the request, don't handle response - the revalidation worker will cache it
-          waitUntil(fetch(revalidateRequest));
-        }
+    if (cached?.found === true) {
+      // Handle 304 responses (already checked by SDK)
+      if (cached.notModified && cached.conditional304) {
+        return cached.conditional304;
       }
 
-      return cached.response;
+      if (cached.response) {
+        // Handle stale revalidation
+        if (cached.stale === true) {
+          const waitUntil = context.locals.runtime?.ctx?.waitUntil;
+          // Check if env supports waitUntil (Cloudflare Workers)
+          if (typeof waitUntil === 'function') {
+            const revalidateRequest = htmlCache.createRevalidationRequest(
+              context.request,
+            );
+            // Fire the request with Edge CDN bypass
+            waitUntil(
+              fetch(revalidateRequest, {
+                cf: {
+                  cacheTtl: 0, // Don't cache this request at Edge
+                  cacheEverything: false, // Don't force caching of non-cacheable responses
+                },
+              }),
+            );
+          }
+        }
+
+        return cached.response;
+      }
     }
   }
 
