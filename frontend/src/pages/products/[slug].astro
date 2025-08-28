@@ -1,5 +1,5 @@
 ---
-import { ProductRecommendationsResource } from '@/resources';
+import { ProductResource } from '@/resources';
 import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
@@ -9,7 +9,8 @@ import type { Swell } from '@swell/apps-sdk';
 export async function getData(swell: Swell, slug?: string) {
   const { options, purchase_option, quantity = 1 } = swell.queryParams;
 
-  const product = new ProductRecommendationsResource(swell, slug as string, {
+  const product = new ProductResource(swell, slug as string, {
+    $recommendations: true,
     $pricing: {
       quantity,
       options,

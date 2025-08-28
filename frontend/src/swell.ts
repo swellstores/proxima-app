@@ -38,7 +38,7 @@ export function initSwell(
   options?: Record<string, unknown>,
 ): Swell {
   const env = context.locals.runtime?.env;
-
+  
   // Build logger config only if env vars are set
   const loggerConfig: any = {};
   if (env?.LOG_LEVEL) {
@@ -194,44 +194,13 @@ export function deleteCookie(
   );
 }
 
-// use exact class name and inherit it from the imported resource
-function createMockResourceClass(
-  parent: ThemeLookupResourceFactory,
-  name: string,
-) {
-  const NamedResourceClass = class extends parent {
-    constructor(...args: any[]) {
-      super(...args);
-
-      Object.defineProperty(this, '_resourceName', {
-        value: name,
-      });
-    }
-  };
-
-  // Define the name of class constructor
-  Object.defineProperty(NamedResourceClass, 'name', {
-    value: name,
-  });
-
-  return NamedResourceClass;
-}
-
-// we should use exact resource names
-const MockedResources = Object.fromEntries(
-  Object.entries(resources).map(([key, resource]) => [
-    key,
-    createMockResourceClass(resource as ThemeLookupResourceFactory, key),
-  ]),
-);
-
 function loadResources<T extends ResourceKey>(
   resourceList: Record<string, T>,
 ): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(resourceList).map(([key, resource]) => [
       key,
-      MockedResources[resource],
+      resources[resource],
     ]),
   );
 }
