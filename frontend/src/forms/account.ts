@@ -230,6 +230,60 @@ export async function accountAddressCreateUpdate({
   return redirect(return_to || '/account/addresses', 303);
 }
 
+export async function accountSubscriptionUpdate({
+  params,
+  swell,
+  context,
+}: SwellServerContext) {
+  const { id, date_pause_end, paused, canceled, return_to } = params;
+  const update = {
+    date_pause_end: toDate(date_pause_end)?.toISOString(),
+    paused: toBoolean(paused),
+    canceled: toBoolean(canceled),
+  };
+
+  if (update.date_pause_end) {
+    update.paused = true;
+  }
+
+  try {
+    await swell.storefront.subscriptions.update(id as string, update);
+  } catch (err) {
+    console.log(err);
+  }
+
+  return context.redirect(return_to || `/account/subscriptions/${id}`, 303);
+}
+
+function toDate(value: unknown): Date | undefined {
+  if (typeof value !== 'string') {
+    return;
+  }
+
+  const timestamp = Date.parse(value);
+
+  if (isNaN(timestamp)) {
+    return;
+  }
+
+  return new Date(timestamp);
+}
+
+function toBoolean(value: unknown): boolean | undefined {
+  if (typeof value !== 'string') {
+    return;
+  }
+
+  switch (value.toLowerCase()) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      return;
+  }
+}
+
 async function setLoginError(theme: SwellTheme) {
   theme.setFormData('account_login', {
     errors: [
@@ -371,34 +425,6 @@ async function setSubscribeAccountErrors(theme: SwellTheme, errors: SwellData) {
       },
     ],
   });
-}
-
-export async function accountSubscriptionUpdate({
-  params,
-  swell,
-  context,
-}: SwellServerContext) {
-  const { subscription_id: id, date_pause_end, paused, canceled } = params;
-  const datePauseEndValue =
-    date_pause_end === 'null' ? null : (date_pause_end as string);
-  const pausedValue =
-    paused === 'true' ? true : paused === 'false' ? false : undefined;
-  const canceledValue =
-    canceled === 'true' ? true : canceled === 'false' ? false : undefined;
-  const update = {
-    paused: pausedValue,
-    date_pause_end: datePauseEndValue,
-    canceled: canceledValue,
-  };
-
-  try {
-    await swell.storefront.subscriptions.update(id as string, update);
-  } catch (err) {
-    console.log(err);
-  }
-
-  // force the editor to reload subscription page with status 307
-  return context.redirect(`/account/subscriptions/${id}`, 307);
 }
 
 export default [

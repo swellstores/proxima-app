@@ -72,7 +72,13 @@
 				},
 				{
 					"id": "account_subscription",
-					"url": "/account/subscription_update"
+					"url": "/account/subscription_update",
+					"params": [
+						{
+							"name": "id",
+							"value": "{{ value.id }}"
+						}
+					]
 				},
 				{
 					"id": "cart_add",
