@@ -305,8 +305,7 @@
 			}
 		]
 	},
-	"preview_src": "assets/preview-proxima.jpg",
-	"preview_mobile_src": "",
+	"preview_src": "assets/preview-proxima.png",
 	"use_cases": [
 		"direct_to_consumer",
 		"wholesale",
