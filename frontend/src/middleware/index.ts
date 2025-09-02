@@ -5,6 +5,7 @@ import globalRoutes from './route';
 import { formRoutes, restoreThemeRequestData } from './form';
 import accountRoutes from './account';
 import cartRoutes from './cart';
+import assetRoutes from './asset';
 
 export const onRequest = sequence(
   initLogger,
@@ -13,5 +14,6 @@ export const onRequest = sequence(
   ...accountRoutes,
   ...cartRoutes,
   ...formRoutes,
+  ...assetRoutes,
   restoreThemeRequestData,
 );

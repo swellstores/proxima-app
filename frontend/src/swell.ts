@@ -32,13 +32,14 @@ type LookupResourceType = {
 type LookupResourceKey = keyof LookupResourceType;
 
 const SWELL_DATA_COOKIE = 'swell-data';
+export const DYNAMIC_ASSET_URL = '/assets/';
 
 export function initSwell(
   context: AstroGlobal | APIContext,
   options?: Record<string, unknown>,
 ): Swell {
   const env = context.locals.runtime?.env;
-  
+
   // Build logger config only if env vars are set
   const loggerConfig: any = {};
   if (env?.LOG_LEVEL) {
@@ -222,6 +223,7 @@ export function initTheme(swell: Swell): SwellTheme {
   return new SwellTheme(swell, {
     forms,
     resources: getResources(swellConfig.storefront.theme.resources),
+    dynamic_asset_url: DYNAMIC_ASSET_URL,
     shopifyCompatibilityClass:
       StorefrontShopifyCompatibility as unknown as typeof ShopifyCompatibility,
   });
