@@ -1,5 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
-import { getHtmlCache, type HtmlCacheEnv } from '@swell/apps-sdk';
+import { getHtmlCache, DEFAULT_CACHE_RULES, type HtmlCacheEnv, type CacheRules } from '@swell/apps-sdk';
 import { logger } from '@/utils/logger';
 
 export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
@@ -17,7 +17,15 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
       (runtime?.env?.HTML_CACHE_BACKEND as 'kv' | 'worker' | undefined) || 'kv',
   };
 
-  const htmlCache = getHtmlCache(environment);
+  const cacheRules: CacheRules = {
+    ...DEFAULT_CACHE_RULES,
+    pathRules: [
+      ...DEFAULT_CACHE_RULES.pathRules || [],
+      { path: '/account', skip: true }
+    ]
+  };
+
+  const htmlCache = getHtmlCache(environment, cacheRules);
   if (!htmlCache) return next();
 
   const isRevalidation =
@@ -25,7 +33,7 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
   const method = context.request.method.toUpperCase();
 
   // ---- READ PATH ----
-  if (!isRevalidation && htmlCache.isReadCacheCandidate(context.request)) {
+  if (!isRevalidation && htmlCache.canReadFromCache(context.request)) {
     const cached = await htmlCache.getWithConditionals(context.request);
 
     if (cached?.found === true) {
@@ -80,7 +88,7 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
     h.delete('Content-Length');
   };
 
-  if (htmlCache.isWriteCacheCandidate(context.request, response)) {
+  if (htmlCache.canWriteToCache(context.request, response)) {
     // Buffer once
     const bodyText = await response.text();
 
