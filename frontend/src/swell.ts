@@ -223,7 +223,7 @@ export function initTheme(swell: Swell): SwellTheme {
   return new SwellTheme(swell, {
     forms,
     resources: getResources(swellConfig.storefront.theme.resources),
-    dynamic_asset_url: DYNAMIC_ASSET_URL,
+    dynamicAssetUrl: DYNAMIC_ASSET_URL,
     shopifyCompatibilityClass:
       StorefrontShopifyCompatibility as unknown as typeof ShopifyCompatibility,
   });
