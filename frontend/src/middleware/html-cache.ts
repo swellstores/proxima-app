@@ -1,5 +1,10 @@
 import { defineMiddleware } from 'astro:middleware';
-import { getHtmlCache, DEFAULT_CACHE_RULES, type HtmlCacheEnv, type CacheRules } from '@swell/apps-sdk';
+import {
+  getHtmlCache,
+  DEFAULT_CACHE_RULES,
+  type HtmlCacheEnv,
+  type CacheRules,
+} from '@swell/apps-sdk';
 import { logger } from '@/utils/logger';
 
 export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
@@ -20,9 +25,15 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
   const cacheRules: CacheRules = {
     ...DEFAULT_CACHE_RULES,
     pathRules: [
-      ...DEFAULT_CACHE_RULES.pathRules || [],
-      { path: '/account', skip: true }
-    ]
+      ...(DEFAULT_CACHE_RULES.pathRules || []),
+      { path: '/account', skip: true },
+      {
+        path: '/hooks/route-deps.json',
+        ttl: 7776000, // 90 days
+        swr: 7776000, // 90 days
+        contentTypes: ['application/json'],
+      },
+    ],
   };
 
   const htmlCache = getHtmlCache(environment, cacheRules);
