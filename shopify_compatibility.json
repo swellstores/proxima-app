@@ -68,6 +68,16 @@
           "from": "category",
           "to": "collection",
           "object": "ShopifyCollection"
+        }
+      ]
+    },
+    {
+      "page": "product",
+      "resources": [
+        {
+          "from": "category",
+          "to": "collection",
+          "object": "ShopifyCollection"
         },
         {
           "from": "product.recommendations",
