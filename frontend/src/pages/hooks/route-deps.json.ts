@@ -1,6 +1,3 @@
-// ABOUTME: Dev/ops endpoint to return route → collections dependencies
-// ABOUTME: Cached via HtmlCache using JSON content-type path rule
-
 import { handleServerRequest } from '@/utils/server';
 import { getPageDependencies } from '@swell/apps-sdk';
 
