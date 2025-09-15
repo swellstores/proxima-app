@@ -150,6 +150,10 @@
     },
     {
       "from": "BlogResource",
+      "object": "ShopifyArticle"
+    },
+    {
+      "from": "BlogCategoryResource",
       "object": "ShopifyBlog"
     }
   ],
