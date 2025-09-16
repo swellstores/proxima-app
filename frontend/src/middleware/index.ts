@@ -5,15 +5,16 @@ import globalRoutes from './route';
 import { formRoutes, restoreThemeRequestData } from './form';
 import accountRoutes from './account';
 import cartRoutes from './cart';
-import assetRoutes from './asset';
+import { assetCacheRead, assetRender } from './asset';
 
 export const onRequest = sequence(
   initLogger,
   htmlCacheMiddleware,
+  assetCacheRead,
   ...globalRoutes,
   ...accountRoutes,
   ...cartRoutes,
   ...formRoutes,
-  ...assetRoutes,
+  assetRender,
   restoreThemeRequestData,
 );

@@ -1,5 +1,18 @@
+import { defineMiddleware } from 'astro:middleware';
+import type { APIContext, MiddlewareNext } from 'astro';
+import { ContentCache } from '@swell/apps-sdk';
 import { DYNAMIC_ASSET_URL } from '@/swell';
-import { handleMiddlewareRequest, SwellServerContext } from '@/utils/server';
+import { handleMiddlewareRequest } from '@/utils/server';
+
+interface CachedAsset {
+  content: string;
+  contentType: string;
+}
+
+interface AssetParams {
+  asset_name: string;
+  version?: string;
+}
 
 const CONTENT_TYPES: Record<string, string> = {
   '.js': 'application/javascript',
@@ -9,37 +22,126 @@ const CONTENT_TYPES: Record<string, string> = {
   '.html': 'text/html',
 };
 
-const renderDynamicAsset = handleMiddlewareRequest(
-  'GET',
-  `${DYNAMIC_ASSET_URL}:asset_name`,
-  async ({ theme, params }: SwellServerContext) => {
-    const { asset_name } = params;
+const MAX_CACHE_SIZE = 5 * 1024 * 1024;
+const MAX_VERSION_LENGTH = 64;
+const ASSET_VERSION_PATTERN = /^\/assets\/v\/([^\/]+)\/(.+)$/;
+
+let assetCache: ContentCache | null = null;
+
+function getAssetCache(
+  runtime: APIContext['locals']['runtime'],
+): ContentCache | null {
+  if (!runtime?.env?.THEME) {
+    return null;
+  }
+
+  if (!assetCache) {
+    assetCache = new ContentCache({
+      kvStore: runtime.env.THEME,
+      workerCtx: runtime.ctx,
+    });
+  }
+  return assetCache;
+}
+
+function buildCacheKey(version: string, assetName: string): string {
+  return `asset:${version}:${assetName}`;
+}
+
+export const assetCacheRead = defineMiddleware(
+  async (context: APIContext, next: MiddlewareNext) => {
+    if (
+      context.request.method !== 'GET' ||
+      !context.url.pathname.startsWith(`${DYNAMIC_ASSET_URL}v/`)
+    ) {
+      return next();
+    }
+
+    const match = context.url.pathname.match(ASSET_VERSION_PATTERN);
+    if (!match) {
+      return next();
+    }
+
+    const [, version, assetName] = match;
+
+    if (version.length > MAX_VERSION_LENGTH) {
+      return new Response('Invalid version', { status: 400 });
+    }
+
+    const cache = getAssetCache(context.locals.runtime);
+    if (!cache) {
+      return next();
+    }
 
     try {
-      await theme.themeLoader.init();
+      const cached = await cache.get<CachedAsset>(
+        buildCacheKey(version, assetName),
+      );
 
-      const config = await theme.getAssetConfig(asset_name);
-
-      if (!config) {
-        return new Response(`Asset config not found: ${asset_name}`, {
-          status: 404,
+      if (cached) {
+        return new Response(cached.content, {
+          status: 200,
+          headers: {
+            'Content-Type': cached.contentType,
+            'Cache-Control': 'public, max-age=31536000, immutable',
+            'X-Cache-Status': 'HIT',
+          },
         });
       }
-
-      const content = await theme.renderTemplateString(config?.file_data || '');
-      const contentType = getContentType(asset_name);
-
-      return new Response(content, {
-        status: 200,
-        headers: {
-          'Content-Type': contentType,
-        },
-      });
-    } catch (error) {
-      console.error(`Failed to render asset: ${asset_name}`, error);
-
-      return new Response('Internal Server Error', { status: 500 });
+    } catch {
+      // Fallback to rendering on cache error
     }
+
+    return next();
+  },
+);
+
+export const assetRender = handleMiddlewareRequest<AssetParams>(
+  'GET',
+  [
+    `${DYNAMIC_ASSET_URL}v/:version/:asset_name`,
+    `${DYNAMIC_ASSET_URL}:asset_name`,
+  ],
+  async ({ theme, params, context }) => {
+    const { asset_name, version } = params;
+
+    await theme.themeLoader.init();
+
+    const config = await theme.getAssetConfig(asset_name);
+    if (!config) {
+      return new Response(`Asset config not found: ${asset_name}`, {
+        status: 404,
+      });
+    }
+
+    const content = await theme.renderTemplateString(config.file_data || '');
+    const contentType = getContentType(asset_name);
+
+    if (version && content.length <= MAX_CACHE_SIZE) {
+      const cache = getAssetCache(context.locals.runtime);
+      const ctx = context.locals.runtime?.ctx;
+
+      if (cache && ctx?.waitUntil) {
+        ctx.waitUntil(
+          cache
+            .set(buildCacheKey(version, asset_name), { content, contentType })
+            .catch(() => {
+              // Silent fail for cache write errors
+            }),
+        );
+      }
+    }
+
+    return new Response(content, {
+      status: 200,
+      headers: {
+        'Content-Type': contentType,
+        'Cache-Control': version
+          ? 'public, max-age=31536000, immutable'
+          : 'no-cache',
+        'X-Cache-Status': version ? 'MISS' : 'DYNAMIC',
+      },
+    });
   },
 );
 
@@ -55,4 +157,4 @@ function getContentType(assetName: string): string {
   return 'text/plain';
 }
 
-export default [renderDynamicAsset];
+export default [assetCacheRead, assetRender];
