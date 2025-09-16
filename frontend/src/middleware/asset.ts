@@ -119,7 +119,16 @@ export const assetRender = handleMiddlewareRequest<AssetParams>(
         });
       }
 
-      const content = await theme.renderTemplateString(config.file_data || '');
+      const settingsConfig = await theme.getThemeTemplateConfigByType(
+        'config',
+        'settings_data',
+        'json',
+      );
+      const settings = JSON.parse(settingsConfig?.file_data);
+
+      const content = await theme.renderTemplateString(config.file_data || '', {
+        settings: settings.current,
+      });
       const contentType = getContentType(asset_name);
 
       if (version && content.length <= MAX_CACHE_SIZE) {
