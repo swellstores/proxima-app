@@ -27,8 +27,11 @@ jobs:
 
       - name: Install dependencies and push to Swell
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           npm i -g @swell/cli@latest
           npm ci
           swell app push --force
           swell app version patch -m "Patch release" -y
           swell app release -y
+          git push --follow-tags
