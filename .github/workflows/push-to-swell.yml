@@ -34,4 +34,5 @@ jobs:
           swell app push --force
           swell app version patch -m "Patch release" -y
           swell app release -y
+          git pull
           git push --follow-tags
