@@ -2,7 +2,10 @@ import { defineMiddleware } from 'astro:middleware';
 import type { APIContext, MiddlewareNext } from 'astro';
 import { ContentCache } from '@swell/apps-sdk';
 import { DYNAMIC_ASSET_URL } from '@/swell';
-import { handleMiddlewareRequest } from '@/utils/server';
+import {
+  handleMiddlewareRequest,
+  type SwellServerContext,
+} from '@/utils/server';
 
 interface CachedAsset {
   content: string;
@@ -102,46 +105,53 @@ export const assetRender = handleMiddlewareRequest<AssetParams>(
     `${DYNAMIC_ASSET_URL}v/:version/:asset_name`,
     `${DYNAMIC_ASSET_URL}:asset_name`,
   ],
-  async ({ theme, params, context }) => {
+  async ({ theme, params, context }: SwellServerContext<AssetParams>) => {
     const { asset_name, version } = params;
 
-    await theme.themeLoader.init();
+    try {
+      await theme.themeLoader.init();
 
-    const config = await theme.getAssetConfig(asset_name);
-    if (!config) {
-      return new Response(`Asset config not found: ${asset_name}`, {
-        status: 404,
-      });
-    }
+      const config = await theme.getAssetConfig(asset_name);
 
-    const content = await theme.renderTemplateString(config.file_data || '');
-    const contentType = getContentType(asset_name);
-
-    if (version && content.length <= MAX_CACHE_SIZE) {
-      const cache = getAssetCache(context.locals.runtime);
-      const ctx = context.locals.runtime?.ctx;
-
-      if (cache && ctx?.waitUntil) {
-        ctx.waitUntil(
-          cache
-            .set(buildCacheKey(version, asset_name), { content, contentType })
-            .catch(() => {
-              // Silent fail for cache write errors
-            }),
-        );
+      if (!config) {
+        return new Response(`Asset config not found: ${asset_name}`, {
+          status: 404,
+        });
       }
-    }
 
-    return new Response(content, {
-      status: 200,
-      headers: {
-        'Content-Type': contentType,
-        'Cache-Control': version
-          ? 'public, max-age=31536000, immutable'
-          : 'no-cache',
-        'X-Cache-Status': version ? 'MISS' : 'DYNAMIC',
-      },
-    });
+      const content = await theme.renderTemplateString(config.file_data || '');
+      const contentType = getContentType(asset_name);
+
+      if (version && content.length <= MAX_CACHE_SIZE) {
+        const cache = getAssetCache(context.locals.runtime);
+        const ctx = context.locals.runtime?.ctx;
+
+        if (cache && ctx?.waitUntil) {
+          ctx.waitUntil(
+            cache
+              .set(buildCacheKey(version, asset_name), { content, contentType })
+              .catch(() => {
+                // Silent fail for cache write errors
+              }),
+          );
+        }
+      }
+
+      return new Response(content, {
+        status: 200,
+        headers: {
+          'Content-Type': contentType,
+          'Cache-Control': version
+            ? 'public, max-age=31536000, immutable'
+            : 'no-cache',
+          'X-Cache-Status': version ? 'MISS' : 'DYNAMIC',
+        },
+      });
+    } catch (error) {
+      console.error(`Failed to render asset: ${asset_name}`, error);
+
+      return new Response('Internal Server Error', { status: 500 });
+    }
   },
 );
 
