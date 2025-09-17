@@ -11,10 +11,10 @@ export const onRequest = sequence(
   initLogger,
   htmlCacheMiddleware,
   assetCacheRead,
-  ...globalRoutes,
+  assetRender,
   ...accountRoutes,
   ...cartRoutes,
   ...formRoutes,
-  assetRender,
+  ...globalRoutes,
   restoreThemeRequestData,
 );
