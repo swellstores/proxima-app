@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@swell/apps-sdk": "^1.0.132",
-    "astro": "^4.12.3",
+    "astro": "^4.16.19",
     "lodash": "^4.17.21",
     "minimatch": "^10.0.1",
     "path-to-regexp": "^7.0.0",
