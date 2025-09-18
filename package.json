@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/cloudflare": "^11.0.1",
+    "@astrojs/cloudflare": "^12.6.6",
     "@astrojs/react": "^3.6.1",
     "@eslint/js": "^9.19.0",
     "@types/jest": "29.5.14",
