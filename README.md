@@ -206,9 +206,12 @@ This is an official Swell storefront app. For customizations:
 
 ## 📚 Resources
 
-- [Swell Documentation](https://docs.swell.is)
+- [Swell Documentation](https://developers.swell.is/)
+- [Proxima Documentation](https://developers.swell.is/storefronts/proxima-app)
 - [Astro Documentation](https://docs.astro.build)
+- [Storefront App Development](https://developers.swell.is/storefronts/storefront-app-guide)
 - [Swell Apps SDK](https://github.com/swellstores/swell-apps-sdk)
+- [Swell CLI Documentation](https://developers.swell.is/apps/cli)
 
 ## 📄 License
 
