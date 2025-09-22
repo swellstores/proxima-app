@@ -3,11 +3,17 @@ import { getHtmlCache, DEFAULT_CACHE_RULES, type HtmlCacheEnv, type CacheRules }
 import { logger } from '@/utils/logger';
 
 export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
-  const epoch = context.locals.runtime?.env?.HTML_CACHE_EPOCH;
+  // Check if HTML caching is enabled
+  const htmlCacheEnabled = context.locals.runtime?.env?.HTML_CACHE;
 
-  if (typeof epoch !== 'string' || !epoch) {
+  if (!htmlCacheEnabled) {
     return next();
   }
+
+  const versionMetadata = context.locals.runtime?.env?.CF_VERSION_METADATA;
+  const epoch = versionMetadata?.id || "default";
+
+  logger.info('[SDK Html-cache] Using epoch:', { epoch });
 
   const runtime = context.locals.runtime;
   const environment: HtmlCacheEnv = {
