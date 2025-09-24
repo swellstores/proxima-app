@@ -13,7 +13,8 @@
     "preview": "astro preview --root frontend",
     "astro": "astro --root frontend",
     "test": "jest --silent",
-    "frontend:deploy": "npx wrangler deploy --config frontend/wrangler.jsonc"
+    "frontend:deploy": "npx wrangler deploy --config frontend/wrangler.jsonc",
+    "postinstall": "node releases/compat.cjs || true"
   },
   "dependencies": {
     "@swell/apps-sdk": "^1.0.132",
