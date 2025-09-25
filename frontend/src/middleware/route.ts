@@ -31,7 +31,11 @@ function initThemePageHandler(swellContext: SwellServerContext) {
   const { redirect, url } = context;
 
   if (Array.isArray(theme.props.pages)) {
-    const pagePath = url.pathname.replace(/\.[^/]+$/, '');
+    const { pathname } = url;
+
+    const pagePath = pathname.endsWith('/index.json')
+      ? pathname.slice(0, -'/index.json'.length)
+      : pathname.replace(/\.[^/]+$/, '');
 
     const page = theme.props.pages.find((page) => {
       const regexp = pathToRegexp(page.url);

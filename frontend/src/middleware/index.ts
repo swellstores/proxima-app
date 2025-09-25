@@ -6,12 +6,14 @@ import { formRoutes, restoreThemeRequestData } from './form';
 import accountRoutes from './account';
 import cartRoutes from './cart';
 import { assetCacheRead, assetRender } from './asset';
+import jsonIndexFlatten from './json-index-flatten';
 
 export const onRequest = sequence(
   initLogger,
   htmlCacheMiddleware,
   assetCacheRead,
   assetRender,
+  ...jsonIndexFlatten,
   ...accountRoutes,
   ...cartRoutes,
   ...formRoutes,
