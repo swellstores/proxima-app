@@ -1,4 +1,5 @@
 {
+  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     "allowJs": true,
     "skipLibCheck": true,
@@ -20,13 +21,16 @@
     "jsxImportSource": "react",
     "sourceMap": true
   },
+  "include": [
+    ".astro/types.d.ts",
+    "**/*"
+  ],
   "exclude": [
+    "dist",
+    "node_modules",
     ".astro",
     ".wrangler",
     "../.prettierrc.mjs",
-    "astro.config.mjs",
-    "node_modules",
-    "dist"
-  ],
-  "extends": "astro/tsconfigs/strict"
+    "astro.config.mjs"
+  ]
 }

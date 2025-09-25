@@ -1,0 +1,1 @@
+export { getJSON as GET } from './products/index.astro';
