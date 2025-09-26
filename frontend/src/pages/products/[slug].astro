@@ -4,12 +4,13 @@ import { handleServerRequest } from '@/utils/server';
 import ThemePage from '@/components/ThemePage.astro';
 import { parseResources } from '@/utils/server-resources';
 
-import type { Swell } from '@swell/apps-sdk';
+import { StorefrontResource, type Swell } from '@swell/apps-sdk';
 
 export async function getData(swell: Swell, slug?: string) {
   const { options, purchase_option, quantity = 1 } = swell.queryParams;
 
   const product = new ProductResource(swell, slug as string, {
+    $categories: true,
     $recommendations: true,
     $pricing: {
       quantity,
@@ -26,6 +27,25 @@ export async function getData(swell: Swell, slug?: string) {
 export const getJSON = handleServerRequest(async ({ swell, context }) => {
   const data = await getData(swell, context.params.slug);
   return parseResources(data);
+});
+
+export const getJS = handleServerRequest(async ({ swell, theme, context }) => {
+  const data = await getData(swell, context.params.slug);
+
+  if (theme.shopifyCompatibility) {
+    theme.shopifyCompatibility.adaptObjectData(data);
+  }
+
+  if (data.product instanceof StorefrontResource) {
+    await data.product.resolve();
+  }
+
+  return new Response(JSON.stringify(data.product), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 });
 ---
 

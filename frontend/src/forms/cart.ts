@@ -52,14 +52,15 @@ export async function cartAdd(context: SwellServerContext) {
   return getShopifyCompatibleServerResponse('cart_add', context, cart);
 }
 
-export async function cartUpdate(context: SwellServerContext) {
-  const { swell, theme } = context;
+export async function cartUpdate(swellContext: SwellServerContext) {
+  const { swell, theme, context } = swellContext;
+  const { redirect } = context;
 
   // Manually handle cart_update compatibility
   // because there is no equivalent form for it in Shopify
   const { item_id, quantity } = await getShopifyCompatibleServerParams(
     'cart_update',
-    context,
+    swellContext,
   );
 
   let response;
@@ -75,8 +76,8 @@ export async function cartUpdate(context: SwellServerContext) {
 
     const cart = await theme.fetchCart();
 
-    // Make sure cart items are loaded
-    await cart.items;
+    // Make sure cart is loaded
+    await cart.resolve();
 
     theme.setGlobals({ cart });
 
@@ -85,13 +86,22 @@ export async function cartUpdate(context: SwellServerContext) {
     response = theme.globals.cart;
   }
 
-  return getShopifyCompatibleServerResponse('cart_update', context, response);
+  // Fallback to cart page
+  if (context.request.method === 'GET') {
+    return redirect('/cart', 303);
+  }
+
+  return getShopifyCompatibleServerResponse(
+    'cart_update',
+    swellContext,
+    response,
+  );
 }
 
 export async function cartCheckout(swellContext: SwellServerContext) {
   const { params, swell, theme, context } = swellContext;
   const { redirect } = context;
-  const { updates } = params;
+  const { updates, checkout } = params;
 
   const cart = theme.globals.cart;
 
@@ -117,25 +127,25 @@ export async function cartCheckout(swellContext: SwellServerContext) {
         }
       }
 
-      if (cart.checkout_url) {
+      if (checkout !== undefined && cart.checkout_url) {
         return redirect(cart.checkout_url, 303);
       }
     }
   }
 
   // Fallback to cart page
-  return redirect('/cart', 307);
+  return redirect('/cart', 303);
 }
 
 export default [
   {
     id: 'cart_add',
-    url: '/cart/add',
+    url: ['/cart/add', '/cart/add.js'],
     handler: cartAdd,
   },
   {
     id: 'cart_update',
-    url: '/cart/update',
+    url: ['/cart/update', '/cart/update.js'],
     handler: cartUpdate,
   },
   {

@@ -2,7 +2,8 @@ import type { SwellServerContext } from '@/utils/server';
 
 export async function localizationUpdate(context: SwellServerContext) {
   const { params, swell } = context;
-  const { locale, currency } = params;
+  const locale = params.locale || params.language_code;
+  const currency = params.currency || params.currency_code;
 
   console.log('localizationUpdate', params);
 

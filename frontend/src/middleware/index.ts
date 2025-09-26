@@ -5,6 +5,7 @@ import globalRoutes from './route';
 import { formRoutes, restoreThemeRequestData } from './form';
 import accountRoutes from './account';
 import cartRoutes from './cart';
+import checkoutRoutes from './checkout';
 import { assetCacheRead, assetRender } from './asset';
 
 export const onRequest = sequence(
@@ -14,6 +15,7 @@ export const onRequest = sequence(
   assetRender,
   ...accountRoutes,
   ...cartRoutes,
+  ...checkoutRoutes,
   ...formRoutes,
   ...globalRoutes,
   restoreThemeRequestData,
