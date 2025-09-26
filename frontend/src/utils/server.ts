@@ -164,6 +164,10 @@ async function initServerContext<T extends SwellData = SwellData>(
 
   const theme: SwellTheme = context.locals.theme || initTheme(swell);
 
+  if (!theme.pageId) {
+    await theme.initGlobals('index');
+  }
+
   if (!context.locals.theme) {
     // Initialize currency and locale
     await theme.swell.getStorefrontSettings();
@@ -347,6 +351,19 @@ export async function getFormParams(
     }
   }
 
+  // URL-encoded form
+  if (
+    !request.parsedBody &&
+    requestContentType.includes('application/x-www-form-urlencoded')
+  ) {
+    try {
+      const text = await request.text();
+      request.parsedBody = qs.parse(text);
+    } catch {
+      // noop
+    }
+  }
+
   // JSON data
   if (!request.parsedJson && requestContentType === 'application/json') {
     try {
@@ -357,15 +374,20 @@ export async function getFormParams(
   }
 
   if (request.parsedBody) {
-    // Use qs to parse because form may contain array[] properties
-    let formData = '';
-    for (const [key, value] of request.parsedBody.entries()) {
-      formData += `&${key}=${value}`;
-    }
+    if (typeof request.parsedBody.entries === 'function') {
+      let formData = '';
 
-    const formParams = qs.parse(formData.slice(1));
-    for (const [key, value] of Object.entries(formParams)) {
-      params[key] = value;
+      for (const [key, value] of request.parsedBody.entries()) {
+        formData += `&${key}=${value}`;
+      }
+
+      // Use qs to parse because form may contain array[] properties
+      const formParams = qs.parse(formData.slice(1));
+
+      Object.assign(params, formParams);
+    } else {
+      // If parsedBody is already an object (from qs.parse), just merge
+      Object.assign(params, request.parsedBody);
     }
   }
 
