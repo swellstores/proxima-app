@@ -7,6 +7,7 @@ import {
   type SwellData,
   StorefrontResource,
   dehydrateSwellRefsInStorefrontResources,
+  isObject,
 } from '@swell/apps-sdk';
 
 import {
@@ -196,7 +197,7 @@ export async function sendServerResponse<T extends SwellData = SwellData>(
   result: unknown,
   swellContext: SwellServerContext<T>,
 ): Promise<Response> {
-  const { theme, context } = swellContext;
+  const { theme, context, params } = swellContext;
 
   if (theme.shopifyCompatibility) {
     theme.setCompatibilityData(result as SwellData);
@@ -205,6 +206,12 @@ export async function sendServerResponse<T extends SwellData = SwellData>(
   let response = await resolveAsyncResources(result as SwellData);
 
   dehydrateSwellRefsInStorefrontResources(response);
+
+  if (params.section_id) {
+    const html = await theme.renderSection(params.section_id, response);
+
+    return htmlResponse(html);
+  }
 
   if (typeof response === 'string') {
     response = {
@@ -220,6 +227,8 @@ export async function sendServerResponse<T extends SwellData = SwellData>(
     // return swell-data cookie
     response.swellData = getSwellDataCookie(context);
   }
+
+  await populateSections(swellContext, result);
 
   return jsonResponse(response);
 }
@@ -414,6 +423,17 @@ export function jsonResponse(
   });
 }
 
+export function htmlResponse(html: string, options?: ResponseInit): Response {
+  return new Response(html, {
+    status: 200,
+    ...options,
+    headers: {
+      'Content-Type': 'text/html',
+      ...options?.headers,
+    },
+  });
+}
+
 export function restoreThemeRequestData(
   context: APIContext,
   theme: SwellTheme,
@@ -485,6 +505,21 @@ export function wrapSectionContent(
   }
 
   return `<div id="swell-section-${sectionId}" class="swell-section">${content}</div>`;
+}
+
+async function populateSections(
+  serverContext: SwellServerContext,
+  result: unknown,
+) {
+  const { params, theme } = serverContext;
+
+  if (typeof params.sections !== 'string' || !isObject(result)) {
+    return;
+  }
+
+  const sections = await theme.renderAllSections(params.sections);
+
+  result.sections = sections;
 }
 
 // TODO: replace with util from storefrontjs
