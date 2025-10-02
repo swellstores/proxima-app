@@ -6,7 +6,15 @@ import react from '@astrojs/react';
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
-  adapter: cloudflare({ imageService: 'cloudflare' }),
+  security: {
+    checkOrigin: false
+  },
+  adapter: cloudflare({
+    imageService: 'cloudflare',
+    platformProxy: {
+      enabled: true
+    }
+  }),
   integrations: [react()],
   devToolbar: {
     enabled: false,
@@ -22,6 +30,9 @@ export default defineConfig({
       'process.platform': 'undefined',
     },
     server: {
+      host: true,
+      allowedHosts: ['.ngrok.app', '.loca.lt'],
+      hmr: false,
       sourcemapIgnoreList: false,
       warmup: {
         // Experimenting with warming up transforms
@@ -30,7 +41,16 @@ export default defineConfig({
       },
     },
     ssr: {
-      external: ['node:events', 'events'],
+      external: [
+        'node:events',
+        'events',
+        'buffer',
+        'crypto',
+        'node:fs/promises',
+        'node:path',
+        'node:url',
+        'node:crypto'
+      ],
     },
   },
 });

@@ -5,6 +5,9 @@
   "description": "An official Swell storefront app.",
   "author": "Swell",
   "license": "MIT",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
     "dev": "astro dev --root frontend",
     "start": "astro dev --root frontend",
@@ -13,13 +16,12 @@
     "preview": "astro preview --root frontend",
     "astro": "astro --root frontend",
     "test": "jest --silent",
-    "frontend:preview": "npx wrangler pages dev frontend/dist/",
-    "frontend:preview:build": "astro build --root frontend && npx wrangler pages dev frontend/dist/",
-    "frontend:deploy": "npx wrangler pages deploy frontend/dist/"
+    "frontend:deploy": "npx wrangler deploy --config frontend/wrangler.jsonc",
+    "postinstall": "node releases/compat.cjs || true"
   },
   "dependencies": {
     "@swell/apps-sdk": "^1.0.132",
-    "astro": "^4.12.3",
+    "astro": "^5.13.10",
     "lodash": "^4.17.21",
     "minimatch": "^10.0.1",
     "path-to-regexp": "^7.0.0",
@@ -29,8 +31,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/cloudflare": "^11.0.1",
-    "@astrojs/react": "^3.6.1",
+    "@astrojs/cloudflare": "^12.6.9",
+    "@astrojs/react": "^4.3.1",
     "@eslint/js": "^9.19.0",
     "@types/jest": "29.5.14",
     "@types/lodash": "^4.17.14",
