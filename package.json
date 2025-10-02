@@ -5,6 +5,9 @@
   "description": "An official Swell storefront app.",
   "author": "Swell",
   "license": "MIT",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
     "dev": "astro dev --root frontend",
     "start": "astro dev --root frontend",
