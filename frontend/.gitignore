@@ -1,6 +1,7 @@
 # build output
 dist/
 .wrangler/
+.workerd-bundle/
 tsconfig.tsbuildinfo
 
 # generated types
