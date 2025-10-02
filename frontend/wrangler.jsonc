@@ -3,15 +3,23 @@
   "name": "swell-proxima-app",
   "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2025-09-17",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "preview_urls": false,
   "workers_dev": true,
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist"
   },
+  "vars": {
+    "HTML_CACHE": true
+  },
   "kv_namespaces": [
-    { "binding": "THEME", "id": "40921157860042bcb7f1c746ba5e9b64" }
+    {
+      "binding": "THEME",
+      "id": "40921157860042bcb7f1c746ba5e9b64"
+    }
   ],
   "version_metadata": {
     "binding": "CF_VERSION_METADATA"
@@ -27,16 +35,28 @@
   },
   "env": {
     "preview": {
+      "vars": {
+        "HTML_CACHE": true
+      },
       "kv_namespaces": [
-        { "binding": "THEME", "id": "b0d940f80873469b968d9107fb1d914b" }
+        {
+          "binding": "THEME",
+          "id": "b0d940f80873469b968d9107fb1d914b"
+        }
       ],
       "version_metadata": {
         "binding": "CF_VERSION_METADATA"
       }
     },
     "production": {
+      "vars": {
+        "HTML_CACHE": true
+      },
       "kv_namespaces": [
-        { "binding": "THEME", "id": "a47205081eac414285418d8fe0851e47" }
+        {
+          "binding": "THEME",
+          "id": "a47205081eac414285418d8fe0851e47"
+        }
       ],
       "version_metadata": {
         "binding": "CF_VERSION_METADATA"

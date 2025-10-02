@@ -31,7 +31,7 @@ export default defineConfig({
     },
     server: {
       host: true,
-      allowedHosts: ['.ngrok.app'],
+      allowedHosts: ['.ngrok.app', '.loca.lt'],
       hmr: false,
       sourcemapIgnoreList: false,
       warmup: {
@@ -45,6 +45,7 @@ export default defineConfig({
         'node:events',
         'events',
         'buffer',
+        'crypto',
         'node:fs/promises',
         'node:path',
         'node:url',
