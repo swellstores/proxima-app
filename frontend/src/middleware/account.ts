@@ -13,7 +13,7 @@ const doLogout = handleMiddlewareRequest(
 
 const ensureAccountLoggedIn = handleMiddlewareRequest(
   'GET',
-  ['/account', '/account/!(login|signup|recover)'],
+  ['/account', '/account/!(login|signup|register|recover)'],
   async ({ swell, context }: SwellServerContext) => {
     const loggedIn = await swell.storefront.account.get();
 

@@ -7,6 +7,7 @@ import {
   type SwellData,
   StorefrontResource,
   dehydrateSwellRefsInStorefrontResources,
+  isObject,
 } from '@swell/apps-sdk';
 
 import {
@@ -164,6 +165,10 @@ async function initServerContext<T extends SwellData = SwellData>(
 
   const theme: SwellTheme = context.locals.theme || initTheme(swell);
 
+  if (!theme.pageId) {
+    await theme.initGlobals('index');
+  }
+
   if (!context.locals.theme) {
     // Initialize currency and locale
     await theme.swell.getStorefrontSettings();
@@ -192,7 +197,7 @@ export async function sendServerResponse<T extends SwellData = SwellData>(
   result: unknown,
   swellContext: SwellServerContext<T>,
 ): Promise<Response> {
-  const { theme, context } = swellContext;
+  const { theme, context, params } = swellContext;
 
   if (theme.shopifyCompatibility) {
     theme.setCompatibilityData(result as SwellData);
@@ -201,6 +206,12 @@ export async function sendServerResponse<T extends SwellData = SwellData>(
   let response = await resolveAsyncResources(result as SwellData);
 
   dehydrateSwellRefsInStorefrontResources(response);
+
+  if (params.section_id) {
+    const html = await theme.renderSection(params.section_id, response);
+
+    return htmlResponse(html);
+  }
 
   if (typeof response === 'string') {
     response = {
@@ -216,6 +227,8 @@ export async function sendServerResponse<T extends SwellData = SwellData>(
     // return swell-data cookie
     response.swellData = getSwellDataCookie(context);
   }
+
+  await populateSections(swellContext, result);
 
   return jsonResponse(response);
 }
@@ -347,6 +360,19 @@ export async function getFormParams(
     }
   }
 
+  // URL-encoded form
+  if (
+    !request.parsedBody &&
+    requestContentType.includes('application/x-www-form-urlencoded')
+  ) {
+    try {
+      const text = await request.text();
+      request.parsedBody = qs.parse(text);
+    } catch {
+      // noop
+    }
+  }
+
   // JSON data
   if (!request.parsedJson && requestContentType === 'application/json') {
     try {
@@ -357,15 +383,20 @@ export async function getFormParams(
   }
 
   if (request.parsedBody) {
-    // Use qs to parse because form may contain array[] properties
-    let formData = '';
-    for (const [key, value] of request.parsedBody.entries()) {
-      formData += `&${key}=${value}`;
-    }
+    if (typeof request.parsedBody.entries === 'function') {
+      let formData = '';
 
-    const formParams = qs.parse(formData.slice(1));
-    for (const [key, value] of Object.entries(formParams)) {
-      params[key] = value;
+      for (const [key, value] of request.parsedBody.entries()) {
+        formData += `&${key}=${value}`;
+      }
+
+      // Use qs to parse because form may contain array[] properties
+      const formParams = qs.parse(formData.slice(1));
+
+      Object.assign(params, formParams);
+    } else {
+      // If parsedBody is already an object (from qs.parse), just merge
+      Object.assign(params, request.parsedBody);
     }
   }
 
@@ -387,6 +418,17 @@ export function jsonResponse(
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+}
+
+export function htmlResponse(html: string, options?: ResponseInit): Response {
+  return new Response(html, {
+    status: 200,
+    ...options,
+    headers: {
+      'Content-Type': 'text/html',
       ...options?.headers,
     },
   });
@@ -463,6 +505,21 @@ export function wrapSectionContent(
   }
 
   return `<div id="swell-section-${sectionId}" class="swell-section">${content}</div>`;
+}
+
+async function populateSections(
+  serverContext: SwellServerContext,
+  result: unknown,
+) {
+  const { params, theme } = serverContext;
+
+  if (typeof params.sections !== 'string' || !isObject(result)) {
+    return;
+  }
+
+  const sections = await theme.renderAllSections(params.sections);
+
+  result.sections = sections;
 }
 
 // TODO: replace with util from storefrontjs

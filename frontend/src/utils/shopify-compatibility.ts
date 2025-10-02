@@ -55,7 +55,13 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         type: 'cart_update',
         shopifyType: undefined, // No Shopify equivalent, manually executed by the cart_update handler
         serverParams: async ({ params, theme }: SwellServerContext) => {
-          const { line, quantity } = params;
+          const { line, quantity, updates } = params;
+
+          if (updates) {
+            const [[item_id, quantity]] = Object.entries(updates);
+
+            return { item_id, quantity: Number(quantity) };
+          }
 
           // Convert line number to item_id
           const prevCartItems = await theme.globals.cart?.items;
@@ -71,13 +77,16 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           const { prevItem, item_id, quantity } = params;
 
           if (cart) {
-            const updatedCartItem = cart.items?.find(
+            const items = cart.items || [];
+            const updatedCartItem = items.find(
               (item: any) => item.id === item_id,
             );
 
             // Indicate which item was updated or removed
             return {
               ...cart,
+              items,
+              item_count: items.length,
               items_added: prevItem && quantity > 0 ? [updatedCartItem] : [],
               items_removed: prevItem && quantity === 0 ? [prevItem] : [],
             };
