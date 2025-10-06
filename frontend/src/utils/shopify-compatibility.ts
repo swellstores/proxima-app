@@ -2,6 +2,7 @@ import {
   SwellTheme,
   ShopifyCompatibility,
   ShopifyFormResourceMap,
+  getCurrencyByCountry,
 } from '@swell/apps-sdk';
 
 import type { SwellServerContext } from './server';
@@ -28,10 +29,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           // Shopify uses id as variant_id, or product_id if no variant selected
           const variant_id = id && id !== product_id ? id : undefined;
 
-          return {
-            prevItems,
-            variant_id,
-          };
+          return { prevItems, variant_id };
         },
         serverResponse: async ({ params, response: cart }: any) => {
           const { prevItems } = params;
@@ -56,15 +54,18 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         shopifyType: undefined, // No Shopify equivalent, manually executed by the cart_update handler
         serverParams: async ({ params, theme }: SwellServerContext) => {
           const { line, quantity, updates } = params;
+          const prevCartItems = await theme.globals.cart?.items;
 
           if (updates) {
-            const [[item_id, quantity]] = Object.entries(updates);
+            const [[id, quantity]] = Object.entries(updates);
+            const item = prevCartItems.find((item) =>
+              [item.variant_id, item.product_id, item.id].includes(id),
+            );
 
-            return { item_id, quantity: Number(quantity) };
+            return { item_id: item.id, quantity: Number(quantity) };
           }
 
           // Convert line number to item_id
-          const prevCartItems = await theme.globals.cart?.items;
           const prevItem = prevCartItems?.[line - 1];
 
           return {
@@ -100,7 +101,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           const { country_code, locale_code } = params;
 
           return {
-            currency: country_code,
+            currency: getCurrencyByCountry(country_code),
             locale: locale_code,
           };
         },
@@ -112,10 +113,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           const { customer } = params;
 
           return {
-            account: {
-              email: customer?.email,
-              password: customer?.password,
-            },
+            account: { email: customer?.email, password: customer?.password },
           };
         },
       },
@@ -141,12 +139,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         serverParams: ({ params }: SwellServerContext) => {
           const { contact } = params;
 
-          return {
-            account: {
-              email: contact?.email,
-              email_optin: true,
-            },
-          };
+          return { account: { email: contact?.email, email_optin: true } };
         },
       },
       {
