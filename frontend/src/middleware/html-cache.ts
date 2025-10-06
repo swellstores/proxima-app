@@ -11,9 +11,8 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
   }
 
   const versionMetadata = context.locals.runtime?.env?.CF_VERSION_METADATA;
-  const epoch = versionMetadata?.id || "default";
-
-  logger.info('[SDK Html-cache] Using epoch:', { epoch });
+  const customEpoch = context.locals.runtime?.env?.HTML_CACHE_EPOCH;
+  const epoch = versionMetadata?.id || customEpoch || "default";
 
   const runtime = context.locals.runtime;
   const environment: HtmlCacheEnv = {
@@ -37,6 +36,11 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
   const isRevalidation =
     context.request.headers.get('X-Cache-Bypass') === 'revalidation';
   const method = context.request.method.toUpperCase();
+
+  const storefrontId = context.request.headers.get('swell-storefront-id');
+  const themeVersionHash = context.request.headers.get('swell-theme-version-hash');
+  logger.info('[SDK Html-cache] cache values:', { storefrontId, themeVersionHash, isRevalidation, epoch });
+
 
   // ---- READ PATH ----
   if (!isRevalidation && htmlCache.canReadFromCache(context.request)) {
