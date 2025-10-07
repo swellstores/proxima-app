@@ -20,6 +20,7 @@
     "postinstall": "node releases/compat.cjs || true"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.6.9",
     "@swell/apps-sdk": "^1.0.132",
     "astro": "^5.13.10",
     "lodash": "^4.17.21",
@@ -31,7 +32,6 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/cloudflare": "^12.6.9",
     "@astrojs/react": "^4.3.1",
     "@eslint/js": "^9.19.0",
     "@types/jest": "29.5.14",
