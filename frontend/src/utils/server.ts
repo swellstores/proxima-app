@@ -499,12 +499,9 @@ export function wrapSectionContent(
   sectionId: string,
   content: string,
 ): string {
-  if (theme.shopifyCompatibility) {
-    // TODO: figure out a way to use compatibility class for this
-    return `<div id="shopify-section-${sectionId}" class="shopify-section">${content}</div>`;
-  }
-
-  return `<div id="swell-section-${sectionId}" class="swell-section">${content}</div>`;
+  const sectionClassName = theme.getSectionClassName();
+  const sectionIdPrefix = theme.getSectionIdPrefix();
+  return `<div id="${sectionIdPrefix}-${sectionId}" class="${sectionClassName}">${content}</div>`;
 }
 
 async function populateSections(
