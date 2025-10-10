@@ -26,12 +26,13 @@ interface Section {
 
 const { theme, content, data } = Astro.props;
 const sections = (await theme.renderPageSections(content, data)) as Section[];
+const sectionClassName = theme.getSectionClassName();
 ---
 
 {
   sections.map(({ section, output, tag: Tag }: Section) => {
     const { type = 'unknown' } = section;
     const TagComponent = Tag as keyof JSX.IntrinsicElements;
-    return <TagComponent data-swell-section={type} id={section.id} set:html={output} />;
+    return <TagComponent data-swell-section={type} class={sectionClassName} id={section.id} set:html={output} />;
   })
 }
