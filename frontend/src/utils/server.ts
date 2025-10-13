@@ -199,10 +199,11 @@ export function isResponseSent(request: Request): boolean {
 
   To support these themes, I'm returning predefined empty content.
 */
-const NOT_SUPPORTED_SECTIONS: { [key: string]: string } = Object.freeze({
-  'pickup-availability':
-    '<div id="shopify-section-pickup-availability" class="shopify-section"></div>',
-});
+const NOT_SUPPORTED_SECTIONS: Record<string, string | undefined> =
+  Object.freeze({
+    'pickup-availability':
+      '<div id="shopify-section-pickup-availability" class="shopify-section"></div>',
+  });
 
 export async function sendServerResponse<T extends SwellData = SwellData>(
   result: unknown,
