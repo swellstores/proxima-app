@@ -193,6 +193,18 @@ export function isResponseSent(request: Request): boolean {
   return Boolean(Reflect.get(request, Symbol.for('astro.responseSent')));
 }
 
+/* 
+  We don't support some features, like pickup availability.
+  However, this section is required for some themes.
+
+  To support these themes, I'm returning predefined empty content.
+*/
+const NOT_SUPPORTED_SECTIONS: Record<string, string | undefined> =
+  Object.freeze({
+    'pickup-availability':
+      '<div id="shopify-section-pickup-availability" class="shopify-section"></div>',
+  });
+
 export async function sendServerResponse<T extends SwellData = SwellData>(
   result: unknown,
   swellContext: SwellServerContext<T>,
@@ -208,7 +220,9 @@ export async function sendServerResponse<T extends SwellData = SwellData>(
   dehydrateSwellRefsInStorefrontResources(response);
 
   if (params.section_id) {
-    const html = await theme.renderSection(params.section_id, response);
+    const html =
+      NOT_SUPPORTED_SECTIONS[params.section_id as string] ??
+      (await theme.renderSection(params.section_id as string, response));
 
     return htmlResponse(html);
   }
