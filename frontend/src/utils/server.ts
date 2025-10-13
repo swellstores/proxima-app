@@ -227,6 +227,13 @@ export async function sendServerResponse<T extends SwellData = SwellData>(
     return htmlResponse(html);
   }
 
+  if (params.sections && response && typeof response === 'object') {
+    const sections = await theme.renderAllSections(
+      (params.sections as string[]) ?? [],
+    );
+    response.sections = sections;
+  }
+
   if (typeof response === 'string') {
     response = {
       response,
