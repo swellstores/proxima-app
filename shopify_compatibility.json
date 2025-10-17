@@ -190,6 +190,7 @@
     },
     {
       "id": "account_address",
+      "shopify_type": "customer_address",
       "client_params": [
         {
           "name": "account_address_id",
