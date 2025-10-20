@@ -90,10 +90,18 @@ export async function accountSubscribe({
     const loggedIn = await swell.storefront.account.get();
 
     if (loggedIn) {
+      // the same email should be used
+      if (loggedIn.email !== account.email) {
+        await setSubscribeAccountErrors(theme, {
+          email: 'Invalid email address',
+        });
+        return;
+      }
+
       // Ignore email if already logged in
       await swell.storefront.account.update({
-        email: undefined,
         ...account,
+        email: undefined,
       });
     } else {
       const result = await swell.storefront.account.create(account);
@@ -412,11 +420,6 @@ async function setSubscribeAccountErrors(theme: SwellTheme, errors: SwellData) {
       {
         code: 'invalid_email',
         field_name: 'email',
-        field_label: await theme.lang(
-          'forms.account_signup.email',
-          null,
-          'Email',
-        ),
         message: await theme.lang(
           'forms.account_signup.invalid_email',
           null,
