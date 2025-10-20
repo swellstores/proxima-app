@@ -26,10 +26,25 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
           const { id, product_id } = params;
           const prevItems = await theme.globals.cart?.items;
 
-          // Shopify uses id as variant_id, or product_id if no variant selected
-          const variant_id = id && id !== product_id ? id : undefined;
+          let productId = product_id;
+          let variantId = id && id !== product_id ? id : undefined;
 
-          return { prevItems, variant_id };
+          // Shopify may send only one "id",
+          // which can be either a product ID or a variant ID.
+          if (!productId) {
+            const [product, variant] = await Promise.all([
+              theme.swell.get('/products/{id}', { id, fields: ['id'] }),
+              theme.swell.get('/products:variants/{id}', {
+                id,
+                fields: ['id', 'parent_id'],
+              }),
+            ]);
+
+            productId = product?.id || variant?.parent_id;
+            variantId = variant?.id;
+          }
+
+          return { product_id: productId, variant_id: variantId, prevItems };
         },
         serverResponse: async ({ params, response: cart }: any) => {
           const { prevItems } = params;
