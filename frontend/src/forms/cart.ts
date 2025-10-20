@@ -127,7 +127,7 @@ export async function cartCheckout(swellContext: SwellServerContext) {
         }
       }
 
-      if (checkout !== undefined && cart.checkout_url) {
+      if (cart.checkout_url) {
         return redirect(cart.checkout_url, 303);
       }
     }
