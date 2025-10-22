@@ -13,7 +13,7 @@
 					"exclude_files": [
 						"theme/config/**",
 						"theme/templates/**",
-						"theme/sections/**"
+						"theme/sections/**/*.json"
 					]
 				}
 			},
