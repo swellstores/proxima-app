@@ -48,6 +48,10 @@ async function handleResponse<T extends SwellData = SwellData>(
   result: Response,
   swellContext: SwellServerContext<T>,
 ): Promise<Response> {
+  if (result.headers.get('X-Astro-Route-Type') === 'page') {
+    return result;
+  }
+
   // return json for editor form actions instead of redirect
   if (isEditorRequest(swellContext.context)) {
     return sendServerResponse(
