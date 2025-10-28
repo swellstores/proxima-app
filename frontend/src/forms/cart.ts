@@ -15,7 +15,13 @@ export async function cartGet(
   } = context;
 
   // Skip handler if something else is expected instead of json
-  if (!(request.headers.get('accept') ?? '').startsWith('application/json')) {
+  const acceptHeader = request.headers.get('accept') ?? '';
+  const acceptJSON = acceptHeader.startsWith('application/json');
+  const acceptAll = acceptHeader.startsWith('*/*');
+  const jsonResponse =
+    acceptJSON || (request.url.includes('/cart.js') && acceptAll);
+
+  if (!jsonResponse) {
     await next();
     return;
   }
