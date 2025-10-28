@@ -58,13 +58,11 @@ export async function cartUpdate(swellContext: SwellServerContext) {
 
   // Manually handle cart_update compatibility
   // because there is no equivalent form for it in Shopify
-  const { item_id, quantity } = await getShopifyCompatibleServerParams(
-    'cart_update',
-    swellContext,
-  );
+  const { item_id, quantity, comments } =
+    await getShopifyCompatibleServerParams('cart_update', swellContext);
 
   let response;
-
+  let refetch = false;
   if (item_id) {
     if (quantity === 0) {
       await swell.storefront.cart.removeItem(item_id);
@@ -74,6 +72,15 @@ export async function cartUpdate(swellContext: SwellServerContext) {
       });
     }
 
+    refetch = true;
+  }
+
+  if (comments) {
+    await swell.storefront.cart.update({ comments });
+    refetch = true;
+  }
+
+  if (refetch) {
     const cart = await theme.fetchCart();
 
     // Make sure cart is loaded
