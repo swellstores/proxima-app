@@ -15,7 +15,13 @@ export async function cartGet(
   } = context;
 
   // Skip handler if something else is expected instead of json
-  if (!(request.headers.get('accept') ?? '').startsWith('application/json')) {
+  const acceptHeader = request.headers.get('accept') ?? '';
+  const acceptJSON = acceptHeader.startsWith('application/json');
+  const acceptAll = acceptHeader.startsWith('*/*');
+  const jsonResponse =
+    acceptJSON || (request.url.includes('/cart.js') && acceptAll);
+
+  if (!jsonResponse) {
     await next();
     return;
   }
@@ -58,13 +64,11 @@ export async function cartUpdate(swellContext: SwellServerContext) {
 
   // Manually handle cart_update compatibility
   // because there is no equivalent form for it in Shopify
-  const { item_id, quantity } = await getShopifyCompatibleServerParams(
-    'cart_update',
-    swellContext,
-  );
+  const { item_id, quantity, comments } =
+    await getShopifyCompatibleServerParams('cart_update', swellContext);
 
   let response;
-
+  let refetch = false;
   if (item_id) {
     if (quantity === 0) {
       await swell.storefront.cart.removeItem(item_id);
@@ -74,6 +78,15 @@ export async function cartUpdate(swellContext: SwellServerContext) {
       });
     }
 
+    refetch = true;
+  }
+
+  if (comments) {
+    await swell.storefront.cart.update({ comments });
+    refetch = true;
+  }
+
+  if (refetch) {
     const cart = await theme.fetchCart();
 
     // Make sure cart is loaded

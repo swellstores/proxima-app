@@ -68,7 +68,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
         type: 'cart_update',
         shopifyType: undefined, // No Shopify equivalent, manually executed by the cart_update handler
         serverParams: async ({ params, theme }: SwellServerContext) => {
-          const { line, quantity, updates } = params;
+          const { line, quantity, updates, note } = params;
           const prevCartItems = await theme.globals.cart?.items;
 
           if (updates) {
@@ -87,6 +87,7 @@ export default class StorefrontShopifyCompatibility extends ShopifyCompatibility
             prevItem,
             item_id: prevItem?.id,
             quantity: Number(quantity),
+            comments: note,
           };
         },
         serverResponse: async ({ params, response: cart }: any) => {
