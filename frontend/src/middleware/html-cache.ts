@@ -1,6 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
-import { getHtmlCache, DEFAULT_CACHE_RULES, type HtmlCacheEnv, type CacheRules } from '@swell/apps-sdk';
+
 import { logger } from '@/utils/logger';
+import { createHtmlCache } from '@/utils/html-cache';
 
 export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
   // Check if HTML caching is enabled
@@ -10,27 +11,7 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  const versionMetadata = context.locals.runtime?.env?.CF_VERSION_METADATA;
-  const customEpoch = context.locals.runtime?.env?.HTML_CACHE_EPOCH;
-  const epoch = versionMetadata?.id || customEpoch || "default";
-
-  const runtime = context.locals.runtime;
-  const environment: HtmlCacheEnv = {
-    NAMESPACE: runtime?.env?.THEME,
-    HTML_CACHE_EPOCH: epoch,
-    HTML_CACHE_BACKEND:
-      (runtime?.env?.HTML_CACHE_BACKEND as 'kv' | 'worker' | undefined) || 'kv',
-  };
-
-  const cacheRules: CacheRules = {
-    ...DEFAULT_CACHE_RULES,
-    pathRules: [
-      ...DEFAULT_CACHE_RULES.pathRules || [],
-      { path: '/account', skip: true }
-    ]
-  };
-
-  const htmlCache = getHtmlCache(environment, cacheRules);
+  const htmlCache = createHtmlCache(context);
   if (!htmlCache) return next();
 
   const isRevalidation =
@@ -38,9 +19,16 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
   const method = context.request.method.toUpperCase();
 
   const storefrontId = context.request.headers.get('swell-storefront-id');
-  const themeVersionHash = context.request.headers.get('swell-theme-version-hash');
-  logger.info('[SDK Html-cache] cache values:', { storefrontId, themeVersionHash, isRevalidation, epoch });
-
+  const themeVersionHash = context.request.headers.get(
+    'swell-theme-version-hash',
+  );
+  logger.info('[SDK Html-cache] cache values:', {
+    storefrontId,
+    themeVersionHash,
+    isRevalidation,
+    // @ts-expect-error protected epoch
+    epoch: htmlCache.epoch,
+  });
 
   // ---- READ PATH ----
   if (!isRevalidation && htmlCache.canReadFromCache(context.request)) {
@@ -90,14 +78,6 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
   // ---- MISS PATH ----
   const response = await next();
 
-  // Helpers
-  const stripEnc = (h: Headers) => {
-    h.delete('content-encoding');
-    h.delete('Content-Encoding');
-    h.delete('content-length');
-    h.delete('Content-Length');
-  };
-
   if (htmlCache.canWriteToCache(context.request, response)) {
     // Buffer once
     const bodyText = await response.text();
@@ -138,3 +118,9 @@ export const htmlCacheMiddleware = defineMiddleware(async (context, next) => {
   );
   return response;
 });
+
+// Helpers
+function stripEnc(h: Headers) {
+  h.delete('content-encoding');
+  h.delete('content-length');
+}
