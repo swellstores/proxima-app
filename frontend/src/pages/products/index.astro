@@ -9,9 +9,10 @@ import type { Swell } from '@swell/apps-sdk';
 
 export async function getData(swell: Swell, Astro?: AstroGlobal) {
   const productId = Astro?.url?.searchParams?.get('product_id');
+  const categoryId = Astro?.url?.searchParams?.get('category');
 
   return {
-    category: new CategoryResource(swell, 'all'),
+    category: new CategoryResource(swell, categoryId || 'all'),
     product: productId
       ? new ProductResource(swell, productId, {
           $recommendations: true,
