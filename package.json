@@ -22,7 +22,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.9",
     "@swell/apps-sdk": "^1.0.132",
-    "astro": "^5.13.10",
+    "astro": "^5.15.9",
     "lodash": "^4.17.21",
     "minimatch": "^10.0.1",
     "path-to-regexp": "^7.0.0",
