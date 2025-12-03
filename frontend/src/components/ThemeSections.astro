@@ -22,6 +22,7 @@ interface Section {
   };
   output: string;
   tag: AllowedTags;
+  class?: string;
 }
 
 const { theme, content, data } = Astro.props;
@@ -30,9 +31,10 @@ const sectionClassName = theme.getSectionClassName();
 ---
 
 {
-  sections.map(({ section, output, tag: Tag }: Section) => {
+  sections.map(({ section, output, tag: Tag, class: className }: Section) => {
     const { type = 'unknown' } = section;
     const TagComponent = Tag as keyof JSX.IntrinsicElements;
-    return <TagComponent data-swell-section={type} class={`${sectionClassName} ${sectionClassName}-${section.id}`} id={section.id} set:html={output} />;
+
+    return <TagComponent data-swell-section={type} class={`${sectionClassName} ${sectionClassName}-${section.id} ${className}`} id={section.id} set:html={output} />;
   })
 }
