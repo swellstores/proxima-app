@@ -1,0 +1,46 @@
+---
+import { ProductResource, VariantResource } from '@/resources';
+import { parseResources } from '@/utils/server-resources';
+import { handleServerRequest } from '@/utils/server';
+
+import ThemePage from '@/components/ThemePage.astro';
+
+import type { Swell } from '@swell/apps-sdk';
+
+async function getData(swell: Swell, productId?: string, variantId?: string) {
+  const { options, purchase_option, quantity = 1 } = swell.queryParams;
+
+  const variant = await ((new VariantResource(swell, {}, variantId as string) as any).resolve());
+
+  if (variant) {
+    swell.queryParams.variant = variant.id;
+  }
+
+  const product = new ProductResource(swell, productId as string, {
+    $categories: true,
+    $recommendations: true,
+    $pricing: {
+      quantity,
+      options,
+      purchase_option,
+    },
+  });
+
+  return {
+    product,
+  };
+}
+
+export const getJSON = handleServerRequest(async ({ swell, context }) => {
+  const data = await getData(swell, context.params.slug, context.params.variant);
+  return parseResources(data);
+});
+
+---
+<ThemePage
+  id="products/product"
+  required="product.id"
+  title="{{ product.meta_title | default: product.name }}"
+  description="{{ product.meta_description | default: product.description }}"
+  getData={(swell) => getData(swell, Astro.params.slug, Astro.params.variant)}
+/>
