@@ -12,9 +12,11 @@ async function getData(swell: Swell, productId?: string, variantId?: string) {
 
   const variant = await (new VariantResource(swell, {}, variantId as string).resolve());
 
-  if (variant) {
-    swell.queryParams.variant = variant.id;
+  if (!variant?.id) {
+    return {};
   }
+
+  swell.queryParams.variant = variant.id;
 
   const product = new ProductResource(swell, productId as string, {
     $categories: true,
