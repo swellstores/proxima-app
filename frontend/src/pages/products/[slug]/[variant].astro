@@ -10,7 +10,7 @@ import type { Swell } from '@swell/apps-sdk';
 async function getData(swell: Swell, productId?: string, variantId?: string) {
   const { options, purchase_option, quantity = 1 } = swell.queryParams;
 
-  const variant = await ((new VariantResource(swell, {}, variantId as string) as any).resolve());
+  const variant = await (new VariantResource(swell, {}, variantId as string).resolve());
 
   if (variant) {
     swell.queryParams.variant = variant.id;
