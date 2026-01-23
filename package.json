@@ -23,7 +23,7 @@
     "@astrojs/cloudflare": "^12.6.9",
     "@swell/apps-sdk": "^1.0.188",
     "astro": "^5.13.10",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "minimatch": "^10.0.1",
     "path-to-regexp": "^7.0.0",
     "qs": "^6.12.1",
