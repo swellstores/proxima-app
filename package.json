@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.9",
-    "@swell/apps-sdk": "^1.0.188",
+    "@swell/apps-sdk": "^1.0.189",
     "astro": "^5.13.10",
     "lodash": "^4.17.21",
     "minimatch": "^10.0.1",
