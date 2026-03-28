@@ -251,7 +251,19 @@
 				"content/blogs": "blogs/blog",
 				"content/pages": "pages/page"
 			},
-			"cache_hook": "/hooks/theme"
+			"cache_hook": "/hooks/theme",
+			"warmup_pages": {
+				"enabled": true,
+				"pages": [
+					"index",
+					"products/index",
+					"categories/index",
+					"blogs/blog",
+					"pages/page",
+					"categories/category",
+					"products/product"
+				]
+			}
 		},
 		"menus": [
 			{
