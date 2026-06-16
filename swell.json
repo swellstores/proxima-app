@@ -313,7 +313,7 @@
 	],
 	"purchase_options": [
 		"standard",
-		"susbcription"
+		"subscription"
 	],
 	"features": [
 		"multi_currency",
