@@ -23,6 +23,7 @@ export const GET: APIRoute = async (context) => {
   }
 
   const host =
+    context.request.headers.get('swell-storefront-host') ||
     context.request.headers.get('x-forwarded-host') ||
     context.request.headers.get('host') ||
     context.url.host;
