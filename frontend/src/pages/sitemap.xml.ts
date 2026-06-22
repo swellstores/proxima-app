@@ -22,6 +22,11 @@ export const GET: APIRoute = async (context) => {
     return new Response(null, { status: 404 });
   }
 
+  const protocol =
+    context.request.headers.get('x-forwarded-proto')?.trim().toLowerCase() ===
+    'https'
+      ? 'https:'
+      : 'http:';
   const host =
     context.request.headers.get('swell-storefront-host') ||
     context.request.headers.get('x-forwarded-host') ||
@@ -53,7 +58,7 @@ export const GET: APIRoute = async (context) => {
   }
 
   const files = await collectSiteLinks(initSwell(context)).then((links) =>
-    generateSitemapFiles(`${context.url.protocol}//${host}`, links),
+    generateSitemapFiles(`${protocol}//${host}`, links),
   );
 
   if (htmlCache) {
