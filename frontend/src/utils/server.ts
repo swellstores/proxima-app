@@ -8,7 +8,7 @@ import {
   StorefrontResource,
   dehydrateSwellRefsInStorefrontResources,
   isObject,
-} from '@swell/apps-sdk';
+} from '@swell/themes-sdk';
 
 import {
   initSwell,

@@ -15,4 +15,4 @@ export {
   AccountSubscriptionResource,
   AccountSubscriptionsResource,
   VariantResource,
-} from '@swell/apps-sdk';
+} from '@swell/themes-sdk';

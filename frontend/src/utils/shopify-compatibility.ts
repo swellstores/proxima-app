@@ -3,7 +3,7 @@ import {
   ShopifyCompatibility,
   ShopifyFormResourceMap,
   getCurrencyByCountry,
-} from '@swell/apps-sdk';
+} from '@swell/themes-sdk';
 
 import type { SwellServerContext } from './server';
 

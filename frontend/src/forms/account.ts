@@ -1,4 +1,4 @@
-import { SwellTheme, SwellData } from '@swell/apps-sdk';
+import { SwellTheme, SwellData } from '@swell/themes-sdk';
 
 import type { SwellServerContext } from '@/utils/server';
 import { APIContext } from 'astro';

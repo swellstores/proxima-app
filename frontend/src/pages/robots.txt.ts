@@ -5,7 +5,7 @@ import {
   PageNotFound,
   type ShopifyRobots,
   type ThemeGlobals,
-} from '@swell/apps-sdk';
+} from '@swell/themes-sdk';
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async (context) => {

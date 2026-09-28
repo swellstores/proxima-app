@@ -1,4 +1,4 @@
-import type { ThemePageTemplateConfig } from '@swell/apps-sdk';
+import type { ThemePageTemplateConfig } from '@swell/themes-sdk';
 
 export function isPageContentRecord(
   pageContent: unknown,

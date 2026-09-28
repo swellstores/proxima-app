@@ -4,7 +4,7 @@ import {
   type CacheRules,
   type HtmlCache,
   type HtmlCacheEnv,
-} from '@swell/apps-sdk';
+} from '@swell/themes-sdk';
 
 import type { APIContext } from 'astro';
 

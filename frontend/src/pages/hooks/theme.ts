@@ -1,7 +1,7 @@
 import { handleServerRequest } from '@/utils/server';
 
 import type { SwellServerContext } from '@/utils/server';
-import type { SwellThemePreload } from '@swell/apps-sdk';
+import type { SwellThemePreload } from '@swell/themes-sdk';
 
 export async function handleThemeRequest(
   serverContext: SwellServerContext<SwellThemePreload>,

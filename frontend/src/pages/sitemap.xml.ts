@@ -2,7 +2,7 @@ import { initSwell } from '@/swell';
 import { createHtmlCache } from '@/utils/html-cache';
 
 import type { APIContext, APIRoute } from 'astro';
-import type { HtmlCache, Swell } from '@swell/apps-sdk';
+import type { HtmlCache, Swell } from '@swell/themes-sdk';
 
 interface SitemapFile {
   index: number;
