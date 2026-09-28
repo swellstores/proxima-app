@@ -1,4 +1,4 @@
-import { Swell, SwellTheme } from '@swell/apps-sdk';
+import { Swell, SwellTheme } from '@swell/themes-sdk';
 
 import type { SwellServerContext } from '@/utils/server';
 

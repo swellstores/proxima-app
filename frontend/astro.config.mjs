@@ -31,7 +31,7 @@ export default defineConfig({
     },
     server: {
       host: true,
-      allowedHosts: ['.ngrok.app', '.loca.lt'],
+      allowedHosts: ['.ngrok.app', '.loca.lt', '.trycloudflare.com'],
       hmr: false,
       sourcemapIgnoreList: false,
       warmup: {

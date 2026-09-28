@@ -9,7 +9,7 @@ import {
   type ThemeLookupResourceFactory,
   type SwellAppStorefrontThemeResources,
   type SwellAppShopifyCompatibilityConfig,
-} from '@swell/apps-sdk';
+} from '@swell/themes-sdk';
 import { AstroGlobal, APIContext, AstroCookieSetOptions } from 'astro';
 
 import forms from '@/forms';

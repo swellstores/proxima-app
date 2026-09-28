@@ -5,7 +5,7 @@ import { handleServerRequest } from '@/utils/server';
 
 import ThemePage from '@/components/ThemePage.astro';
 
-import type { Swell } from '@swell/apps-sdk';
+import type { Swell } from '@swell/themes-sdk';
 
 async function getData(swell: Swell, productId?: string, variantId?: string) {
   const { options, purchase_option, quantity = 1 } = swell.queryParams;

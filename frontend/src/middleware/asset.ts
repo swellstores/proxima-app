@@ -1,6 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
 import type { APIContext, MiddlewareNext } from 'astro';
-import { ContentCache } from '@swell/apps-sdk';
+import { ContentCache } from '@swell/themes-sdk';
 import { DYNAMIC_ASSET_URL } from '@/swell';
 import {
   handleMiddlewareRequest,
