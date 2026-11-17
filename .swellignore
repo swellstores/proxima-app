@@ -1,0 +1,7 @@
+# Kept in git, not part of the published app
+.swellignore
+/test/
+/vitest.config.*
+/jest.config.*
+*.test.*
+*.spec.*
