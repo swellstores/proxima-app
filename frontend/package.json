@@ -1,5 +1,6 @@
 {
     "name": "frontend",
+    "license": "SEE LICENSE IN ../LICENSE",
     "type": "module",
     "private": true,
     "scripts": {}

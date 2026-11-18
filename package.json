@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "A Swell storefront app that runs Shopify-style Liquid themes.",
   "author": "Swell",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "workspaces": [
     "frontend"
   ],
