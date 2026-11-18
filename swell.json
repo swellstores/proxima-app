@@ -306,6 +306,13 @@
 		]
 	},
 	"preview_src": "assets/preview-proxima.png",
+	"images": [
+		{
+			"id": "proxima-preview",
+			"title": "Proxima storefront preview",
+			"image_src": "assets/preview-proxima.png"
+		}
+	],
 	"use_cases": [
 		"direct_to_consumer",
 		"wholesale",
