@@ -1,12 +1,14 @@
-# Proxima - Swell Storefront App
+# Proxima: Shopify-style themes on Swell
 
-**Proxima** is an official Swell storefront app built with Astro and React, designed to provide a modern, performant e-com
+**Proxima** is a Swell storefront app, built with Astro and React, that runs Shopify-style Liquid themes on Swell. It renders Online Store 2.0 templates, sections and blocks against your Swell catalog, so a store moving to Swell can keep the theme it already has, and developers can keep working in Liquid.
+
+> **Starting a new storefront?** Swell recommends [Wave](https://developers.swell.is/app-guides/wave), a storefront editor with an AI agent built in. Wave can import a Shopify theme too: it rebuilds the theme as a native Wave theme, keeping your content, colors, fonts and photos, and then you edit it by asking in plain words or by clicking. Wave themes can also place widgets from installed apps, show data from apps and run app actions, which Proxima doesn't support. Proxima keeps running for the stores built on it, and it's the right choice when you need a Liquid theme to run as it is.
 
 ## 📦 Deployment
 
-Proxima is designed to deploy on Cloudflare Pages for optimal performance. This app serves as both a production-ready app and a reference implementation for building custom Swell storefronts apps.
+Proxima is designed to deploy on Cloudflare Pages for optimal performance. It can run a production store, and it also works as an example for building your own Swell storefront app.
 
-👉 [Official documentation](https://developers.swell.is/storefronts/proxima-app)
+👉 [Documentation](https://developers.swell.is/storefronts/proxima-app)
 
 ## 🌟 Features
 
@@ -197,7 +199,7 @@ Proxima is designed to deploy on Cloudflare Pages for optimal performance:
 
 ## 🤝 Contributing
 
-This is an official Swell storefront app. For customizations:
+Proxima is open source. To customize it:
 
 1. Fork the repository
 2. Make your changes
@@ -219,4 +221,4 @@ See the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Proxima** is maintained by the Swell team and serves as the reference implementation for modern Swell storefronts.
+**Proxima** is maintained by the Swell team. It is one of the storefront apps Swell builds, each suited to different needs.

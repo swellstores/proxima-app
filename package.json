@@ -2,7 +2,7 @@
   "name": "@swell/proxima",
   "type": "module",
   "version": "1.0.0",
-  "description": "An official Swell storefront app.",
+  "description": "A Swell storefront app that runs Shopify-style Liquid themes.",
   "author": "Swell",
   "license": "SEE LICENSE IN LICENSE",
   "workspaces": [

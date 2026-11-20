@@ -3,7 +3,7 @@
 	"name": "Proxima",
 	"type": "storefront",
 	"version": "1.0.136",
-	"description": "Official storefront app for Swell",
+	"description": "Runs Shopify-style Liquid themes on Swell",
 	"storefront": {
 		"theme": {
 			"provider": "app",
