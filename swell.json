@@ -2,7 +2,7 @@
 	"id": "proxima",
 	"name": "Proxima",
 	"type": "storefront",
-	"version": "1.0.136",
+	"version": "1.0.137",
 	"description": "Runs Shopify-style Liquid themes on Swell",
 	"storefront": {
 		"theme": {
