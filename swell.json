@@ -4,6 +4,7 @@
 	"type": "storefront",
 	"version": "1.0.138",
 	"description": "Runs Shopify-style Liquid themes on Swell",
+	"repository_url": "https://github.com/swellstores/proxima-app",
 	"storefront": {
 		"theme": {
 			"provider": "app",

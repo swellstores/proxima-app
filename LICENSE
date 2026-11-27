@@ -1,54 +1,21 @@
-Swell App License
+MIT License
 
-This is the initial version of the Swell App License. Swell may publish
-revised versions with later releases of this app; each release is governed by
-the license included in it.
+Copyright (c) 2024-present Swell Commerce Corp.
 
-Copyright (c) 2026-present Swell Commerce Corp.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and the associated files, including code, models, settings,
-content, text, images and other assets (the "Software"), to use, copy, modify,
-merge, publish, distribute, sublicense, sell and/or create derivative works of
-the Software or any part thereof, and to permit persons to whom the Software is
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-1. Swell only. The rights above may be exercised only to develop, customize,
-   operate or distribute apps for stores that run on Swell software or
-   services. All other uses of the Software, including use with any other
-   commerce platform, are strictly prohibited.
-
-2. Where apps may be offered. An app that contains or is derived from the
-   Software may be:
-   (a) used by any Swell store;
-   (b) made for one Swell store, by that store or by a developer or agency
-       working for it, for any fee for that work; and
-   (c) offered, free or for a price, to more than one Swell store only through
-       the Swell App Store, subject to its review standards. A companion app
-       may be offered only with the theme that names it.
-
-3. Notice. The above copyright notice and this permission notice shall be
-   included in all copies or substantial portions of the Software that are
-   distributed as source, such as a repository, a package or a download. The
-   copies Swell keeps for a store need not include it.
-
-4. Names. This license grants no right to use the names, logos or other marks of
-   Swell, Wave, Tide, Proxima or Swell's other apps and themes, except to state
-   truthfully that an app is built on Proxima. An app derived from the Software
-   must have its own name and must not be presented as a version of the
-   original.
-
-5. Other Swell software. This license covers only the files it accompanies. It
-   grants no rights to Wave, the Swell APIs or any other Swell software
-   or service, which are governed by Swell's terms of service.
-
-6. Third-party content. Any file marked with another license (for example a
-   font under the SIL Open Font License, or a photo under the Unsplash License)
-   remains under that license.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
-AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
